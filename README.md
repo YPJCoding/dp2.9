@@ -129,6 +129,7 @@ DP Frida 侧入口，负责：
 - [x] 在 `script/bootstrap.lua` 中按配置开关控制模块注册，默认不注册新 handler
 - [x] 在 `df_game_r.lua` 中安全接入 `bootstrap.setup(...)`
 - [x] 首批启用 `quest.lua` 模块，覆盖任务类旧 handler
+- [x] 启用 `job.lua` 模块，覆盖觉醒/转职类旧 handler；SQL 职业转换默认关闭
 - [ ] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
 - [x] 新增 `script/utils.lua` 工具函数模板
 - [x] 在 `script/utils.lua` 中提供旧全局工具函数兼容实现
