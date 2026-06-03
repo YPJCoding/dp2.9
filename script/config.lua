@@ -13,7 +13,7 @@ local config = {
             item_cleanup = false,
             inherit = true,
             pvp = false,
-            misc = false,
+            misc = true,
         },
     },
 
