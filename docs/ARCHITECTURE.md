@@ -79,14 +79,17 @@ LD_PRELOAD=/dp2/libdp2pre.so
 - 不应把未使用的 NativeFunction 长期堆在主文件里。
 - 高风险 Hook 应单独标注功能、版本、风险和关闭方式。
 
-## 5. `script/` 目录建议
+## 5. `script/` 目录
 
-后续建议逐步把业务逻辑拆到 `script/` 目录：
+当前重构分支已建立以下模板结构：
 
 ```text
 script/
+  bootstrap.lua
   config.lua
+  utils.lua
   handlers/
+    README.md
     quest.lua
     job.lua
     item_cleanup.lua
@@ -97,15 +100,35 @@ script/
 
 其中：
 
+- `bootstrap.lua`：负责后续统一装配配置、工具函数和 handler 模块。
 - `config.lua`：集中配置功能开关。
+- `utils.lua`：存放 Lua 工具函数。
 - `handlers/quest.lua`：主线、普通、每日、成就任务清理。
 - `handlers/job.lua`：职业转换、转职任务、觉醒券。
 - `handlers/item_cleanup.lua`：宠物、时装、装备清理。
 - `handlers/inherit.lua`：装备继承。
-- `handlers/pvp.lua`：PVP 经验、胜点等。
-- `handlers/misc.lua`：其他低频道具券。
+- `handlers/pvp.lua`：PVP 经验等。
+- `handlers/misc.lua`：其他低频或尚未分类的道具券。
 
-## 6. 从 `dp2` 仓库吸收内容的原则
+## 6. 当前模块迁移状态
+
+已迁移到模块文件，但尚未接入 `df_game_r.lua` 的内容：
+
+- 任务类 handler：`script/handlers/quest.lua`
+- 职业/转职/觉醒类 handler：`script/handlers/job.lua`
+- 宠物、时装、装备清理类 handler：`script/handlers/item_cleanup.lua`
+- 装备继承类 handler：`script/handlers/inherit.lua`
+- PVP 类 handler：`script/handlers/pvp.lua`
+
+暂未迁移：
+
+- `script/handlers/misc.lua` 仍为模板文件。
+- `df_game_r.lua` 仍保留原始 handler 实现。
+- `df_game_r.lua` 尚未调用 `script/bootstrap.lua`。
+
+因此当前分支的模块迁移提交不会改变现有运行行为。
+
+## 7. 从 `dp2` 仓库吸收内容的原则
 
 `YPJCoding/dp2` 可以作为参考仓库，但不能直接覆盖 `dp2.9`。
 
@@ -123,7 +146,7 @@ script/
 - 未拆分、不可开关的大段业务代码
 - 硬编码账号、密码、路径的实现
 
-## 7. 风险分级
+## 8. 风险分级
 
 高风险功能：
 
@@ -148,14 +171,15 @@ script/
 - 查询类命令
 - 只读状态检查
 
-## 8. 当前重构目标
+## 9. 当前重构目标
 
 短期目标：
 
 1. 建立文档，明确真实加载链路。
-2. 给功能加配置开关。
-3. 拆分 `item_handler`。
-4. 清理 `df_game_r.js` 中未使用或风险不明的内容。
+2. 建立编码规范和模块边界。
+3. 将 handler 逐步迁移到模块文件。
+4. 在确认行为一致后，再接入 `script/bootstrap.lua`。
+5. 清理 `df_game_r.js` 中未使用或风险不明的内容。
 
 长期目标：
 
