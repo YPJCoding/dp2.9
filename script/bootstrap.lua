@@ -2,18 +2,18 @@
 --
 -- 说明：
 -- 1. 当前文件先作为装配模板引入，暂不改变现有业务行为。
--- 2. 后续 df_game_r.lua 可调用 M.setup(ctx) 统一加载 config、utils、handlers。
--- 3. 这里不直接注册现有 handler，避免和 df_game_r.lua 中已有逻辑重复。
+-- 2. df_game_r.lua 可调用 M.setup(item_handler, ctx) 统一加载 config、utils、handlers。
+-- 3. 模块化 handler 默认不注册，必须由 config.features.enable_modular_handlers 显式开启。
 
 local M = {}
 
 local handler_modules = {
-    'script.handlers.quest',
-    'script.handlers.job',
-    'script.handlers.item_cleanup',
-    'script.handlers.inherit',
-    'script.handlers.pvp',
-    'script.handlers.misc',
+    quest = 'script.handlers.quest',
+    job = 'script.handlers.job',
+    item_cleanup = 'script.handlers.item_cleanup',
+    inherit = 'script.handlers.inherit',
+    pvp = 'script.handlers.pvp',
+    misc = 'script.handlers.misc',
 }
 
 local function safe_require(module_name, logger)
@@ -49,6 +49,19 @@ function M.load_utils(logger)
     return utils
 end
 
+local function is_modular_handlers_enabled(ctx)
+    local config = ctx.config or {}
+    local features = config.features or {}
+    return features.enable_modular_handlers == true
+end
+
+local function is_handler_module_enabled(ctx, module_key)
+    local config = ctx.config or {}
+    local features = config.features or {}
+    local modules = features.modular_handlers or {}
+    return modules[module_key] == true
+end
+
 function M.register_handlers(item_handler, ctx)
     if not item_handler then
         if ctx and ctx.logger then
@@ -57,15 +70,26 @@ function M.register_handlers(item_handler, ctx)
         return
     end
 
-    for _, module_name in ipairs(handler_modules) do
-        local module = safe_require(module_name, ctx and ctx.logger)
-        if module and type(module.register) == 'function' then
-            module.register(item_handler, ctx)
-            if ctx and ctx.logger then
-                ctx.logger.info('[bootstrap] registered handler module=%s', module_name)
+    if not is_modular_handlers_enabled(ctx) then
+        if ctx and ctx.logger then
+            ctx.logger.info('[bootstrap] modular handlers disabled')
+        end
+        return
+    end
+
+    for module_key, module_name in pairs(handler_modules) do
+        if is_handler_module_enabled(ctx, module_key) then
+            local module = safe_require(module_name, ctx and ctx.logger)
+            if module and type(module.register) == 'function' then
+                module.register(item_handler, ctx)
+                if ctx and ctx.logger then
+                    ctx.logger.info('[bootstrap] registered handler module=%s', module_name)
+                end
+            elseif ctx and ctx.logger then
+                ctx.logger.error('[bootstrap] handler module missing register function: %s', module_name)
             end
         elseif ctx and ctx.logger then
-            ctx.logger.error('[bootstrap] handler module missing register function: %s', module_name)
+            ctx.logger.info('[bootstrap] skipped handler module=%s', module_name)
         end
     end
 end
