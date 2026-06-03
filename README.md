@@ -130,7 +130,9 @@ DP Frida 侧入口，负责：
 - [x] 在 `df_game_r.lua` 中安全接入 `bootstrap.setup(...)`，默认不注册新 handler
 - [ ] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
 - [x] 新增 `script/utils.lua` 工具函数模板
-- [ ] 从 `df_game_r.lua` 移动工具函数到 `script/utils.lua` 并接入
+- [x] 在 `script/utils.lua` 中提供旧全局工具函数兼容实现
+- [x] 在 `script/bootstrap.lua` 中安装 legacy 工具函数兼容层
+- [ ] 从 `df_game_r.lua` 删除旧工具函数定义
 - [x] 将任务相关 handler 迁移草稿写入 `script/handlers/quest.lua`
 - [x] 将职业/转职/觉醒逻辑迁移草稿写入 `script/handlers/job.lua`
 - [x] 将宠物/时装/装备清理逻辑迁移草稿写入 `script/handlers/item_cleanup.lua`
