@@ -11,9 +11,9 @@ LD_PRELOAD=/dp2/libdp2pre.so
   ↓
 libdp2.xml
   ↓
-/ dp2/df_game_r.lua
+/dp2/df_game_r.lua
   ↓ frida.load(...)
-/ dp2/df_game_r.js
+/dp2/df_game_r.js
 ```
 
 > 注意：`frida.js` 不是 DP 默认加载文件。DP 默认关注的是 `df_game_r.lua` 和 `df_game_r.js`。
@@ -85,16 +85,88 @@ DP Frida 侧入口，负责：
 3. 优先保留 `df_game_r.lua` 中的 `item_handler` 写法。
 4. 新功能优先模块化，避免继续把所有逻辑堆在入口文件里。
 5. 所有高风险功能必须有清晰注释，后续逐步接入配置开关。
+6. 先定编码规范和模块边界，再重构业务代码。
 
-## 后续整理方向
+## TODO
 
-优先级从高到低：
+### P0：底板规范与文档
 
-```text
-P0：补 README / 架构文档
-P1：梳理 df_game_r.lua 结构
-P2：拆分 item_handler
-P3：增加 script/config.lua 功能开关
-P4：审查 df_game_r.js 未使用函数和高风险 Hook
-P5：从 dp2 仓库吸收成熟 GM/运营功能
-```
+- [x] 新建重构分支 `refactor/dp2-9-base`
+- [x] 补充 `README.md`
+- [x] 补充 `docs/ARCHITECTURE.md`
+- [x] 补充 `docs/CODING_STANDARDS.md`
+- [x] 修正 README 中真实加载链路的路径格式
+- [x] 明确：DP 默认加载 `df_game_r.lua` 和 `df_game_r.js`，不加载 `frida.js`
+- [ ] 审核编码规范是否需要调整
+
+### P1：审查现有代码位置与职责
+
+- [ ] 审查 `df_game_r.lua` 中每段代码的位置是否合理
+- [ ] 审查 `df_game_r.js` 中每段代码的位置是否合理
+- [ ] 区分入口初始化、配置、工具函数、handler、hook、临时调试代码
+- [ ] 标记应保留在 Lua 层的逻辑
+- [ ] 标记应保留在 JS/Frida 层的逻辑
+- [ ] 标记应迁入配置文件的开关
+- [ ] 标记应拆成独立模块的业务逻辑
+
+### P2：建立模板代码结构
+
+- [ ] 新增 `script/config.lua` 配置模板
+- [ ] 新增 `script/handlers/` 目录结构
+- [ ] 新增 handler 模块模板
+- [ ] 定义 handler 注册约定
+- [ ] 定义 Lua 模块上下文 `ctx` 传参约定
+- [ ] 定义风险标记注释模板
+- [ ] 定义日志格式模板
+
+### P3：重构 `df_game_r.lua`，尽量不改变行为
+
+- [ ] 梳理 `df_game_r.lua` 当前结构
+- [ ] 保留 `item_handler[item_id] = function(...)` 的主分发写法
+- [ ] 将配置开关从入口逻辑中抽离
+- [ ] 将工具函数移动到合适位置
+- [ ] 将任务相关 handler 拆到 `script/handlers/quest.lua`
+- [ ] 将职业/转职/觉醒逻辑拆到 `script/handlers/job.lua`
+- [ ] 将宠物/时装/装备清理逻辑拆到 `script/handlers/item_cleanup.lua`
+- [ ] 将装备继承逻辑拆到 `script/handlers/inherit.lua`
+- [ ] 将 PVP 经验逻辑拆到 `script/handlers/pvp.lua`
+- [ ] 将其他零散道具券逻辑拆到 `script/handlers/misc.lua`
+- [ ] 在 `df_game_r.lua` 中统一加载 handler 模块
+
+### P4：审查和整理 `df_game_r.js`
+
+- [ ] 梳理 `df_game_r.js` 中所有 NativeFunction
+- [ ] 标记已使用 / 未使用函数
+- [ ] 标记版本强绑定地址
+- [ ] 标记高风险 Hook
+- [ ] 隔离临时调试代码
+- [ ] 整理 JS -> Lua/DP 回调逻辑
+- [ ] 判断哪些 JS 功能可以迁回 Lua/DPX 层
+
+### P5：从 `dp2` 仓库吸收可用经验
+
+- [ ] 对比 `dp2` 的 README 部署说明
+- [ ] 评估 `dp2` 的 Lua 热加载机制是否迁入 `dp2.9`
+- [ ] 评估 `Work_Reload.lua` 中可复用的 GM/运营功能
+- [ ] 评估 `dp2` 的 `df_game_r.js` 中可复用 Hook/工具函数
+- [ ] 明确 `frida.js` 仅作为参考，不作为 DP 默认加载文件
+
+### P6：稳定性与安全整理
+
+- [ ] 给直接 SQL 操作增加注释和开关
+- [ ] 给删除类功能增加二次保护或限制条件
+- [ ] 给发奖/发物品功能增加日志
+- [ ] 给高风险 DPX 开关增加说明
+- [ ] 补充常见问题和回滚方式
+
+### P7：最终整理
+
+- [ ] 更新 README 的目录结构说明
+- [ ] 更新 `docs/ARCHITECTURE.md`
+- [ ] 增加 `CHANGELOG.md`
+- [ ] 创建 PR 合并回 `main`
+
+## 文档
+
+- [架构说明](docs/ARCHITECTURE.md)
+- [编码规范](docs/CODING_STANDARDS.md)
