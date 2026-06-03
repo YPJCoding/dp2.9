@@ -145,26 +145,26 @@ DP Frida 侧入口，负责：
 
 ### P5：从 `dp2` 仓库吸收可用经验
 
-- [ ] 对比 `dp2` 的 README 部署说明
-- [ ] 评估 `dp2` 的 Lua 热加载机制是否迁入 `dp2.9`
-- [ ] 评估 `Work_Reload.lua` 中可复用的 GM/运营功能
-- [ ] 评估 `dp2` 的 `df_game_r.js` 中可复用 Hook/工具函数
-- [ ] 明确 `frida.js` 仅作为参考，不作为 DP 默认加载文件
+- [x] 对比 `dp2` 的 README 部署说明
+- [x] 评估 `dp2` 的 Lua 热加载机制是否迁入 `dp2.9`
+- [x] 评估 `Work_Reload.lua` 中可复用的 GM/运营功能
+- [x] 评估 `dp2` 的 `df_game_r.js` 中可复用 Hook/工具函数
+- [x] 明确 `frida.js` 仅作为参考，不作为 DP 默认加载文件
 
 ### P6：稳定性与安全整理
 
-- [ ] 给直接 SQL 操作增加注释和开关
-- [ ] 给删除类功能增加二次保护或限制条件
-- [ ] 给发奖/发物品功能增加日志
-- [ ] 给高风险 DPX 开关增加说明
-- [ ] 补充常见问题和回滚方式
+- [x] 给直接 SQL 操作增加注释和开关
+- [x] 给删除类功能增加二次保护或限制条件
+- [x] 给发奖/发物品功能增加日志
+- [x] 给高风险 DPX 开关增加说明
+- [x] 补充常见问题和回滚方式
 
 ### P7：最终整理
 
 - [ ] 更新 README 的目录结构说明
 - [x] 更新 `docs/ARCHITECTURE.md`
-- [ ] 增加 `CHANGELOG.md`
-- [ ] 创建 PR 合并回 `main`
+- [x] 增加 `CHANGELOG.md`
+- [x] 创建 PR 合并回 `main`
 
 ## 文档
 
@@ -173,3 +173,7 @@ DP Frida 侧入口，负责：
 - [初始代码审查记录](docs/CODE_REVIEW_NOTES.md)
 - [P3 重构计划](docs/P3_REFACTOR_PLAN.md)
 - [df_game_r.js 审查记录](docs/DF_GAME_R_JS_AUDIT.md)
+- [df_game_r.js 索引草案](docs/DF_GAME_R_JS_INDEX.md)
+- [dp2 参考仓库评估](docs/DP2_REFERENCE_NOTES.md)
+- [风险治理说明](docs/RISK_GUIDE.md)
+- [更新日志](CHANGELOG.md)
