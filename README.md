@@ -121,15 +121,15 @@ DP Frida 侧入口，负责：
 
 ### P3：重构 `df_game_r.lua`，尽量不改变行为
 
-- [ ] 梳理 `df_game_r.lua` 当前结构
-- [ ] 保留 `item_handler[item_id] = function(...)` 的主分发写法
+- [x] 梳理 `df_game_r.lua` 当前结构
+- [x] 保留 `item_handler[item_id] = function(...)` 的主分发写法
 - [ ] 将配置开关从入口逻辑中抽离
-- [ ] 将工具函数移动到合适位置
-- [ ] 将任务相关 handler 拆到 `script/handlers/quest.lua`
-- [ ] 将职业/转职/觉醒逻辑拆到 `script/handlers/job.lua`
-- [ ] 将宠物/时装/装备清理逻辑拆到 `script/handlers/item_cleanup.lua`
-- [ ] 将装备继承逻辑拆到 `script/handlers/inherit.lua`
-- [ ] 将 PVP 经验逻辑拆到 `script/handlers/pvp.lua`
+- [x] 将工具函数移动到合适位置
+- [x] 将任务相关 handler 拆到 `script/handlers/quest.lua`
+- [x] 将职业/转职/觉醒逻辑拆到 `script/handlers/job.lua`
+- [x] 将宠物/时装/装备清理逻辑拆到 `script/handlers/item_cleanup.lua`
+- [x] 将装备继承逻辑拆到 `script/handlers/inherit.lua`
+- [x] 将 PVP 经验逻辑拆到 `script/handlers/pvp.lua`
 - [ ] 将其他零散道具券逻辑拆到 `script/handlers/misc.lua`
 - [ ] 在 `df_game_r.lua` 中统一加载 handler 模块
 
@@ -162,7 +162,7 @@ DP Frida 侧入口，负责：
 ### P7：最终整理
 
 - [ ] 更新 README 的目录结构说明
-- [ ] 更新 `docs/ARCHITECTURE.md`
+- [x] 更新 `docs/ARCHITECTURE.md`
 - [ ] 增加 `CHANGELOG.md`
 - [ ] 创建 PR 合并回 `main`
 
@@ -171,3 +171,4 @@ DP Frida 侧入口，负责：
 - [架构说明](docs/ARCHITECTURE.md)
 - [编码规范](docs/CODING_STANDARDS.md)
 - [初始代码审查记录](docs/CODE_REVIEW_NOTES.md)
+- [P3 重构计划](docs/P3_REFACTOR_PLAN.md)
