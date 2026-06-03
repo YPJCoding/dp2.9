@@ -94,6 +94,84 @@ function M.register_handlers(item_handler, ctx)
     end
 end
 
+function M.apply_dpx_startup(ctx)
+    local config = ctx.config or {}
+    local startup = config.dpx_startup or {}
+    local dpx = ctx.dpx
+    local logger = ctx.logger
+
+    if not dpx then
+        if logger then
+            logger.error('[bootstrap] missing dpx, skip startup config')
+        end
+        return
+    end
+
+    if startup.set_level_cap then
+        dpx.set_auction_min_level(startup.level_cap or 95)
+    end
+
+    if startup.enable_creator then
+        dpx.enable_creator()
+    end
+
+    if startup.enable_unlimit_towerofdespair then
+        dpx.set_unlimit_towerofdespair()
+    end
+
+    if startup.disable_item_routing then
+        dpx.disable_item_routing()
+    end
+
+    if startup.disable_security_protection then
+        dpx.disable_security_protection()
+    end
+
+    if startup.extend_teleport_item then
+        dpx.extend_teleport_item()
+    end
+
+    if startup.disable_trade_limit then
+        dpx.disable_trade_limit()
+    end
+
+    if startup.set_auction_min_level then
+        dpx.set_auction_min_level(startup.auction_min_level or 10)
+    end
+
+    if startup.fix_auction_regist_item then
+        dpx.fix_auction_regist_item(startup.auction_max_total_price or 200000000)
+    end
+
+    if startup.liberate_random_option then
+        dpx.liberate_random_option()
+    end
+
+    if startup.disable_redeem_item then
+        dpx.disable_redeem_item()
+    end
+
+    if startup.disable_mobile_rewards then
+        dpx.disable_mobile_rewards()
+    end
+
+    if startup.enable_game_master then
+        dpx.enable_game_master()
+    end
+
+    if startup.disable_giveup_panalty then
+        dpx.disable_giveup_panalty()
+    end
+
+    if startup.set_item_unlock_time then
+        dpx.set_item_unlock_time(startup.item_unlock_time or 1)
+    end
+
+    if logger then
+        logger.info('[bootstrap] applied dpx startup config')
+    end
+end
+
 function M.build_ctx(base_ctx)
     local ctx = base_ctx or {}
     ctx.config = ctx.config or M.load_config(ctx.logger)
