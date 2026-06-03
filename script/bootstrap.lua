@@ -172,6 +172,18 @@ function M.apply_dpx_startup(ctx)
     end
 end
 
+function M.install_utils(ctx)
+    local utils = ctx and ctx.utils
+    if utils and type(utils.install_legacy_globals) == 'function' then
+        utils.install_legacy_globals(_G)
+        if ctx.logger then
+            ctx.logger.info('[bootstrap] installed legacy utils')
+        end
+    elseif ctx and ctx.logger then
+        ctx.logger.error('[bootstrap] utils.install_legacy_globals missing')
+    end
+end
+
 function M.build_ctx(base_ctx)
     local ctx = base_ctx or {}
     ctx.config = ctx.config or M.load_config(ctx.logger)
@@ -181,6 +193,7 @@ end
 
 function M.setup(item_handler, base_ctx)
     local ctx = M.build_ctx(base_ctx)
+    M.install_utils(ctx)
     M.register_handlers(item_handler, ctx)
     return ctx
 end
