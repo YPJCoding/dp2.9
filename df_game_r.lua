@@ -46,7 +46,7 @@ frida.load("DP2 load success!", on_frida_call)
 
 local function mainDpLoad(_user)
     game.fac.user(_user):SendNotiPacketMessage(
-        decode_unicode('\\u795e\\u8ff9\\u0020\\u003a\\u0020\\u6b64\\u7248\\u672c\\u514d\\u8d39\\u53d1\\u5e03\\u4e8e\\u4e92\\u8054\\u7f51\\uff0c\\u0020\\u4ec5\\u4f9b\\u5b66\\u4e60\\u548c\\u7814\\u7a76\\u4f7f\\u7528\\uff0c\\u0020\\u4efb\\u4f55\\u76c8\\u5229\\u884c\\u4e3a\\u6240\\u5e26\\u6765\\u7684\\u6cd5\\u5f8b\\u8d23\\u4efb\\u7531\\u76f4\\u63a5\\u53d7\\u76ca\\u4eba\\u627f\\u62c5\\u0021'),
+        decode_unicode('\u795e\u8ff9\u0020\u003a\u0020\u6b64\u7248\u672c\u514d\u8d39\u53d1\u5e03\u4e8e\u4e92\u8054\u7f51\uff0c\u0020\u4ec5\u4f9b\u5b66\u4e60\u548c\u7814\u7a76\u4f7f\u7528\uff0c\u0020\u4efb\u4f55\u76c8\u5229\u884c\u4e3a\u6240\u5e26\u6765\u7684\u6cd5\u5f8b\u8d23\u4efb\u7531\u76f4\u63a5\u53d7\u76ca\u4eba\u627f\u62c5\u0021'),
          14)
 end
 dpx.hook(game.HookType.Reach_GameWord, mainDpLoad)
@@ -461,6 +461,22 @@ local my_useitem2 = function(_user, item_id)
         handler(user, item_id)
         logger.info("[useitem] acc: %d chr: %d item_id: %d", user:GetAccId(), user:GetCharacNo(), item_id)
     end
+end
+
+-- 安全接入 bootstrap：默认只加载 config/utils，不注册模块化 handler。
+-- script/config.lua 中 enable_modular_handlers 默认 false，避免和当前旧 handler 重复注册。
+local bootstrap_ctx = nil
+local ok_bootstrap, bootstrap = pcall(require, "script.bootstrap")
+if ok_bootstrap and bootstrap then
+    bootstrap_ctx = bootstrap.setup(item_handler, {
+        dp = dp,
+        dpx = dpx,
+        game = game,
+        world = world,
+        logger = logger,
+    })
+else
+    logger.error("[bootstrap] skipped: %s", tostring(bootstrap))
 end
 
 --------------------------------------- 功能函数 -------------------------------------- !
