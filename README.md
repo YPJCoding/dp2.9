@@ -135,13 +135,13 @@ DP Frida 侧入口，负责：
 
 ### P4：审查和整理 `df_game_r.js`
 
-- [ ] 梳理 `df_game_r.js` 中所有 NativeFunction
+- [x] 梳理 `df_game_r.js` 中所有 NativeFunction
 - [ ] 标记已使用 / 未使用函数
-- [ ] 标记版本强绑定地址
-- [ ] 标记高风险 Hook
+- [x] 标记版本强绑定地址
+- [x] 标记高风险 Hook
 - [ ] 隔离临时调试代码
 - [ ] 整理 JS -> Lua/DP 回调逻辑
-- [ ] 判断哪些 JS 功能可以迁回 Lua/DPX 层
+- [x] 判断哪些 JS 功能可以迁回 Lua/DPX 层
 
 ### P5：从 `dp2` 仓库吸收可用经验
 
@@ -172,3 +172,4 @@ DP Frida 侧入口，负责：
 - [编码规范](docs/CODING_STANDARDS.md)
 - [初始代码审查记录](docs/CODE_REVIEW_NOTES.md)
 - [P3 重构计划](docs/P3_REFACTOR_PLAN.md)
+- [df_game_r.js 审查记录](docs/DF_GAME_R_JS_AUDIT.md)
