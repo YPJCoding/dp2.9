@@ -16,8 +16,24 @@ local config = {
     },
 
     features = {
-        -- 是否启用道具 handler 分发
+        -- 是否启用原始道具 handler 分发。
+        -- 当前 df_game_r.lua 仍使用旧 handler 表，保持 true。
         enable_item_handlers = true,
+
+        -- 是否启用模块化 handler 注册。
+        -- 默认 false，避免 df_game_r.lua 接入 bootstrap 后与旧 handler 重复注册。
+        enable_modular_handlers = false,
+
+        -- 按模块控制 handler 注册。
+        -- 只有 enable_modular_handlers=true 时才会读取这些开关。
+        modular_handlers = {
+            quest = false,
+            job = false,
+            item_cleanup = false,
+            inherit = false,
+            pvp = false,
+            misc = false,
+        },
 
         -- 是否允许创建缔造者
         enable_creator = true,
