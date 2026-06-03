@@ -125,6 +125,8 @@ DP Frida 侧入口，负责：
 
 - [x] 梳理 `df_game_r.lua` 当前结构
 - [x] 保留 `item_handler[item_id] = function(...)` 的主分发写法
+- [x] 在 `script/config.lua` 中增加模块化 handler 总开关和分模块开关
+- [x] 在 `script/bootstrap.lua` 中按配置开关控制模块注册，默认不注册新 handler
 - [ ] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
 - [x] 新增 `script/utils.lua` 工具函数模板
 - [ ] 从 `df_game_r.lua` 移动工具函数到 `script/utils.lua` 并接入
@@ -181,6 +183,7 @@ DP Frida 侧入口，负责：
 - [编码规范](docs/CODING_STANDARDS.md)
 - [初始代码审查记录](docs/CODE_REVIEW_NOTES.md)
 - [P3 重构计划](docs/P3_REFACTOR_PLAN.md)
+- [Handler 迁移对照表](docs/HANDLER_MIGRATION_MAP.md)
 - [df_game_r.js 审查记录](docs/DF_GAME_R_JS_AUDIT.md)
 - [df_game_r.js 索引草案](docs/DF_GAME_R_JS_INDEX.md)
 - [dp2 参考仓库评估](docs/DP2_REFERENCE_NOTES.md)
