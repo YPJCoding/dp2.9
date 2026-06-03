@@ -127,6 +127,7 @@ DP Frida 侧入口，负责：
 - [x] 保留 `item_handler[item_id] = function(...)` 的主分发写法
 - [x] 在 `script/config.lua` 中增加模块化 handler 总开关和分模块开关
 - [x] 在 `script/bootstrap.lua` 中按配置开关控制模块注册，默认不注册新 handler
+- [x] 在 `df_game_r.lua` 中安全接入 `bootstrap.setup(...)`，默认不注册新 handler
 - [ ] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
 - [x] 新增 `script/utils.lua` 工具函数模板
 - [ ] 从 `df_game_r.lua` 移动工具函数到 `script/utils.lua` 并接入
