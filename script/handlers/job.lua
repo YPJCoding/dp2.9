@@ -1,9 +1,14 @@
 -- 职业、转职、觉醒相关道具 handler
 --
 -- 当前模块迁移自 df_game_r.lua。
--- 注意：文件已包含真实 handler 注册逻辑，但在 df_game_r.lua 接入 bootstrap 前不会改变运行行为。
 
 local M = {}
+
+local function is_sql_handler_enabled(ctx)
+    local config = ctx.config or {}
+    local risk = config.risk or {}
+    return risk.enable_sql_handlers == true
+end
 
 local function accept_quests(user, item_id, ctx, quest_ids, success_message)
     local dpx = ctx.dpx
@@ -23,13 +28,23 @@ end
 function M.register(item_handler, ctx)
     local dpx = ctx.dpx
     local game = ctx.game
+    local logger = ctx.logger
 
     -- [RISK:HIGH][SQL] 女鬼剑职业转换券：直接修改 charac_info.job
     item_handler[2021458807] = function(user, item_id)
+        if not is_sql_handler_enabled(ctx) then
+            user:SendNotiPacketMessage("注意： 女鬼剑职业转换功能未开启！")
+            dpx.item.add(user.cptr, item_id)
+            return
+        end
+
         local level = user:GetCharacLevel()
         if level == 1 then
             dpx.sqlexec(game.DBType.taiwan_cain, "update charac_info set job=10 where charac_no=" .. user:GetCharacNo() .. " and lev=1")
             user:SendNotiPacketMessage("恭喜： 女鬼剑职业转换 成功！ <请切换角色以生效！>")
+            if logger then
+                logger.info("[useitem][sql][job_convert] acc=%d chr=%d item_id=%d", user:GetAccId(), user:GetCharacNo(), item_id)
+            end
         else
             user:SendNotiPacketMessage("注意： 女鬼剑职业转换 失败！")
             dpx.item.add(user.cptr, item_id)
