@@ -136,7 +136,8 @@ DP Frida 侧入口，负责：
 - [x] 将宠物/时装/装备清理逻辑迁移草稿写入 `script/handlers/item_cleanup.lua`
 - [x] 将装备继承逻辑迁移草稿写入 `script/handlers/inherit.lua`
 - [x] 将 PVP 经验逻辑迁移草稿写入 `script/handlers/pvp.lua`
-- [ ] 将其他零散道具券逻辑拆到 `script/handlers/misc.lua`
+- [x] 将低风险/中风险零散道具券迁入 `script/handlers/misc.lua`
+- [ ] 将 SQL 类零散道具券迁入 `script/handlers/misc.lua` 或独立模块
 - [ ] 在 `df_game_r.lua` 中统一加载 handler 模块
 - [ ] 从 `df_game_r.lua` 移除已迁移的旧 handler 实现
 
