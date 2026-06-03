@@ -112,6 +112,8 @@ DP Frida 侧入口，负责：
 ### P2：建立模板代码结构
 
 - [x] 新增 `script/config.lua` 配置模板
+- [x] 新增 `script/utils.lua` 工具函数模板
+- [x] 新增 `script/bootstrap.lua` 装配模板
 - [x] 新增 `script/handlers/` 目录结构
 - [x] 新增 handler 模块模板
 - [x] 定义 handler 注册约定
@@ -123,22 +125,25 @@ DP Frida 侧入口，负责：
 
 - [x] 梳理 `df_game_r.lua` 当前结构
 - [x] 保留 `item_handler[item_id] = function(...)` 的主分发写法
-- [ ] 将配置开关从入口逻辑中抽离
-- [x] 将工具函数移动到合适位置
-- [x] 将任务相关 handler 拆到 `script/handlers/quest.lua`
-- [x] 将职业/转职/觉醒逻辑拆到 `script/handlers/job.lua`
-- [x] 将宠物/时装/装备清理逻辑拆到 `script/handlers/item_cleanup.lua`
-- [x] 将装备继承逻辑拆到 `script/handlers/inherit.lua`
-- [x] 将 PVP 经验逻辑拆到 `script/handlers/pvp.lua`
+- [ ] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
+- [x] 新增 `script/utils.lua` 工具函数模板
+- [ ] 从 `df_game_r.lua` 移动工具函数到 `script/utils.lua` 并接入
+- [x] 将任务相关 handler 迁移草稿写入 `script/handlers/quest.lua`
+- [x] 将职业/转职/觉醒逻辑迁移草稿写入 `script/handlers/job.lua`
+- [x] 将宠物/时装/装备清理逻辑迁移草稿写入 `script/handlers/item_cleanup.lua`
+- [x] 将装备继承逻辑迁移草稿写入 `script/handlers/inherit.lua`
+- [x] 将 PVP 经验逻辑迁移草稿写入 `script/handlers/pvp.lua`
 - [ ] 将其他零散道具券逻辑拆到 `script/handlers/misc.lua`
 - [ ] 在 `df_game_r.lua` 中统一加载 handler 模块
+- [ ] 从 `df_game_r.lua` 移除已迁移的旧 handler 实现
 
 ### P4：审查和整理 `df_game_r.js`
 
-- [x] 梳理 `df_game_r.js` 中所有 NativeFunction
+- [x] 建立 `df_game_r.js` 初始审查和分组文档
+- [ ] 梳理所有 NativeFunction 并生成逐函数索引
 - [ ] 标记已使用 / 未使用函数
-- [x] 标记版本强绑定地址
-- [x] 标记高风险 Hook
+- [x] 标记版本强绑定风险
+- [x] 标记高风险 Hook 区域
 - [ ] 隔离临时调试代码
 - [ ] 整理 JS -> Lua/DP 回调逻辑
 - [x] 判断哪些 JS 功能可以迁回 Lua/DPX 层
@@ -153,18 +158,22 @@ DP Frida 侧入口，负责：
 
 ### P6：稳定性与安全整理
 
-- [x] 给直接 SQL 操作增加注释和开关
-- [x] 给删除类功能增加二次保护或限制条件
-- [x] 给发奖/发物品功能增加日志
-- [x] 给高风险 DPX 开关增加说明
-- [x] 补充常见问题和回滚方式
+- [x] 新增 `docs/RISK_GUIDE.md` 风险治理说明
+- [x] 在已迁移的部分 handler 草稿中增加风险注释和开关示例
+- [ ] 给当前运行中的 `df_game_r.lua` 直接 SQL 操作增加注释和开关
+- [ ] 给当前运行中的删除类功能增加二次保护或限制条件
+- [ ] 给发奖/发物品功能增加日志
+- [ ] 给高风险 DPX 开关接入配置并增加代码注释
+- [ ] 补充常见问题 FAQ
+- [x] 补充回滚原则
 
 ### P7：最终整理
 
 - [ ] 更新 README 的目录结构说明
 - [x] 更新 `docs/ARCHITECTURE.md`
 - [x] 增加 `CHANGELOG.md`
-- [x] 创建 PR 合并回 `main`
+- [x] 创建 Draft PR
+- [ ] 合并 PR 回 `main`
 
 ## 文档
 
