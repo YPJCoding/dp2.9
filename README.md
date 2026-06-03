@@ -111,13 +111,13 @@ DP Frida 侧入口，负责：
 
 ### P2：建立模板代码结构
 
-- [ ] 新增 `script/config.lua` 配置模板
-- [ ] 新增 `script/handlers/` 目录结构
-- [ ] 新增 handler 模块模板
-- [ ] 定义 handler 注册约定
-- [ ] 定义 Lua 模块上下文 `ctx` 传参约定
-- [ ] 定义风险标记注释模板
-- [ ] 定义日志格式模板
+- [x] 新增 `script/config.lua` 配置模板
+- [x] 新增 `script/handlers/` 目录结构
+- [x] 新增 handler 模块模板
+- [x] 定义 handler 注册约定
+- [x] 定义 Lua 模块上下文 `ctx` 传参约定
+- [x] 定义风险标记注释模板
+- [x] 定义日志格式模板
 
 ### P3：重构 `df_game_r.lua`，尽量不改变行为
 
