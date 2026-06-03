@@ -127,7 +127,8 @@ DP Frida 侧入口，负责：
 - [x] 保留 `item_handler[item_id] = function(...)` 的主分发写法
 - [x] 在 `script/config.lua` 中增加模块化 handler 总开关和分模块开关
 - [x] 在 `script/bootstrap.lua` 中按配置开关控制模块注册，默认不注册新 handler
-- [x] 在 `df_game_r.lua` 中安全接入 `bootstrap.setup(...)`，默认不注册新 handler
+- [x] 在 `df_game_r.lua` 中安全接入 `bootstrap.setup(...)`
+- [x] 首批启用 `quest.lua` 模块，覆盖任务类旧 handler
 - [ ] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
 - [x] 新增 `script/utils.lua` 工具函数模板
 - [x] 在 `script/utils.lua` 中提供旧全局工具函数兼容实现
@@ -140,7 +141,7 @@ DP Frida 侧入口，负责：
 - [x] 将 PVP 经验逻辑迁移草稿写入 `script/handlers/pvp.lua`
 - [x] 将低风险/中风险零散道具券迁入 `script/handlers/misc.lua`
 - [x] 将 SQL 类零散道具券以默认关闭方式迁入 `script/handlers/misc.lua`
-- [ ] 在 `df_game_r.lua` 中统一加载 handler 模块
+- [ ] 在 `df_game_r.lua` 中统一加载全部 handler 模块
 - [ ] 从 `df_game_r.lua` 移除已迁移的旧 handler 实现
 
 ### P4：审查和整理 `df_game_r.js`
