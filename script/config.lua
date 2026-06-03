@@ -11,7 +11,7 @@ local config = {
             quest = true,
             job = true,
             item_cleanup = false,
-            inherit = false,
+            inherit = true,
             pvp = false,
             misc = false,
         },
