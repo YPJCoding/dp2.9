@@ -34,21 +34,59 @@ local config = {
             pvp = false,
             misc = false,
         },
+    },
 
-        -- 是否允许创建缔造者
+    -- DPX 启动开关。
+    -- 默认值保持和当前 df_game_r.lua 入口中的实际调用一致，确保后续接入 config 时不改变行为。
+    dpx_startup = {
+        -- dpx.set_auction_min_level(95)
+        set_level_cap = true,
+        level_cap = 95,
+
+        -- dpx.enable_creator()
         enable_creator = true,
 
-        -- 是否设置物品免确认
+        -- dpx.set_unlimit_towerofdespair()
+        enable_unlimit_towerofdespair = true,
+
+        -- dpx.disable_item_routing()
         disable_item_routing = true,
 
-        -- 是否解除交易限额
+        -- dpx.disable_security_protection()
+        -- [RISK:HIGH] 解除 100 级及以上安全限制，当前入口默认启用，所以这里先保持 true。
+        disable_security_protection = true,
+
+        -- dpx.extend_teleport_item()
+        extend_teleport_item = true,
+
+        -- dpx.disable_trade_limit()
+        -- [RISK:HIGH] 交易限制相关，当前入口默认启用，所以这里先保持 true。
         disable_trade_limit = true,
 
-        -- 是否修复拍卖行消耗品上架最大总价
-        fix_auction_regist_item = true,
+        -- dpx.set_auction_min_level(10)
+        set_auction_min_level = true,
+        auction_min_level = 10,
 
-        -- 是否扩展移动瞬间药剂 ID
-        extend_teleport_item = true,
+        -- dpx.fix_auction_regist_item(200000000)
+        fix_auction_regist_item = true,
+        auction_max_total_price = 200000000,
+
+        -- dpx.liberate_random_option()
+        liberate_random_option = true,
+
+        -- dpx.disable_redeem_item()
+        disable_redeem_item = true,
+
+        -- dpx.disable_mobile_rewards()
+        disable_mobile_rewards = true,
+
+        -- dpx.set_item_unlock_time(1)
+        set_item_unlock_time = true,
+        item_unlock_time = 1,
+
+        -- 当前入口中为注释状态，默认保持关闭。
+        enable_game_master = false,
+        disable_giveup_panalty = false,
     },
 
     risk = {
@@ -59,6 +97,7 @@ local config = {
         enable_delete_handlers = false,
 
         -- [RISK:HIGH] 是否允许关闭服务端安全限制
+        -- 注意：DPX 启动阶段的旧行为由 dpx_startup.disable_security_protection 控制。
         enable_security_bypass = false,
 
         -- [RISK:HIGH] 是否允许执行外部 shell 脚本
