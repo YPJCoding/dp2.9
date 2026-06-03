@@ -132,6 +132,7 @@ DP Frida 侧入口，负责：
 - [x] 启用 `job.lua` 模块，覆盖觉醒/转职类旧 handler；SQL 职业转换默认关闭
 - [x] 启用 `inherit.lua` 模块，覆盖装备继承券旧 handler
 - [x] 启用 `misc.lua` 模块，覆盖跨界/异界重置/SQL misc；SQL misc 默认关闭
+- [x] 启用 `item_cleanup.lua` 模块，覆盖宠物/时装/装备清理；删除类操作默认关闭
 - [ ] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
 - [x] 新增 `script/utils.lua` 工具函数模板
 - [x] 在 `script/utils.lua` 中提供旧全局工具函数兼容实现
