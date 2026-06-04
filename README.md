@@ -194,6 +194,7 @@ DP Frida 侧入口，负责：
 - [x] 评估 `Work_Reload.lua` 中可复用的 GM/运营功能
 - [x] 评估 `dp2` 的 `df_game_r.js` 中可复用 Hook/工具函数
 - [x] 明确 `frida.js` 仅作为参考，不作为 DP 默认加载文件
+- [x] 建立 `dp2` 未迁移功能跟踪清单
 
 ### P6：稳定性与安全整理
 
@@ -239,6 +240,24 @@ DP Frida 侧入口，负责：
 - [ ] 添加并验证 `2021458805` 异界 E3 重置
 - [ ] 添加并验证 `2022110505` 装备继承
 
+### P10：从 dp2 逐步迁移未吸收功能
+
+详见 [dp2 未迁移功能清单](docs/DP2_UNMIGRATED_FEATURES.md)。
+
+优先顺序：
+
+- [ ] `online.lua`：在线玩家表、上线/下线记录
+- [ ] `broadcast.lua`：全服消息，带频率限制
+- [ ] `gm_permissions.lua`：GM 权限判断
+- [ ] `item_query.lua`：物品查询 GM 指令
+- [ ] `hot_reload.lua`：测试服热加载，默认关闭
+- [ ] `dungeon_gate.lua`：持物进图
+- [ ] `drop_rules.lua`：等级差限制掉落
+- [ ] `exp_dungeon.lua`：经验副本 / 泡点
+- [ ] `finish_back_home.lua`：翻牌回城 / 自动处理
+- [ ] 801xx 运营道具系列
+- [ ] 高风险 GM / JS 功能
+
 ## 文档
 
 - [架构说明](docs/ARCHITECTURE.md)
@@ -247,6 +266,7 @@ DP Frida 侧入口，负责：
 - [P3 重构计划](docs/P3_REFACTOR_PLAN.md)
 - [动态路线图](docs/ROADMAP.md)
 - [服务器烟测记录](docs/SERVER_SMOKE_TEST.md)
+- [dp2 未迁移功能清单](docs/DP2_UNMIGRATED_FEATURES.md)
 - [代码自检记录](docs/CODE_SELF_CHECK.md)
 - [Handler 迁移对照表](docs/HANDLER_MIGRATION_MAP.md)
 - [df_game_r.js 审查记录](docs/DF_GAME_R_JS_AUDIT.md)
