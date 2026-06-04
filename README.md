@@ -32,6 +32,16 @@ libdp2.xml
   lib/
   lua/
   script/
+    bootstrap.lua
+    config.lua
+    utils.lua
+    handlers/
+      quest.lua
+      job.lua
+      item_cleanup.lua
+      inherit.lua
+      pvp.lua
+      misc.lua
 ```
 
 ## 启动方式
@@ -43,6 +53,11 @@ LD_PRELOAD=/dp2/libdp2pre.so ./df_game_r cain01 start &
 ```
 
 一般只对普通频道加载，PK 频道是否加载按实际需要决定。
+
+部署前请阅读：
+
+- [部署前检查清单](docs/DEPLOYMENT_CHECKLIST.md)
+- [FAQ](docs/FAQ.md)
 
 ## 主要文件职责
 
@@ -177,12 +192,12 @@ DP Frida 侧入口，负责：
 - [x] 给当前运行中的删除类功能增加二次保护或限制条件
 - [ ] 给发奖/发物品功能增加日志
 - [x] 给高风险 DPX 开关接入配置并增加代码注释
-- [ ] 补充常见问题 FAQ
+- [x] 补充常见问题 FAQ
 - [x] 补充回滚原则
 
 ### P7：最终整理
 
-- [ ] 更新 README 的目录结构说明
+- [x] 更新 README 的目录结构说明
 - [x] 更新 `docs/ARCHITECTURE.md`
 - [x] 增加 `CHANGELOG.md`
 - [x] 创建 Draft PR
@@ -199,4 +214,6 @@ DP Frida 侧入口，负责：
 - [df_game_r.js 索引草案](docs/DF_GAME_R_JS_INDEX.md)
 - [dp2 参考仓库评估](docs/DP2_REFERENCE_NOTES.md)
 - [风险治理说明](docs/RISK_GUIDE.md)
+- [部署前检查清单](docs/DEPLOYMENT_CHECKLIST.md)
+- [FAQ](docs/FAQ.md)
 - [更新日志](CHANGELOG.md)
