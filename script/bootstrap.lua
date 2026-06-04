@@ -1,10 +1,11 @@
 -- dp2.9 Lua bootstrap
 --
 -- 说明：
--- 1. 本文件负责统一加载 config、utils 和 handler 模块。
+-- 1. 本文件负责统一加载 config、utils、handler 模块和基础设施模块。
 -- 2. df_game_r.lua 调用 M.setup(item_handler, ctx) 完成运行时装配。
 -- 3. handler 是否注册由 script/config.lua 控制。
 -- 4. 当前默认配置已开启全部 handler 模块；SQL、删除、shell 等高风险能力仍由 risk 开关控制。
+-- 5. 基础设施模块按依赖顺序加载：online -> broadcast, gm_permissions -> item_query。
 
 local M = {}
 
@@ -15,6 +16,13 @@ local handler_modules = {
     { key = 'misc', module = 'script.handlers.misc' },
     { key = 'item_cleanup', module = 'script.handlers.item_cleanup' },
     { key = 'pvp', module = 'script.handlers.pvp' },
+}
+
+local infra_modules = {
+    { key = 'online', module = 'script.modules.online' },
+    { key = 'gm_permissions', module = 'script.modules.gm_permissions' },
+    { key = 'broadcast', module = 'script.modules.broadcast' },
+    { key = 'item_query', module = 'script.modules.item_query' },
 }
 
 local function safe_require(module_name, logger)
@@ -63,6 +71,25 @@ local function is_handler_module_enabled(ctx, module_key)
     return modules[module_key] == true
 end
 
+local function is_module_enabled(ctx, module_key)
+    local config = ctx.config or {}
+    local features = config.features or {}
+
+    if module_key == 'online' then
+        return features.enable_online_module == true
+    end
+    if module_key == 'broadcast' then
+        return features.enable_broadcast_module == true
+    end
+    if module_key == 'item_query' then
+        return features.enable_item_query == true
+    end
+    if module_key == 'gm_permissions' then
+        return true
+    end
+    return false
+end
+
 function M.register_handlers(item_handler, ctx)
     if not item_handler then
         if ctx and ctx.logger then
@@ -95,6 +122,34 @@ function M.register_handlers(item_handler, ctx)
             ctx.logger.info('[bootstrap] skipped handler module=%s', module_name)
         end
     end
+end
+
+function M.load_modules(ctx)
+    local loaded = {}
+
+    for _, item in ipairs(infra_modules) do
+        local module_key = item.key
+        local module_name = item.module
+
+        if not is_module_enabled(ctx, module_key) then
+            if ctx and ctx.logger then
+                ctx.logger.info('[bootstrap] skipped module=%s', module_name)
+            end
+        else
+            local module = safe_require(module_name, ctx and ctx.logger)
+            if module and type(module.setup) == 'function' then
+                module.setup(ctx, loaded)
+                loaded[module_key] = module
+                if ctx and ctx.logger then
+                    ctx.logger.info('[bootstrap] loaded module=%s', module_name)
+                end
+            elseif ctx and ctx.logger then
+                ctx.logger.error('[bootstrap] module missing setup function: %s', module_name)
+            end
+        end
+    end
+
+    return loaded
 end
 
 local function collect_debug_useitem_ids(debug)
@@ -254,6 +309,7 @@ end
 function M.setup(item_handler, base_ctx)
     local ctx = M.build_ctx(base_ctx)
     M.install_utils(ctx)
+    M.load_modules(ctx)
     M.register_handlers(item_handler, ctx)
     M.register_debug_handlers(item_handler, ctx)
     return ctx
