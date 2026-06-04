@@ -3,6 +3,10 @@ local dp = _DP
 ---@type DPXGame
 local dpx = _DPX
 
+-- DP 2.9 的默认 package.path 只包含 /dp2/lua 与 /dp2/lua2。
+-- 这里补充 /dp2，确保 require("script.bootstrap") 能加载 /dp2/script/bootstrap.lua。
+package.path = "/dp2/?.lua;/dp2/?/init.lua;" .. package.path
+
 local luv = require("luv")
 local game = require("df.game")
 local world = require("df.game.mgr.world")
