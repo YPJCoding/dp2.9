@@ -3,15 +3,14 @@ local config = {
         enable_debug_log = false,
         enable_debug_hooks = false,
 
-        -- 临时 UseItem2 链路测试 handler。
-        -- 使用 PVF 中已有的可使用道具触发，用于验证 UseItem2 -> item_handler -> 日志/通知。
-        enable_test_useitem_handler = true,
+        -- 临时 UseItem 链路测试 handler。
+        -- 默认关闭，避免正式环境劫持 1034-1037 等已有道具。
+        enable_test_useitem_handler = false,
         test_useitem_ids = {1034, 1035, 1036, 1037},
         test_useitem_return_item = true,
 
-        -- 临时 UseItem2 trace。
-        -- 开启后，任何进入 UseItem2 hook 的道具都会打印实际 item_id 和是否命中 handler。
-        enable_useitem_trace = true,
+        -- UseItem trace 默认关闭，需要排查道具入口时可临时开启。
+        enable_useitem_trace = false,
     },
 
     features = {
