@@ -30,7 +30,7 @@ local config = {
     },
 
     gm = {
-        admin_accounts = {},
+        admin_accounts = {},  -- account UIDs with GM access
         min_gm_level = 1,
     },
 
@@ -68,7 +68,7 @@ local config = {
         auction_min_level = 10,
         item_unlock_time = 1,
         broadcast_rate_per_min = 5,
-    }
+    },
 }
 
 return config
