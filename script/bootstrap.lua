@@ -23,6 +23,10 @@ local infra_modules = {
     { key = 'gm_permissions', module = 'script.modules.gm_permissions' },
     { key = 'broadcast', module = 'script.modules.broadcast' },
     { key = 'item_query', module = 'script.modules.item_query' },
+    { key = 'exp_dungeon', module = 'script.modules.exp_dungeon' },
+    { key = 'dungeon_gate', module = 'script.modules.dungeon_gate' },
+    { key = 'drop_rules', module = 'script.modules.drop_rules' },
+    { key = 'finish_back_home', module = 'script.modules.finish_back_home' },
 }
 
 local function safe_require(module_name, logger)
@@ -88,6 +92,18 @@ local function is_module_enabled(ctx, module_key)
     end
     if module_key == 'item_query' then
         return features.enable_item_query == true
+    end
+    if module_key == 'exp_dungeon' then
+        return features.enable_exp_dungeon == true
+    end
+    if module_key == 'dungeon_gate' then
+        return features.enable_dungeon_gate == true
+    end
+    if module_key == 'drop_rules' then
+        return features.enable_drop_rules == true
+    end
+    if module_key == 'finish_back_home' then
+        return features.enable_finish_back_home == true
     end
     return false
 end

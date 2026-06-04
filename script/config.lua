@@ -53,6 +53,47 @@ local config = {
 
         -- 物品查询指令模块（//viewid / //viewname，所有人可用）
         enable_item_query = true,
+
+        -- 经验副本/泡点模块（在线玩家在指定副本中每分钟获得经验和代币）
+        enable_exp_dungeon = false,
+
+        -- 持物进图模块（进入指定副本需要持有指定道具）
+        enable_dungeon_gate = false,
+
+        -- 等级差限制掉落模块（高等级刷低级图不掉落，持豁免道具可绕过）
+        enable_drop_rules = false,
+
+        -- 翻牌回城模块（副本完成后随机点券 + 自动回城/分解/出售）
+        enable_finish_back_home = false,
+    },
+
+    ------------------------------------------------
+    -- 玩法模块参数配置
+    ------------------------------------------------
+    exp_dungeon = {
+        dungeon_id = 5000,      -- 经验副本 ID
+        level_cap = 90,         -- 等级上限（达到后不再获得经验）
+        exp_percent = 0.01,     -- 每次获得的经验比例（1%）
+        token_amount = 60,      -- 每次获得的代币数量
+        interval_ms = 60000,    -- 执行间隔（毫秒），60000=每分钟
+    },
+
+    dungeon_gate = {
+        rules = {
+            -- {dungeon_id = 5000, item_id = 80206, message = "持有特殊凭证才能进入此副本！"},
+        },
+    },
+
+    drop_rules = {
+        level_gap = 20,             -- 等级差阈值（角色等级 - 副本等级 > 此值时限制掉落）
+        bypass_item_id = 80207,     -- 豁免道具 ID（背包中有此道具时不受限制）
+        message = "此副本等级过低，掉落物品已被系统收回！",
+    },
+
+    finish_back_home = {
+        default_mode = "0",     -- 默认模式：0=关 1=回城 2=诺顿分解+回城 3=玩家分解机+回城 4=出售+回城
+        point_min = 100,        -- 随机点券最小值
+        point_max = 1000,       -- 随机点券最大值
     },
 
     ------------------------------------------------
