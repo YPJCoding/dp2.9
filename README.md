@@ -89,7 +89,8 @@ DP2 的加载配置，指定：
 - 接入 `script/bootstrap.lua`
 - 注册 `on_frida_call`，允许 JS 层回调 DP/Lua 逻辑
 - 维护 `item_handler` 道具触发表
-- 注册 `UseItem2` hook
+- 注册 `UseItem1` hook，处理普通右键消耗品
+- 保留 `UseItem2` hook，兼容原入口和其他可能走 UseItem2 的道具
 - 通过 `script/config.lua` 应用 DPX 启动配置
 
 ### `df_game_r.js`
@@ -215,13 +216,27 @@ DP Frida 侧入口，负责：
 
 ### P8：服务器验收
 
-- [ ] 普通频道启动验证
-- [ ] 确认 bootstrap 日志正常
-- [ ] 确认 `frida.load` 正常
-- [ ] 确认 `UseItem2` hook 正常
-- [ ] 验证低/中风险 handler
+- [x] 普通频道启动验证
+- [x] 确认 bootstrap 日志正常
+- [x] 确认 `frida.load` 正常
+- [x] 确认 `Reach_GameWord` 登录 hook 正常
+- [x] 确认 `UseItem1` 是普通右键消耗品入口
+- [x] 在 `df_game_r.lua` 中正式接入 `UseItem1 -> item_handler` 分发
+- [x] 保留 `UseItem2` hook 作为兼容入口
+- [x] 关闭 1034-1037 临时 debug handler
 - [ ] 验证高风险 handler 默认拒绝并返还道具
 - [ ] 根据服务器日志修正 require 路径或 API 差异
+
+### P9：PVF 正式道具验证（后置）
+
+当前 PVF 暂不添加 DP 正式道具，以下功能放到最后阶段验证：
+
+- [ ] 添加并验证 `2021458802` 主线任务清理
+- [ ] 添加并验证 `2021458808` 每日任务清理
+- [ ] 添加并验证 `2021458809` 成就任务清理
+- [ ] 添加并验证 `2021458804` 异界 E2 重置
+- [ ] 添加并验证 `2021458805` 异界 E3 重置
+- [ ] 添加并验证 `2022110505` 装备继承
 
 ## 文档
 
