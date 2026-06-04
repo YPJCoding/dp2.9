@@ -2,7 +2,7 @@
 
 `dp2.9` 是一个以 DP2/DPX 为核心的 DNF 服务端插件底板。
 
-本仓库当前以 `df_game_r.lua` 作为主要业务入口，并通过 DP 的 Frida 加载链路使用 `df_game_r.js`。仓库目标是保留一个相对干净、可维护、可逐步模块化的 DP 插件底板。
+本仓库当前以 `df_game_r.lua` 作为轻量入口，并通过 DP 的 Frida 加载链路使用 `df_game_r.js`。仓库目标是保留一个相对干净、可维护、可逐步模块化的 DP 插件底板。
 
 ## 真实加载链路
 
@@ -57,14 +57,15 @@ DP2 的加载配置，指定：
 
 ### `df_game_r.lua`
 
-主业务入口，负责：
+轻量主入口，负责：
 
 - 加载 `dp`、`dpx`、`df.game`、`df.game.mgr.world`、`df.logger`
 - 加载 `df.frida`
+- 接入 `script/bootstrap.lua`
 - 注册 `on_frida_call`，允许 JS 层回调 DP/Lua 逻辑
 - 维护 `item_handler` 道具触发表
 - 注册 `UseItem2` hook
-- 启用 DPX 补丁开关
+- 通过 `script/config.lua` 应用 DPX 启动配置
 
 ### `df_game_r.js`
 
@@ -76,7 +77,7 @@ DP Frida 侧入口，负责：
 
 ### `script/`
 
-存放辅助脚本，例如 PVP 经验脚本、后续拆分出来的 handler 模块、配置文件等。
+存放配置、工具函数、handler 模块和辅助脚本。
 
 ## 当前底板原则
 
@@ -134,11 +135,11 @@ DP Frida 侧入口，负责：
 - [x] 启用 `misc.lua` 模块，覆盖跨界/异界重置/SQL misc；SQL misc 默认关闭
 - [x] 启用 `item_cleanup.lua` 模块，覆盖宠物/时装/装备清理；删除类操作默认关闭
 - [x] 启用 `pvp.lua` 模块，覆盖 PVP 经验书；shell 操作默认关闭
-- [ ] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
+- [x] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
 - [x] 新增 `script/utils.lua` 工具函数模板
 - [x] 在 `script/utils.lua` 中提供旧全局工具函数兼容实现
 - [x] 在 `script/bootstrap.lua` 中安装 legacy 工具函数兼容层
-- [ ] 从 `df_game_r.lua` 删除旧工具函数定义
+- [x] 从 `df_game_r.lua` 删除旧工具函数定义
 - [x] 将任务相关 handler 迁移草稿写入 `script/handlers/quest.lua`
 - [x] 将职业/转职/觉醒逻辑迁移草稿写入 `script/handlers/job.lua`
 - [x] 将宠物/时装/装备清理逻辑迁移草稿写入 `script/handlers/item_cleanup.lua`
@@ -147,7 +148,7 @@ DP Frida 侧入口，负责：
 - [x] 将低风险/中风险零散道具券迁入 `script/handlers/misc.lua`
 - [x] 将 SQL 类零散道具券以默认关闭方式迁入 `script/handlers/misc.lua`
 - [x] 在 `df_game_r.lua` 中统一加载全部 handler 模块
-- [ ] 从 `df_game_r.lua` 移除已迁移的旧 handler 实现
+- [x] 从 `df_game_r.lua` 移除已迁移的旧 handler 实现
 
 ### P4：审查和整理 `df_game_r.js`
 
@@ -172,10 +173,10 @@ DP Frida 侧入口，负责：
 
 - [x] 新增 `docs/RISK_GUIDE.md` 风险治理说明
 - [x] 在已迁移的部分 handler 草稿中增加风险注释和开关示例
-- [ ] 给当前运行中的 `df_game_r.lua` 直接 SQL 操作增加注释和开关
-- [ ] 给当前运行中的删除类功能增加二次保护或限制条件
+- [x] 给当前运行中的 `df_game_r.lua` 直接 SQL 操作增加注释和开关
+- [x] 给当前运行中的删除类功能增加二次保护或限制条件
 - [ ] 给发奖/发物品功能增加日志
-- [ ] 给高风险 DPX 开关接入配置并增加代码注释
+- [x] 给高风险 DPX 开关接入配置并增加代码注释
 - [ ] 补充常见问题 FAQ
 - [x] 补充回滚原则
 
