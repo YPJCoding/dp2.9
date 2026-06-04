@@ -119,7 +119,7 @@ local config = {
     risk = {
         -- [RISK:HIGH][SQL] 允许道具直接执行 SQL（改库操作）
         -- 影响：女鬼剑职业转换、角色出战、装备设计图熟练度
-        enable_sql_handlers = false,
+        enable_sql_handlers = true,
 
         -- [RISK:HIGH][DELETE] 允许道具删除角色物品
         -- 影响：宠物清理、时装清理、副职业一键分解
