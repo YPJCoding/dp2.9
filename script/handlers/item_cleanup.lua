@@ -1,7 +1,7 @@
 -- 宠物、时装、装备清理相关道具 handler
 --
--- 当前模块迁移自 df_game_r.lua。
--- 注意：文件已包含真实 handler 注册逻辑，但在 df_game_r.lua 接入 bootstrap 前不会改变运行行为。
+-- 当前模块迁移自 df_game_r.lua，已接入 bootstrap 加载链路。
+-- 删除类能力受 config.risk.enable_delete_handlers 控制，默认关闭。
 
 local M = {}
 
