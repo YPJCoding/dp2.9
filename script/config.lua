@@ -52,7 +52,7 @@ local config = {
         disable_mobile_rewards = true,
         set_item_unlock_time = true,
         item_unlock_time = 1,
-        enable_game_master = false,
+        enable_game_master = true,
         disable_giveup_panalty = false,
     },
 
