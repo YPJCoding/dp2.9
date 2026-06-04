@@ -2,6 +2,12 @@
 /**
  * 用于存放所有的和游戏相关的公共方法
  */
+
+// ===== Native: Declarations =====
+
+// ===== Debug Flag =====
+var DP2_DEBUG = false;
+function dp2_log() { if (DP2_DEBUG) console.log.apply(console, arguments); }
 //获取UTC时间(秒)
 const getCurSec = new NativeFunction(Module.getExportByName(null, 'time'), 'int', ['pointer'], {"abi":"sysv"});
 
@@ -573,6 +579,8 @@ var ReqDBSendNewSystemMail = new NativeFunction(ptr(0x085555E8), 'int', ['pointe
 var strlen = new NativeFunction(Module.getExportByName(null, 'strlen'), 'int', ['pointer'], { "abi": "sysv" });
 var global_config = {};
 
+
+// ===== Utils: Logging / Config / Recharge =====
 //获取道具名
 var CItem_GetItemName = new NativeFunction(ptr(0x811ED82), 'pointer', ['pointer'], { "abi": "sysv" });
 
@@ -883,6 +891,8 @@ function start_event_lucky_online_user() {
 
 	//定时开启活动
 	api_scheduleOnMainThread_delay(on_event_lucky_online_user, null, delay_time * 1000);
+
+// ===== Hook: Account Cargo (账号仓库扩展) =====
 }
 
 // 存放所有用户的账号金库数据
@@ -2014,6 +2024,8 @@ function enable_online_reward() {
 function api_CUser_gain_exp_sp(user, exp) {
 	var a2 = Memory.alloc(4);
 	var a3 = Memory.alloc(4);
+
+// ===== Utils: GameWorld =====
 	CUser_gain_exp_sp(user, exp, a2, a3, 0, 0, 0);
 }
 
@@ -2061,6 +2073,8 @@ function api_gameworld_foreach(f, args) {
 		}
 		//继续遍历下一个玩家
 		api_gameworld_user_map_next(it);
+
+// ===== Native: Mail / Packet / MySQL =====
 	}
 }
 
@@ -2346,6 +2360,8 @@ function uninit_db() {
 	if (mysql_frida) {
 		MySQL_close(mysql_frida);
 		mysql_frida = null;
+
+// ===== Feature: Village Attack (怪物攻城) =====
 	}
 }
 
@@ -3068,6 +3084,8 @@ function on_end_event_villageattack() {
 	//存档
 	event_villageattack_save_to_db();
 	//开启怪物攻城活动定时器
+
+// ===== Feature: Quest / TOD Fixes =====
 	start_event_villageattack_timer();
 }
 
@@ -3302,6 +3320,8 @@ function api_set_JewelSocketData(jewelSocketData, slot, emblem_item_id) {
 		//镶嵌不改变槽类型, 这里只修改徽章id
 		jewelSocketData.add(slot * 6 + 2).writeInt(emblem_item_id);
 	}
+
+// ===== Feature: Emblem Fix =====
 	return;
 }
 
@@ -3501,6 +3521,8 @@ function processing_data(item_id, user, award_item_id, award_item_count, count) 
 		"]在地下城中获得了"+rarity+"[" + itemName + "], 随机奖励点券：" + count + "", 14);
 		api_recharge_cash_cera(user, count);
 	}
+
+// ===== Hook: History Log / User In-Out =====
 }
 
 //角色登入登出处理
@@ -3909,6 +3931,8 @@ function enable_drop_use_luck_piont() {
 }
 
 //取消新账号送成长契约
+
+// ===== Patch: Random Option / Luck Point / Mobile Auth / Strengthen =====
 function InterSelectMobileAuthReward() {
 	//还原 InterSelectMobileAuthReward::dispatch_sig 函数
 	var Defptr = ptr(0x08161384);
@@ -4041,6 +4065,9 @@ function start() {
 	//开启怪物攻城活动
 	//api_scheduleOnMainThread(start_event_villageattack, null);
 	console.log('[' + get_timestamp() + '] [frida] [info] ----------------------- set function success ------------------------');
+
+// ===== Bridge: Frida Integration =====
+// dp2_resolver, frida_main, frida_handler, rpc.exports
 }
 
 
