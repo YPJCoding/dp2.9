@@ -2,11 +2,10 @@
 --
 -- 提供 //viewid <名称> 和 //viewname <ID> 聊天指令，
 -- 通过 GmInput hook 拦截，使用 dpx.item.query_by_name / query_by_id 查询。
--- 依赖 gm_permissions.lua 进行权限检查。
+-- //viewid / //viewname 为只读查询，所有玩家均可使用。
 
 local M = {}
 
-local gm_module = nil
 local logger = nil
 local dpx = nil
 local game = nil
@@ -52,29 +51,12 @@ end
 -- GmInput hook 回调。
 -- 参数签名参考 dp2: function(fnext, _user, input)
 local function on_gm_input(fnext, _user, input)
-    -- TRACE: 确认 GmInput hook 是否被触发
-    if logger then
-        logger.info("[item_query][trace] GmInput fired input=%s", tostring(input))
-    end
-
-    if not gm_module then
-        if logger then logger.info("[item_query][trace] skip: no gm_module") end
+    if not input or type(input) ~= "string" then
         return fnext(_user, input)
     end
 
     local user = game.fac.user(_user)
     if not user then
-        if logger then logger.info("[item_query][trace] skip: no user") end
-        return fnext(_user, input)
-    end
-
-    -- 权限检查：非 GM 不响应
-    if not gm_module.is_gm(user) then
-        if logger then logger.info("[item_query][trace] skip: not gm, acc=%d", user:GetAccId()) end
-        return fnext(_user, input)
-    end
-
-    if not input or type(input) ~= "string" then
         return fnext(_user, input)
     end
 
@@ -103,7 +85,6 @@ local function on_gm_input(fnext, _user, input)
 end
 
 function M.setup(ctx, deps)
-    gm_module = deps and deps.gm_permissions
     logger = ctx.logger
     dpx = ctx.dpx
     game = ctx.game
