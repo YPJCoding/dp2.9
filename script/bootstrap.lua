@@ -138,10 +138,14 @@ function M.load_modules(ctx)
         else
             local module = safe_require(module_name, ctx and ctx.logger)
             if module and type(module.setup) == 'function' then
-                module.setup(ctx, loaded)
-                loaded[module_key] = module
-                if ctx and ctx.logger then
-                    ctx.logger.info('[bootstrap] loaded module=%s', module_name)
+                local ok, err = pcall(module.setup, ctx, loaded)
+                if ok then
+                    loaded[module_key] = module
+                    if ctx and ctx.logger then
+                        ctx.logger.info('[bootstrap] loaded module=%s', module_name)
+                    end
+                elseif ctx and ctx.logger then
+                    ctx.logger.error('[bootstrap] module setup failed: %s err=%s', module_name, tostring(err))
                 end
             elseif ctx and ctx.logger then
                 ctx.logger.error('[bootstrap] module missing setup function: %s', module_name)
