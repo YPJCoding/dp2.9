@@ -230,6 +230,7 @@ DP Frida 侧入口，负责：
 - [初始代码审查记录](docs/CODE_REVIEW_NOTES.md)
 - [P3 重构计划](docs/P3_REFACTOR_PLAN.md)
 - [动态路线图](docs/ROADMAP.md)
+- [代码自检记录](docs/CODE_SELF_CHECK.md)
 - [Handler 迁移对照表](docs/HANDLER_MIGRATION_MAP.md)
 - [df_game_r.js 审查记录](docs/DF_GAME_R_JS_AUDIT.md)
 - [df_game_r.js 索引草案](docs/DF_GAME_R_JS_INDEX.md)
