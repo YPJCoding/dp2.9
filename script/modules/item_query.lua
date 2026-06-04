@@ -49,18 +49,22 @@ local function on_gm_input(fnext, _user, input)
     end
 
     -- //viewid <名称>
-    if string.match(input, "^//viewid") and string.len(input) > 8 then
-        local name = string.sub(input, 9)
+    local name = string.match(input, "^//viewid%s+(.-)%s*$")
+    if name and #name > 0 then
         handle_viewid(user, name)
         return fnext(_user, input)
     end
 
     -- //viewname <ID>
-    if string.match(input, "^//viewname") and string.len(input) > 10 then
-        local id = tonumber(string.sub(input, 11))
-        if id then
-            handle_viewname(user, id)
-        end
+    local id_str = string.match(input, "^//viewname%s+(%d+)%s*$")
+    if id_str then
+        handle_viewname(user, tonumber(id_str))
+        return fnext(_user, input)
+    end
+
+    -- //viewname 非数字参数，提示用法
+    if string.match(input, "^//viewname%s+") then
+        user:SendNotiPacketMessage("用法错误：//viewname <数字ID>", 14)
         return fnext(_user, input)
     end
 
