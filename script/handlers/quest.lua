@@ -1,13 +1,11 @@
 -- 任务相关道具 handler
 --
--- 当前模块迁移自 df_game_r.lua。
--- 注意：文件已包含真实 handler 注册逻辑，但在 df_game_r.lua 接入 bootstrap 前不会改变运行行为。
+-- 当前模块迁移自 df_game_r.lua，已接入 bootstrap 加载链路。
 
 local M = {}
 
 local function clear_quest_by_type(user, item_id, ctx, quest_type, success_label, fail_label)
     local dpx = ctx.dpx
-    local game = ctx.game
     local quest = dpx.quest
     local lst = quest.all(user.cptr)
     local chr_level = user:GetCharacLevel()
