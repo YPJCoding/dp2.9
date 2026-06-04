@@ -9,12 +9,12 @@
 local M = {}
 
 local handler_modules = {
-    quest = 'script.handlers.quest',
-    job = 'script.handlers.job',
-    item_cleanup = 'script.handlers.item_cleanup',
-    inherit = 'script.handlers.inherit',
-    pvp = 'script.handlers.pvp',
-    misc = 'script.handlers.misc',
+    { key = 'quest', module = 'script.handlers.quest' },
+    { key = 'job', module = 'script.handlers.job' },
+    { key = 'inherit', module = 'script.handlers.inherit' },
+    { key = 'misc', module = 'script.handlers.misc' },
+    { key = 'item_cleanup', module = 'script.handlers.item_cleanup' },
+    { key = 'pvp', module = 'script.handlers.pvp' },
 }
 
 local function safe_require(module_name, logger)
@@ -78,7 +78,9 @@ function M.register_handlers(item_handler, ctx)
         return
     end
 
-    for module_key, module_name in pairs(handler_modules) do
+    for _, item in ipairs(handler_modules) do
+        local module_key = item.key
+        local module_name = item.module
         if is_handler_module_enabled(ctx, module_key) then
             local module = safe_require(module_name, ctx and ctx.logger)
             if module and type(module.register) == 'function' then
