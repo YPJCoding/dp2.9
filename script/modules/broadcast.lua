@@ -29,6 +29,10 @@ end
 -- msg_type 默认为 14（系统通知）。
 -- 返回 true 和 nil 表示发送成功；返回 false 和 "rate limited" 表示被频率限制拦截。
 function M.send(message, msg_type)
+    if not message then
+        return false, "no message"
+    end
+
     local now = os.time()
     if now - last_reset_time >= 60 then
         broadcast_count = 0
@@ -64,7 +68,7 @@ end
 -- 向指定账号发送系统消息。
 -- 返回 true 表示发送成功；false 表示玩家不在线。
 function M.send_to_aid(aid, message, msg_type)
-    if not aid then
+    if not aid or not message then
         return false
     end
 
