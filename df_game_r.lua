@@ -118,18 +118,28 @@ dpx.hook(game.HookType.Reach_GameWord, mainDpLoad)
 logger.info("[hook] registered Reach_GameWord")
 
 ---------------------------------- 通用物品使用处理逻辑 -------------------------------- !
-local my_useitem2 = function(_user, item_id)
+local function dispatch_useitem(hook_name, _user, item_id, slot)
     local user = game.fac.user(_user)
     local handler = item_handler[item_id]
 
     if debug_config.enable_useitem_trace == true then
-        logger.info("[useitem][trace] acc: %d chr: %d item_id: %d has_handler: %s", user:GetAccId(), user:GetCharacNo(), item_id, tostring(handler ~= nil))
+        logger.info("[%s][trace] acc: %d chr: %d item_id: %d slot: %s has_handler: %s", hook_name, user:GetAccId(), user:GetCharacNo(), item_id, tostring(slot), tostring(handler ~= nil))
     end
 
     if handler then
         handler(user, item_id)
-        logger.info("[useitem] acc: %d chr: %d item_id: %d", user:GetAccId(), user:GetCharacNo(), item_id)
+        logger.info("[useitem] hook: %s acc: %d chr: %d item_id: %d slot: %s", hook_name, user:GetAccId(), user:GetCharacNo(), item_id, tostring(slot))
     end
+end
+
+-- 普通右键消耗品实测走 UseItem1：arg1=user, arg2=item_id, arg3=slot。
+local my_useitem1 = function(_user, item_id, slot)
+    dispatch_useitem("UseItem1", _user, item_id, slot)
+end
+
+-- 保留 UseItem2，兼容原 dp2 逻辑和其他可能走 UseItem2 的道具。
+local my_useitem2 = function(_user, item_id)
+    dispatch_useitem("UseItem2", _user, item_id, nil)
 end
 
 local function apply_dpx_startup_fallback()
@@ -155,7 +165,10 @@ else
     apply_dpx_startup_fallback()
 end
 
-dpx.hook(game.HookType.UseItem2, my_useitem2) -- 物品使用 hook
+dpx.hook(game.HookType.UseItem1, my_useitem1) -- 普通右键消耗品使用 hook
+logger.info("[hook] registered UseItem1")
+
+dpx.hook(game.HookType.UseItem2, my_useitem2) -- 兼容原物品使用 hook
 logger.info("[hook] registered UseItem2")
 
 -- dpx.enable_game_master() -- 开启GM模式(需把UID添加到GM数据库中)
