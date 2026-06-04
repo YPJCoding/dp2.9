@@ -12,7 +12,7 @@ local config = {
             job = true,
             item_cleanup = true,
             inherit = true,
-            pvp = false,
+            pvp = true,
             misc = true,
         },
     },
