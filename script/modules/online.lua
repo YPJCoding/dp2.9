@@ -9,7 +9,6 @@ local M = {}
 local online = {}  -- keyed by charac_id (cid)
 
 function M.setup(ctx)
-    local world = ctx.world
     local game = ctx.game
     local dpx = ctx.dpx
     local logger = ctx.logger
@@ -42,10 +41,12 @@ function M.setup(ctx)
 
         if online[cid] then
             local aid = user:GetAccId()
+            local entry = online[cid]
+            local name = entry and entry.name or "unknown"
             online[cid] = nil
             if logger then
-                logger.info("[online][logout] acc=%d chr=%d count=%d",
-                    aid, cid, M.count())
+                logger.info("[online][logout] acc=%d chr=%d name=%s count=%d",
+                    aid, cid, name, M.count())
             end
         end
     end
