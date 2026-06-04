@@ -16,6 +16,9 @@ local config = {
     features = {
         enable_item_handlers = true,
         enable_modular_handlers = true,
+        enable_online_module = true,
+        enable_broadcast_module = false,
+        enable_item_query = false,
         modular_handlers = {
             quest = true,
             job = true,
@@ -24,6 +27,11 @@ local config = {
             pvp = true,
             misc = true,
         },
+    },
+
+    gm = {
+        admin_accounts = {},
+        min_gm_level = 1,
     },
 
     dpx_startup = {
@@ -59,6 +67,7 @@ local config = {
         auction_max_total_price = 200000000,
         auction_min_level = 10,
         item_unlock_time = 1,
+        broadcast_rate_per_min = 5,
     }
 }
 
