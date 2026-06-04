@@ -55,16 +55,16 @@ local config = {
         enable_item_query = true,
 
         -- 经验副本/泡点模块（在线玩家在指定副本中每分钟获得经验和代币）
-        enable_exp_dungeon = false,
+        enable_exp_dungeon = true,
 
         -- 持物进图模块（进入指定副本需要持有指定道具）
-        enable_dungeon_gate = false,
+        enable_dungeon_gate = true,
 
         -- 等级差限制掉落模块（高等级刷低级图不掉落，持豁免道具可绕过）
-        enable_drop_rules = false,
+        enable_drop_rules = true,
 
         -- 翻牌回城模块（副本完成后随机点券 + 自动回城/分解/出售）
-        enable_finish_back_home = false,
+        enable_finish_back_home = true,
     },
 
     ------------------------------------------------
