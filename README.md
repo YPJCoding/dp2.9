@@ -18,6 +18,15 @@ libdp2.xml
 
 > 注意：`frida.js` 不是 DP 默认加载文件。DP 默认关注的是 `df_game_r.lua` 和 `df_game_r.js`。
 
+## 当前进度口径
+
+README 中的 TODO 记录代码与文档重构任务；部署验收进度以 [动态路线图](docs/ROADMAP.md) 为准。
+
+当前拆分为两个目标：
+
+- 安全可部署版：高风险功能默认关闭，先验证服务器能启动和低/中风险功能可用。
+- 完全功能恢复版：按需开启 SQL、删除、shell 类功能，并完成测试服验证。
+
 ## 文件放置
 
 将整个 `dp2` 目录放到服务端根目录，例如：
@@ -56,6 +65,7 @@ LD_PRELOAD=/dp2/libdp2pre.so ./df_game_r cain01 start &
 
 部署前请阅读：
 
+- [动态路线图](docs/ROADMAP.md)
 - [部署前检查清单](docs/DEPLOYMENT_CHECKLIST.md)
 - [FAQ](docs/FAQ.md)
 
@@ -98,10 +108,10 @@ DP Frida 侧入口，负责：
 
 1. 以 `dp2.9` 为主底板。
 2. `dp2` 仓库只作为功能素材库，不直接整包覆盖。
-3. 优先保留 `df_game_r.lua` 中的 `item_handler` 写法。
+3. 优先保留 `item_handler[item_id] = function(...)` 的主分发写法。
 4. 新功能优先模块化，避免继续把所有逻辑堆在入口文件里。
-5. 所有高风险功能必须有清晰注释，后续逐步接入配置开关。
-6. 先定编码规范和模块边界，再重构业务代码。
+5. 高风险功能默认关闭，必须通过配置显式开启。
+6. 后续优先完成服务器烟测，再继续处理 JS 深度审查或完全功能恢复。
 
 ## TODO
 
@@ -137,14 +147,14 @@ DP Frida 侧入口，负责：
 - [x] 定义风险标记注释模板
 - [x] 定义日志格式模板
 
-### P3：重构 `df_game_r.lua`，尽量不改变行为
+### P3：入口模块化与安全默认行为
 
 - [x] 梳理 `df_game_r.lua` 当前结构
 - [x] 保留 `item_handler[item_id] = function(...)` 的主分发写法
 - [x] 在 `script/config.lua` 中增加模块化 handler 总开关和分模块开关
-- [x] 在 `script/bootstrap.lua` 中按配置开关控制模块注册，默认不注册新 handler
-- [x] 在 `df_game_r.lua` 中安全接入 `bootstrap.setup(...)`
-- [x] 首批启用 `quest.lua` 模块，覆盖任务类旧 handler
+- [x] 在 `script/bootstrap.lua` 中按配置开关控制模块注册
+- [x] 在 `df_game_r.lua` 中接入 `bootstrap.setup(...)`
+- [x] 启用 `quest.lua` 模块，覆盖任务类旧 handler
 - [x] 启用 `job.lua` 模块，覆盖觉醒/转职类旧 handler；SQL 职业转换默认关闭
 - [x] 启用 `inherit.lua` 模块，覆盖装备继承券旧 handler
 - [x] 启用 `misc.lua` 模块，覆盖跨界/异界重置/SQL misc；SQL misc 默认关闭
@@ -203,12 +213,23 @@ DP Frida 侧入口，负责：
 - [x] 创建 Draft PR
 - [ ] 合并 PR 回 `main`
 
+### P8：服务器验收
+
+- [ ] 普通频道启动验证
+- [ ] 确认 bootstrap 日志正常
+- [ ] 确认 `frida.load` 正常
+- [ ] 确认 `UseItem2` hook 正常
+- [ ] 验证低/中风险 handler
+- [ ] 验证高风险 handler 默认拒绝并返还道具
+- [ ] 根据服务器日志修正 require 路径或 API 差异
+
 ## 文档
 
 - [架构说明](docs/ARCHITECTURE.md)
 - [编码规范](docs/CODING_STANDARDS.md)
 - [初始代码审查记录](docs/CODE_REVIEW_NOTES.md)
 - [P3 重构计划](docs/P3_REFACTOR_PLAN.md)
+- [动态路线图](docs/ROADMAP.md)
 - [Handler 迁移对照表](docs/HANDLER_MIGRATION_MAP.md)
 - [df_game_r.js 审查记录](docs/DF_GAME_R_JS_AUDIT.md)
 - [df_game_r.js 索引草案](docs/DF_GAME_R_JS_INDEX.md)
