@@ -201,7 +201,7 @@ DP Frida 侧入口，负责：
 - [x] 在已迁移的部分 handler 草稿中增加风险注释和开关示例
 - [x] 给当前运行中的 `df_game_r.lua` 直接 SQL 操作增加注释和开关
 - [x] 给当前运行中的删除类功能增加二次保护或限制条件
-- [ ] 给发奖/发物品功能增加日志
+- [x] 给发奖/发物品/返还道具功能增加日志
 - [x] 给高风险 DPX 开关接入配置并增加代码注释
 - [x] 补充常见问题 FAQ
 - [x] 补充回滚原则
@@ -224,7 +224,8 @@ DP Frida 侧入口，负责：
 - [x] 在 `df_game_r.lua` 中正式接入 `UseItem1 -> item_handler` 分发
 - [x] 保留 `UseItem2` hook 作为兼容入口
 - [x] 关闭 1034-1037 临时 debug handler
-- [ ] 验证高风险 handler 默认拒绝并返还道具
+- [x] 高风险 handler 默认拒绝并返还道具：代码级确认完成
+- [ ] 高风险 handler 默认拒绝并返还道具：真实道具实测
 - [ ] 根据服务器日志修正 require 路径或 API 差异
 
 ### P9：PVF 正式道具验证（后置）
@@ -245,6 +246,7 @@ DP Frida 侧入口，负责：
 - [初始代码审查记录](docs/CODE_REVIEW_NOTES.md)
 - [P3 重构计划](docs/P3_REFACTOR_PLAN.md)
 - [动态路线图](docs/ROADMAP.md)
+- [服务器烟测记录](docs/SERVER_SMOKE_TEST.md)
 - [代码自检记录](docs/CODE_SELF_CHECK.md)
 - [Handler 迁移对照表](docs/HANDLER_MIGRATION_MAP.md)
 - [df_game_r.js 审查记录](docs/DF_GAME_R_JS_AUDIT.md)
