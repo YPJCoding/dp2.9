@@ -1,7 +1,6 @@
 -- 装备继承相关道具 handler
 --
--- 当前模块迁移自 df_game_r.lua。
--- 注意：文件已包含真实 handler 注册逻辑，但在 df_game_r.lua 接入 bootstrap 前不会改变运行行为。
+-- 当前模块迁移自 df_game_r.lua，已接入 bootstrap 加载链路。
 
 local M = {}
 
@@ -14,8 +13,8 @@ function M.register(item_handler, ctx)
         local mask = game.InheritMask.FLAG_UPGRADE | game.InheritMask.FLAG_AMPLIFY | game.InheritMask.FLAG_ENCHANT | game.InheritMask.FLAG_SEPARATE
         mask = mask | game.InheritMask.FLAG_MOVE_UPGRADE | game.InheritMask.FLAG_MOVE_AMPLIFY | game.InheritMask.FLAG_MOVE_ENCHANT | game.InheritMask.FLAG_MOVE_SEPARATE
 
-        local item1 = dpx.item.info(user, game.ItemSpace.INVENTORY, 9)
-        local item2 = dpx.item.info(user, game.ItemSpace.INVENTORY, 10)
+        local item1 = dpx.item.info(user.cptr, game.ItemSpace.INVENTORY, 9)
+        local item2 = dpx.item.info(user.cptr, game.ItemSpace.INVENTORY, 10)
 
         if item1 == nil or item2 == nil then
             user:SendNotiPacketMessage("注意：装备栏1或装备栏2的装备数据无法被识别！")
