@@ -52,17 +52,25 @@ end
 -- GmInput hook 回调。
 -- 参数签名参考 dp2: function(fnext, _user, input)
 local function on_gm_input(fnext, _user, input)
+    -- TRACE: 确认 GmInput hook 是否被触发
+    if logger then
+        logger.info("[item_query][trace] GmInput fired input=%s", tostring(input))
+    end
+
     if not gm_module then
+        if logger then logger.info("[item_query][trace] skip: no gm_module") end
         return fnext(_user, input)
     end
 
     local user = game.fac.user(_user)
     if not user then
+        if logger then logger.info("[item_query][trace] skip: no user") end
         return fnext(_user, input)
     end
 
     -- 权限检查：非 GM 不响应
     if not gm_module.is_gm(user) then
+        if logger then logger.info("[item_query][trace] skip: not gm, acc=%d", user:GetAccId()) end
         return fnext(_user, input)
     end
 
