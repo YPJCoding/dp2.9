@@ -13,7 +13,6 @@ function M.setup(ctx)
     local gm_config = config.gm or {}
     local accounts = gm_config.admin_accounts or {}
 
-    admin_accounts = {}
     for _, aid in ipairs(accounts) do
         admin_accounts[aid] = true
     end
