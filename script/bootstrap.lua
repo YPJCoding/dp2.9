@@ -321,6 +321,59 @@ function M.install_utils(ctx)
     end
 end
 
+function M.write_js_config(ctx)
+    local config = ctx.config or {}
+    local js_features = config.js_features or {}
+    local logger = ctx.logger
+
+    local ok_json, json = pcall(require, "json")
+    if not ok_json then
+        if logger then
+            logger.error("[bootstrap] json module not available, skip js_config")
+        end
+        return
+    end
+
+    -- 尝试读取已有 frida_config.json
+    local existing = {}
+    local ok_read, raw = pcall(function()
+        local f = io.open("/dp2/frida/frida_config.json", "r")
+        if not f then return end
+        local content = f:read("*a")
+        f:close()
+        return content
+    end)
+    if ok_read and raw then
+        local ok_parse, parsed = pcall(json.decode, raw)
+        if ok_parse and type(parsed) == "table" then
+            existing = parsed
+        end
+    end
+
+    -- 合并 features
+    existing.features = {}
+    for k, v in pairs(js_features) do
+        existing.features[k] = v
+    end
+
+    -- 写入
+    local ok_write, err = pcall(function()
+        local encoded = json.encode(existing)
+        local f = io.open("/dp2/frida/frida_config.json", "w")
+        if not f then error("cannot open file") end
+        f:write(encoded)
+        f:close()
+    end)
+
+    if ok_write and logger then
+        local count = 0
+        for _ in pairs(js_features) do count = count + 1 end
+        logger.info("[bootstrap] wrote js_config features=%d to frida_config.json", count)
+    elseif logger then
+        logger.error("[bootstrap] failed to write js_config: %s", tostring(err))
+    end
+end
+
 function M.build_ctx(base_ctx)
     local ctx = base_ctx or {}
     ctx.config = ctx.config or M.load_config(ctx.logger)
@@ -332,6 +385,7 @@ function M.setup(item_handler, base_ctx)
     local ctx = M.build_ctx(base_ctx)
     M.install_utils(ctx)
     M.load_modules(ctx)
+    M.write_js_config(ctx)
     M.register_handlers(item_handler, ctx)
     M.register_debug_handlers(item_handler, ctx)
     return ctx

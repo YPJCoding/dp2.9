@@ -4042,28 +4042,62 @@ function UserUseItemEvent(user, item_id, accid) {
 //加载主功能
 function start() {
 	console.log('[' + get_timestamp() + '] [frida] [info] --------------------------- set function ----------------------------');
-	fix_TOD(true); //绝望之塔金币修复
-	fix_use_emblem(); //镶嵌
-	hook_history_log(); //hook日志
-	//hook_user_inout_game_world() //怪物攻城
-	//enable_online_reward(); //在线奖励
-	//change_random_option_inherit(); //魔法封印属性转换时可以继承
-	//auto_unseal_random_option_equipment(); //魔法封印自动解封
-	//enable_drop_use_luck_piont(); //使用角色幸运值加成装备爆率
-	//setMaxCAccountCargoSolt(128); //账号金库扩展至120格
-	disable_check_create_character_limit(); //解除每日创建角色数量限制
-	DP_Strengthen_SendUpdateItemList(); //+13以上强化券自动刷新物品栏
-	check_move_comboSkillSlot_force_true(); //黑暗武士技能栏修复
-	//InterSelectMobileAuthReward(); //取消新账号送成长契约
-	//start_event_lucky_online_user(); //开启抽取幸运在线玩家活动
-	//加载本地配置文件
+
+	// 加载配置文件（由 Lua bootstrap 自动生成，包含 features 开关）
 	load_config('/dp2/frida/frida_config.json');
-	//初始化数据库
+	var cfg = (global_config && global_config.features) ? global_config.features : {};
+
+	// 绝望之塔金币修复
+	if (cfg.enable_tod_fix !== false) { fix_TOD(true); }
+
+	// 时装镶嵌修复
+	if (cfg.enable_emblem_fix !== false) { fix_use_emblem(); }
+
+	// 历史日志追踪
+	if (cfg.enable_history_log !== false) { hook_history_log(); }
+
+	// 上下线处理（幸运点 + 怪物攻城 UI）
+	if (cfg.enable_user_inout_hook === true) { hook_user_inout_game_world(); }
+
+	// 在线奖励（发点券）
+	if (cfg.enable_online_reward === true) { enable_online_reward(); }
+
+	// 魔法封印属性转换时继承
+	if (cfg.enable_random_option_inherit === true) { change_random_option_inherit(); }
+
+	// 魔法封印自动解封
+	if (cfg.enable_auto_unseal === true) { auto_unseal_random_option_equipment(); }
+
+	// 角色幸运值加成装备爆率
+	if (cfg.enable_luck_point_drop === true) { enable_drop_use_luck_piont(); }
+
+	// 账号金库扩展至 128 格
+	if (cfg.enable_account_cargo === true) { setMaxCAccountCargoSolt(128); }
+
+	// 解除每日创建角色数量限制
+	if (cfg.enable_create_character_unlimit !== false) { disable_check_create_character_limit(); }
+
+	// +13 以上强化券自动刷新物品栏
+	if (cfg.enable_strengthen_refresh !== false) { DP_Strengthen_SendUpdateItemList(); }
+
+	// 黑暗武士技能栏修复
+	if (cfg.enable_dark_knight_skill_fix !== false) { check_move_comboSkillSlot_force_true(); }
+
+	// 取消新账号送成长契约
+	if (cfg.enable_mobile_auth === true) { InterSelectMobileAuthReward(); }
+
+	// 抽取幸运在线玩家活动
+	if (cfg.enable_lucky_online === true) { start_event_lucky_online_user(); }
+
+	// 初始化数据库
 	api_scheduleOnMainThread(init_db, null);
-	//挂接消息分发线程 执行需要在主线程运行的代码
+
+	// 挂接消息分发线程
 	hook_TimerDispatcher_dispatch();
-	//开启怪物攻城活动
-	//api_scheduleOnMainThread(start_event_villageattack, null);
+
+	// 怪物攻城活动
+	if (cfg.enable_village_attack === true) { api_scheduleOnMainThread(start_event_villageattack, null); }
+
 	console.log('[' + get_timestamp() + '] [frida] [info] ----------------------- set function success ------------------------');
 
 // ===== Bridge: Frida Integration =====

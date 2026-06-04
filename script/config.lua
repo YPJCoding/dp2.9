@@ -190,6 +190,57 @@ local config = {
         -- 全服广播每分钟最大次数
         broadcast_rate_per_min = 5,
     },
+
+    ------------------------------------------------
+    -- JS/Frida 功能开关（df_game_r.js setup() 读取）
+    -- 修改后重启频道生效
+    ------------------------------------------------
+    js_features = {
+        -- 绝望之塔金币修复（当前启用）
+        enable_tod_fix = true,
+
+        -- 时装镶嵌修复（当前启用）
+        enable_emblem_fix = true,
+
+        -- 历史日志追踪（当前启用）
+        enable_history_log = true,
+
+        -- 解除每日创建角色数量限制（当前启用）
+        enable_create_character_unlimit = true,
+
+        -- +13以上强化券自动刷新物品栏（当前启用）
+        enable_strengthen_refresh = true,
+
+        -- 黑暗武士技能栏修复（当前启用）
+        enable_dark_knight_skill_fix = true,
+
+        -- [RISK:CRITICAL] 账号仓库扩展至128格
+        enable_account_cargo = false,
+
+        -- [RISK:HIGH] 怪物攻城活动
+        enable_village_attack = false,
+
+        -- [RISK:HIGH] 幸运在线玩家
+        enable_lucky_online = false,
+
+        -- [RISK:HIGH] 在线奖励（发点券）
+        enable_online_reward = false,
+
+        -- [RISK:HIGH] 随机属性继承
+        enable_random_option_inherit = false,
+
+        -- [RISK:HIGH] 自动解封随机属性装备
+        enable_auto_unseal = false,
+
+        -- [RISK:HIGH] 幸运点影响掉落率
+        enable_luck_point_drop = false,
+
+        -- [RISK:HIGH] 取消新账号成长契约
+        enable_mobile_auth = false,
+
+        -- [RISK:HIGH] 上下线处理（幸运点+怪物攻城UI）
+        enable_user_inout_hook = false,
+    },
 }
 
 return config
