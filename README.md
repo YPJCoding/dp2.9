@@ -133,6 +133,7 @@ DP Frida 侧入口，负责：
 - [x] 启用 `inherit.lua` 模块，覆盖装备继承券旧 handler
 - [x] 启用 `misc.lua` 模块，覆盖跨界/异界重置/SQL misc；SQL misc 默认关闭
 - [x] 启用 `item_cleanup.lua` 模块，覆盖宠物/时装/装备清理；删除类操作默认关闭
+- [x] 启用 `pvp.lua` 模块，覆盖 PVP 经验书；shell 操作默认关闭
 - [ ] 将配置开关从入口逻辑中抽离并接入 `script/config.lua`
 - [x] 新增 `script/utils.lua` 工具函数模板
 - [x] 在 `script/utils.lua` 中提供旧全局工具函数兼容实现
@@ -145,7 +146,7 @@ DP Frida 侧入口，负责：
 - [x] 将 PVP 经验逻辑迁移草稿写入 `script/handlers/pvp.lua`
 - [x] 将低风险/中风险零散道具券迁入 `script/handlers/misc.lua`
 - [x] 将 SQL 类零散道具券以默认关闭方式迁入 `script/handlers/misc.lua`
-- [ ] 在 `df_game_r.lua` 中统一加载全部 handler 模块
+- [x] 在 `df_game_r.lua` 中统一加载全部 handler 模块
 - [ ] 从 `df_game_r.lua` 移除已迁移的旧 handler 实现
 
 ### P4：审查和整理 `df_game_r.js`
