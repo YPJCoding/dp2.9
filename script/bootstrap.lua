@@ -97,6 +97,41 @@ function M.register_handlers(item_handler, ctx)
     end
 end
 
+function M.register_debug_handlers(item_handler, ctx)
+    local config = ctx.config or {}
+    local debug = config.debug or {}
+    local dpx = ctx.dpx
+    local logger = ctx.logger
+
+    if debug.enable_test_useitem_handler ~= true then
+        return
+    end
+
+    local test_item_id = tonumber(debug.test_useitem_id)
+    if not test_item_id then
+        if logger then
+            logger.error('[bootstrap] invalid debug.test_useitem_id')
+        end
+        return
+    end
+
+    item_handler[test_item_id] = function(user, item_id)
+        user:SendNotiPacketMessage('DP2 测试 handler 执行成功！')
+
+        if debug.test_useitem_return_item == true and dpx and dpx.item then
+            dpx.item.add(user.cptr, item_id)
+        end
+
+        if logger then
+            logger.info('[useitem][test] acc=%d chr=%d item_id=%d', user:GetAccId(), user:GetCharacNo(), item_id)
+        end
+    end
+
+    if logger then
+        logger.info('[bootstrap] registered debug useitem handler item_id=%d', test_item_id)
+    end
+end
+
 function M.apply_dpx_startup(ctx)
     local config = ctx.config or {}
     local startup = config.dpx_startup or {}
@@ -198,6 +233,7 @@ function M.setup(item_handler, base_ctx)
     local ctx = M.build_ctx(base_ctx)
     M.install_utils(ctx)
     M.register_handlers(item_handler, ctx)
+    M.register_debug_handlers(item_handler, ctx)
     return ctx
 end
 
