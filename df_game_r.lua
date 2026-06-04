@@ -65,6 +65,8 @@ else
 end
 
 local utils = get_utils(bootstrap_ctx)
+local config = bootstrap_ctx and bootstrap_ctx.config or {}
+local debug_config = config.debug or {}
 
 -- enable frida framework
 local frida = require("df.frida")
@@ -114,6 +116,11 @@ dpx.hook(game.HookType.Reach_GameWord, mainDpLoad)
 local my_useitem2 = function(_user, item_id)
     local user = game.fac.user(_user)
     local handler = item_handler[item_id]
+
+    if debug_config.enable_useitem_trace == true then
+        logger.info("[useitem][trace] acc: %d chr: %d item_id: %d has_handler: %s", user:GetAccId(), user:GetCharacNo(), item_id, tostring(handler ~= nil))
+    end
+
     if handler then
         handler(user, item_id)
         logger.info("[useitem] acc: %d chr: %d item_id: %d", user:GetAccId(), user:GetCharacNo(), item_id)
