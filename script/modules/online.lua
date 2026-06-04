@@ -6,7 +6,7 @@
 
 local M = {}
 
-local online = {}  -- keyed by charac_id (cid)
+local online = {}  -- keyed by charac_no (cid)
 
 function M.setup(ctx)
     local game = ctx.game
@@ -14,11 +14,24 @@ function M.setup(ctx)
     local logger = ctx.logger
 
     -- 玩家登录 hook
-    local function on_login(_user)
-        local user = game.fac.user(_user)
+    local function on_login(raw_user)
+        local user = game.fac.user(raw_user)
+        if not user then
+            if logger then
+                logger.warn("[online][login] game.fac.user returned nil")
+            end
+            return
+        end
+
         local aid = user:GetAccId()
         local cid = user:GetCharacNo()
         local name = user:GetCharacName()
+
+        if online[cid] then
+            if logger then
+                logger.warn("[online][dup_login] cid=%d already online", cid)
+            end
+        end
 
         online[cid] = {
             aid = aid,
@@ -35,8 +48,15 @@ function M.setup(ctx)
     end
 
     -- 玩家登出 hook
-    local function on_logout(_user)
-        local user = game.fac.user(_user)
+    local function on_logout(raw_user)
+        local user = game.fac.user(raw_user)
+        if not user then
+            if logger then
+                logger.warn("[online][logout] game.fac.user returned nil")
+            end
+            return
+        end
+
         local cid = user:GetCharacNo()
 
         if online[cid] then
@@ -64,6 +84,9 @@ end
 -- 遍历所有在线玩家。
 -- fn 接收 entry = {aid, cid, name, user, login_time}。
 function M.each(fn)
+    if type(fn) ~= "function" then
+        return
+    end
     for _, entry in pairs(online) do
         fn(entry)
     end
@@ -78,7 +101,7 @@ function M.count()
     return n
 end
 
--- 按角色名查找。
+-- 按角色名查找（O(n) 扫描）。
 function M.find_by_name(name)
     for _, entry in pairs(online) do
         if entry.name == name then
@@ -88,7 +111,7 @@ function M.find_by_name(name)
     return nil
 end
 
--- 按账号 ID 查找。
+-- 按账号 ID 查找（O(n) 扫描）。
 function M.find_by_aid(aid)
     for _, entry in pairs(online) do
         if entry.aid == aid then
@@ -98,7 +121,7 @@ function M.find_by_aid(aid)
     return nil
 end
 
--- 按角色 ID 查找。
+-- 按角色 ID 查找（O(1)）。
 function M.find_by_cid(cid)
     return online[cid]
 end
