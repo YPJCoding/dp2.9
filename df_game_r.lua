@@ -67,6 +67,7 @@ end
 local utils = get_utils(bootstrap_ctx)
 local config = bootstrap_ctx and bootstrap_ctx.config or {}
 local debug_config = config.debug or {}
+logger.info("[debug] enable_useitem_trace=%s", tostring(debug_config.enable_useitem_trace == true))
 
 -- enable frida framework
 local frida = require("df.frida")
@@ -102,15 +103,19 @@ local function on_frida_call(arg1, arg2, arg3)
 end
 
 frida.load("DP2 load success!", on_frida_call)
+logger.info("[frida] loaded")
 
 local function mainDpLoad(_user)
-    game.fac.user(_user):SendNotiPacketMessage(
+    local user = game.fac.user(_user)
+    logger.info("[hook][Reach_GameWord] acc: %d chr: %d", user:GetAccId(), user:GetCharacNo())
+    user:SendNotiPacketMessage(
         utils.decode_unicode('\\u795e\\u8ff9\\u0020\\u003a\\u0020\\u6b64\\u7248\\u672c\\u514d\\u8d39\\u53d1\\u5e03\\u4e8e\\u4e92\\u8054\\u7f51\\uff0c\\u0020\\u4ec5\\u4f9b\\u5b66\\u4e60\\u548c\\u7814\\u7a76\\u4f7f\\u7528\\uff0c\\u0020\\u4efb\\u4f55\\u76c8\\u5229\\u884c\\u4e3a\\u6240\\u5e26\\u6765\\u7684\\u6cd5\\u5f8b\\u8d23\\u4efb\\u7531\\u76f4\\u63a5\\u53d7\\u76ca\\u4eba\\u627f\\u62c5\\u0021'),
         14
     )
 end
 
 dpx.hook(game.HookType.Reach_GameWord, mainDpLoad)
+logger.info("[hook] registered Reach_GameWord")
 
 ---------------------------------- 通用物品使用处理逻辑 -------------------------------- !
 local my_useitem2 = function(_user, item_id)
@@ -151,6 +156,7 @@ else
 end
 
 dpx.hook(game.HookType.UseItem2, my_useitem2) -- 物品使用 hook
+logger.info("[hook] registered UseItem2")
 
 -- dpx.enable_game_master() -- 开启GM模式(需把UID添加到GM数据库中)
 -- dpx.disable_giveup_panalty() -- 退出副本后角色默认不虚弱
