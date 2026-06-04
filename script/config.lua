@@ -2,6 +2,12 @@ local config = {
     debug = {
         enable_debug_log = false,
         enable_debug_hooks = false,
+
+        -- 临时 UseItem2 链路测试 handler。
+        -- 使用 PVF 中已有的可使用道具触发，用于验证 UseItem2 -> item_handler -> 日志/通知。
+        enable_test_useitem_handler = true,
+        test_useitem_id = 7457,
+        test_useitem_return_item = true,
     },
 
     features = {
