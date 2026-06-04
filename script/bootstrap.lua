@@ -1,9 +1,10 @@
--- dp2.9 Lua bootstrap 模板
+-- dp2.9 Lua bootstrap
 --
 -- 说明：
--- 1. 当前文件先作为装配模板引入，暂不改变现有业务行为。
--- 2. df_game_r.lua 可调用 M.setup(item_handler, ctx) 统一加载 config、utils、handlers。
--- 3. 模块化 handler 默认不注册，必须由 config.features.enable_modular_handlers 显式开启。
+-- 1. 本文件负责统一加载 config、utils 和 handler 模块。
+-- 2. df_game_r.lua 调用 M.setup(item_handler, ctx) 完成运行时装配。
+-- 3. handler 是否注册由 script/config.lua 控制。
+-- 4. 当前默认配置已开启全部 handler 模块；SQL、删除、shell 等高风险能力仍由 risk 开关控制。
 
 local M = {}
 
