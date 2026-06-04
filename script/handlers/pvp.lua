@@ -10,6 +10,39 @@ local function is_shell_handler_enabled(ctx)
     return risk.enable_shell_handlers == true
 end
 
+local function log_item_return(ctx, user, item_id, reason)
+    local logger = ctx.logger
+    if logger then
+        logger.info(
+            "[useitem][return] module=pvp acc=%d chr=%d item_id=%d reason=%s",
+            user:GetAccId(),
+            user:GetCharacNo(),
+            item_id,
+            tostring(reason or "unknown")
+        )
+    end
+end
+
+local function reject_shell_disabled(user, item_id, ctx, message, reason)
+    local dpx = ctx.dpx
+    local logger = ctx.logger
+    local log_reason = reason or "shell_disabled"
+
+    if logger then
+        logger.info(
+            "[useitem][reject] module=pvp risk=shell acc=%d chr=%d item_id=%d reason=%s",
+            user:GetAccId(),
+            user:GetCharacNo(),
+            item_id,
+            tostring(log_reason)
+        )
+    end
+
+    user:SendNotiPacketMessage(message or "注意： 当前 shell 类功能未开启！")
+    dpx.item.add(user.cptr, item_id)
+    log_item_return(ctx, user, item_id, log_reason)
+end
+
 function M.register(item_handler, ctx)
     local dpx = ctx.dpx
     local game = ctx.game
@@ -18,8 +51,7 @@ function M.register(item_handler, ctx)
     -- [RISK:HIGH][SHELL][SQL] PVP 经验书：执行外部 shell 脚本生成 SQL 后写库
     item_handler[2541121] = function(user, item_id)
         if not is_shell_handler_enabled(ctx) then
-            user:SendNotiPacketMessage("注意： PVP经验书功能未开启！")
-            dpx.item.add(user.cptr, item_id)
+            reject_shell_disabled(user, item_id, ctx, "注意： PVP经验书功能未开启！", "pvp_exp_shell_disabled")
             return
         end
 
@@ -27,6 +59,7 @@ function M.register(item_handler, ctx)
         if not handle then
             user:SendNotiPacketMessage("注意： PVP经验脚本执行失败！")
             dpx.item.add(user.cptr, item_id)
+            log_item_return(ctx, user, item_id, "pvp_exp_script_open_failed")
             if logger then
                 logger.error("[useitem][shell][pvp_exp] failed to open script acc=%d chr=%d item_id=%d", user:GetAccId(), user:GetCharacNo(), item_id)
             end
@@ -39,6 +72,7 @@ function M.register(item_handler, ctx)
         if not sql or sql == "" then
             user:SendNotiPacketMessage("注意： PVP经验脚本没有返回有效 SQL！")
             dpx.item.add(user.cptr, item_id)
+            log_item_return(ctx, user, item_id, "pvp_exp_empty_sql")
             if logger then
                 logger.error("[useitem][shell][pvp_exp] empty sql acc=%d chr=%d item_id=%d", user:GetAccId(), user:GetCharacNo(), item_id)
             end
