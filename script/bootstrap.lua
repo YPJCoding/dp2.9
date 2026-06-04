@@ -75,6 +75,11 @@ local function is_module_enabled(ctx, module_key)
     local config = ctx.config or {}
     local features = config.features or {}
 
+    -- gm_permissions 为工具模块，无副作用，始终加载
+    if module_key == 'gm_permissions' then
+        return true
+    end
+
     if module_key == 'online' then
         return features.enable_online_module == true
     end
@@ -83,9 +88,6 @@ local function is_module_enabled(ctx, module_key)
     end
     if module_key == 'item_query' then
         return features.enable_item_query == true
-    end
-    if module_key == 'gm_permissions' then
-        return true
     end
     return false
 end
