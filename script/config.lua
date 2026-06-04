@@ -240,6 +240,24 @@ local config = {
 
         -- [RISK:HIGH] 上下线处理（幸运点+怪物攻城UI）
         enable_user_inout_hook = false,
+
+        -- [RISK:HIGH] 战力排行榜系统
+        enable_ranking = false,
+
+        -- [RISK:HIGH] 时装潜能系统
+        enable_hidden_option = false,
+
+        -- [RISK:HIGH] 回归勇士时间设置
+        enable_return_user = false,
+
+        -- [RISK:HIGH] 史诗/传说掉落全服公告+奖励
+        enable_drop_announce = false,
+
+        -- [RISK:HIGH] VIP 等级登录公告
+        enable_vip_login = false,
+
+        -- 批量物品添加 UI 通知
+        enable_batch_item_add = false,
     },
 }
 
