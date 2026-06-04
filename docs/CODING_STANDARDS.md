@@ -63,6 +63,11 @@
       inherit.lua
       pvp.lua
       misc.lua
+    modules/
+      online.lua
+      broadcast.lua
+      gm_permissions.lua
+      item_query.lua
   lib/
   lua/
 ```
@@ -97,6 +102,8 @@
 `script/config.lua` 负责功能开关。
 
 `script/handlers/` 负责道具处理逻辑。
+
+`script/modules/` 负责基础设施模块（在线玩家、广播、GM 权限、物品查询等）。
 
 ### 2.4 `df_game_r.js`
 
