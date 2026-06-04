@@ -276,3 +276,7 @@ DP Frida 侧入口，负责：
 - [部署前检查清单](docs/DEPLOYMENT_CHECKLIST.md)
 - [FAQ](docs/FAQ.md)
 - [更新日志](CHANGELOG.md)
+
+## 参考
+
+- [服务器访问与数据库](docs/reference/SERVER_ACCESS.md)
