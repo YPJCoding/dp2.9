@@ -3,6 +3,7 @@
 -- 副本完成后：按配置模式发放随机点券，并可选自动回城/分解/出售。
 -- 模式通过配置控制：0=完全关闭，1=奖励+回城，2=奖励+诺顿分解+回城，3=奖励+玩家分解机+回城，4=奖励+出售+回城。
 -- 依赖 online.lua（模式3查找在线玩家分解机）。
+-- 测试服可通过热加载调用 M.configure(...) 动态切换模式，无需重复注册 GameEvent hook。
 
 local M = {}
 
@@ -11,11 +12,34 @@ local game = nil
 local online_module = nil
 local world = nil
 local dpx = nil
+local is_hook_registered = false
 
 -- 当前模式：0=关 1=回城 2=诺顿分解 3=在线玩家分解机 4=出售
 local mode = "0"
 local point_min = 100
 local point_max = 1000
+
+local function normalize_mode(value)
+    local value_str = tostring(value or "0")
+    if value_str == "0" or value_str == "1" or value_str == "2" or value_str == "3" or value_str == "4" then
+        return value_str
+    end
+    return "0"
+end
+
+local function normalize_points(min_value, max_value)
+    local min_n = tonumber(min_value) or 100
+    local max_n = tonumber(max_value) or 1000
+
+    if min_n < 0 then
+        min_n = 0
+    end
+    if max_n < min_n then
+        max_n = min_n
+    end
+
+    return math.floor(min_n), math.floor(max_n)
+end
 
 -- 执行分解操作（背包槽位 9-56）
 local function exec_disjoint(user, callee)
@@ -147,6 +171,44 @@ local function on_game_event(fnext, event_type, _party, param)
     return result
 end
 
+function M.configure(cfg)
+    cfg = cfg or {}
+
+    local old_mode = mode
+    local old_min = point_min
+    local old_max = point_max
+
+    mode = normalize_mode(cfg.default_mode or cfg.mode or mode)
+    point_min, point_max = normalize_points(cfg.point_min or point_min, cfg.point_max or point_max)
+
+    if logger then
+        logger.info(
+            "[finish_back_home] configured old_mode=%s new_mode=%s old_points=%d-%d new_points=%d-%d",
+            tostring(old_mode),
+            tostring(mode),
+            old_min,
+            old_max,
+            point_min,
+            point_max
+        )
+    end
+
+    return {
+        mode = mode,
+        point_min = point_min,
+        point_max = point_max,
+    }
+end
+
+function M.get_config()
+    return {
+        mode = mode,
+        point_min = point_min,
+        point_max = point_max,
+        is_hook_registered = is_hook_registered,
+    }
+end
+
 function M.setup(ctx, deps)
     logger = ctx.logger
     game = ctx.game
@@ -157,14 +219,18 @@ function M.setup(ctx, deps)
     local config = ctx.config or {}
     local fbh_cfg = config.finish_back_home or {}
 
-    mode = fbh_cfg.default_mode or "0"
-    point_min = fbh_cfg.point_min or 100
-    point_max = fbh_cfg.point_max or 1000
+    M.configure(fbh_cfg)
 
-    ctx.dpx.hook(game.HookType.GameEvent, on_game_event)
+    if not is_hook_registered then
+        ctx.dpx.hook(game.HookType.GameEvent, on_game_event)
+        is_hook_registered = true
 
-    if logger then
-        logger.info("[finish_back_home] registered GameEvent hook mode=%s points=%d-%d",
+        if logger then
+            logger.info("[finish_back_home] registered GameEvent hook mode=%s points=%d-%d",
+                mode, point_min, point_max)
+        end
+    elseif logger then
+        logger.info("[finish_back_home] setup skipped hook registration because hook is already registered mode=%s points=%d-%d",
             mode, point_min, point_max)
     end
 
