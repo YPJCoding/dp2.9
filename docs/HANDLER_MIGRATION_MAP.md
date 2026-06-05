@@ -52,8 +52,11 @@
 | `GetCurrentDayZeroTimestamp` | `script/utils.lua` + legacy globals | `migrated` | `LOW` | 通过 bootstrap 安装兼容全局函数 |
 | `split` | `script/utils.lua` + fallback | `migrated` | `LOW` | `on_frida_call` 已通过 utils 调用 |
 | `decode_unicode` | `script/utils.lua` + fallback | `migrated` | `LOW` | 上线提示已通过 utils 调用 |
-| DPX 启动开关 | `script/config.lua` + `bootstrap.apply_dpx_startup` | `migrated` | `HIGH` | 全局行为集中配置，部分高风险开关仍需确认默认策略 |
-| `MyUseAncientDungeonItems` | JS 配置 / 待继续核对 | `pending` | `MEDIUM` | 绝望之塔金币修复仍需确认 Lua/JS 最终归属 |
+| DPX 启动开关 | `script/config.lua` + `bootstrap.apply_dpx_startup` | `migrated` | `HIGH` | 全局行为集中配置；等级上限使用 `dpx.set_max_level` |
+| `CParty_UseAncientDungeonItems` | `script/modules/legacy_patches.lua` | `migrated` | `MEDIUM` | 绝望之塔金币提示修复，默认关闭，待测试服验证 |
+| `CUser_SaveTown` | `script/modules/legacy_patches.lua` | `migrated` | `MEDIUM` | 城镇下线卡镇魂修复，默认关闭，待测试服验证 |
+| `Open_Dungeon` | `script/modules/legacy_patches.lua` | `migrated` | `MEDIUM` | 开放极限祭坛/指定副本，默认关闭，待测试服验证 |
+| `Work_Reload.lua` 热加载 | `script/modules/hot_reload.lua` | `migrated` | `MEDIUM` | 测试服热加载，默认关闭，待测试服验证 |
 
 ## 已迁移模块差异摘要
 
@@ -102,4 +105,5 @@
 - [ ] SQL 类 handler：测试服开启前准备数据库备份和回滚方案。
 - [ ] 删除类 handler：测试服开启前确认二次保护或白名单策略。
 - [ ] Shell 类 handler：确认脚本路径、输出 SQL 和失败保护。
+- [ ] `legacy_patches` / `hot_reload`：测试服开关验证。
 - [ ] 每次完成真实验证后同步 README、ROADMAP、CHANGELOG。
