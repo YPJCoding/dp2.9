@@ -116,6 +116,16 @@ local config = {
         open_dungeon_ids = {11007},
     },
 
+    hot_reload = {
+        -- 测试服 Lua 热加载模块，默认关闭。
+        -- 生产环境不建议开启。
+        enabled = false,
+        filename = "/dp2/script/Work_Reload.lua",
+        start_delay_ms = 10000,
+        interval_ms = 5000,
+        run_on_start = false,
+    },
+
     ------------------------------------------------
     -- DPX 启动配置（影响服务端全局行为）
     -- [RISK:HIGH] 标注意味着开启后影响范围大，需确认后果
