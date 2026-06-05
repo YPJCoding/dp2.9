@@ -686,7 +686,7 @@ function log(msg) {
 
 //内存十六进制打印
 function bin2hex(p, len) {
-	const hex = '';
+	var hex = '';
 	for (var i = 0; i < len; i++) {
 		const s = p.add(i).readU8().toString(16);
 		if (s.length == 1)
@@ -873,7 +873,7 @@ function on_event_lucky_online_user() {
 			const config = global_config["lucky_online_user_event"];
 
 			//道具奖励
-			const reward_msg = '';
+			var reward_msg = '';
 			for (var i = 0; i < config["reward_items_list"].length; ++i) {
 				const item_id = config["reward_items_list"][i][0];
 				const item_cnt = config["reward_items_list"][i][1];
@@ -1356,7 +1356,7 @@ function event_villageattack_timer() {
 		return;
 	}
 	//当前应扣除的PT
-	const damage = 0;
+	var damage = 0;
 	//P2/P3阶段GBL主教扣PT
 	if ((villageAttackEventInfo.state == VILLAGEATTACK_STATE_P2) || (villageAttackEventInfo.state == VILLAGEATTACK_STATE_P3)) {
 		for (var i = 0; i < villageAttackEventInfo.gbl_cnt; ++i) {
@@ -1480,7 +1480,7 @@ function gameworld_update_villageattack_score() {
 function notify_villageattack_score(user) {
 	//玩家当前PT点
 	const charac_no = CUserCharacInfo_getCurCharacNo(user).toString();
-	const villageattack_pt = 0;
+	var villageattack_pt = 0;
 	if (charac_no in villageAttackEventInfo.user_pt_info)
 		villageattack_pt = villageAttackEventInfo.user_pt_info[charac_no][1];
 	//计算活动剩余时间
@@ -1699,7 +1699,7 @@ function hook_VillageAttack() {
 	//当前正在处理挑战的攻城怪物请求
 	const state_on_fighting = false;
 	//当前正在被挑战的怪物id
-	const on_fighting_village_monster_id = 0;
+	var on_fighting_village_monster_id = 0;
 	//hook 挑战攻城怪物函数 控制副本刷怪流程
 	//CParty::OnFightVillageMonster
 	Interceptor.attach(ptr(0x085B9596),
@@ -1781,7 +1781,7 @@ function hook_VillageAttack() {
 					//新的怪物uid偏移
 					const uid_offset = 1000;
 					//返回值
-					const ret = 0;
+					var ret = 0;
 					while (cnt > 0) {
 						--cnt;
 						//新增怪物index
@@ -1809,7 +1809,7 @@ function hook_VillageAttack() {
 					//新的怪物uid偏移
 					const uid_offset = 1000;
 					//返回值
-					const ret = 0;
+					var ret = 0;
 					while (cnt > 0) {
 						--cnt;
 						//新增怪物index
@@ -1912,9 +1912,9 @@ function on_end_event_villageattack() {
 			}
 		}, null);
 		//榜一大哥
-		const rank_first_charac_no = 0;
-		const rank_first_account_id = 0;
-		const max_pt = 0;
+		var rank_first_charac_no = 0;
+		var rank_first_account_id = 0;
+		var max_pt = 0;
 		//论功行赏
 		for (var charac_no in villageAttackEventInfo.user_pt_info) {
 			//发点券
@@ -2042,7 +2042,7 @@ function clear_all_quest_by_character_level(user)
 	const charac_lv = CUserCharacInfo_get_charac_level(user);
 
 	//本次完成任务数量
-	const clear_quest_cnt = 0;
+	var clear_quest_cnt = 0;
 
 	//pvf数据
 	const data_manager = G_CDataManager();
@@ -2051,12 +2051,12 @@ function clear_all_quest_by_character_level(user)
 	clear_doing_quest(user);
 
 	//完成当前等级所有任务总经验奖励
-	const total_exp_bonus = 0;
+	var total_exp_bonus = 0;
 	//完成当前等级所有任务总金币奖励
-	const total_gold_bonus = 0;
+	var total_gold_bonus = 0;
 	//任务点奖励
-	const total_quest_point_bonus = 0;
-	const total_quest_piece_bonus = 0;
+	var total_quest_point_bonus = 0;
+	var total_quest_piece_bonus = 0;
 
 	//任务最大编号: 29999
 	for(var quest_id=1; quest_id<30000; quest_id++)
