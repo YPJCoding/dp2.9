@@ -13,7 +13,9 @@
 - 所有 handler 模块已经通过 `script/bootstrap.lua` 接入加载链路。
 - `script/config.lua` 已经开启全部 handler 模块。
 - SQL、删除、shell 类高风险能力仍默认关闭。
-- 已完成一轮代码自检，并修正模块注册顺序、继承参数、PVP shell 失败保护和过时注释。
+- 已完成 handler 日志和组合风险开关收敛。
+- 已新增 `script/modules/legacy_patches.lua`，迁移旧 dp2 入口 hook：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛。
+- `legacy_patches` 模块和三个子功能默认关闭，待测试服逐项开启验证。
 - 服务器实测确认普通右键消耗品走 `UseItem1`，并已正式接入 `UseItem1 -> item_handler` 分发。
 - `UseItem2` 保留作为兼容入口。
 - 1034-1037 临时 debug handler 已关闭。
@@ -29,7 +31,7 @@
 
 目标：服务器能启动，入口链路可用，高风险功能默认关闭；正式 DP 道具因 PVF 暂未添加，放到后置阶段验证。
 
-当前估算进度：约 92%。
+当前估算进度：约 93%。
 
 已完成：
 
@@ -45,18 +47,21 @@
 - [x] 高风险 handler 默认拒绝并返还道具：代码级确认完成。
 - [x] Phase 1 基础设施模块：全部 4 个模块（online/broadcast/gm_permissions/item_query）服务器验证通过。
 - [x] 配置口径收敛：SQL、删除、shell handler 均默认关闭。
+- [x] 旧入口补丁迁移为 `legacy_patches` 模块，默认关闭。
 
 还缺：
 
 - [ ] 高风险 handler 默认拒绝并返还道具：真实道具实测（需 PVF 加入道具 ID）。
+- [ ] `legacy_patches` 模块加载验证：默认关闭时不注册 hook。
+- [ ] `legacy_patches` 三个子功能测试服逐项开启验证。
 
 完成后可以作为“安全默认底板”部署。
 
 ## 3. 目标 B：完全功能恢复版
 
-目标：原 `df_game_r.lua` 中所有道具功能都能按预期工作，包括 SQL、删除、shell 类功能。
+目标：原 `df_game_r.lua` 中所有道具功能和入口补丁都能按预期工作，包括 SQL、删除、shell 类功能。
 
-当前估算进度：约 65%。
+当前估算进度：约 66%。
 
 还缺：
 
@@ -65,6 +70,7 @@
 - [ ] 对删除类 handler 做二次确认或白名单策略。
 - [ ] 对 PVP shell handler 确认脚本路径、脚本输出和 SQL 安全性。
 - [x] 为 PVP shell 功能补失败保护和日志。
+- [x] 将旧入口 hook 迁移为可配置模块：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛。
 - [ ] 在测试服逐项开启风险开关验证。
 - [ ] 决定正式服默认是否保持关闭。
 
@@ -116,16 +122,28 @@
 - [ ] `drop_rules` — 等级差限制掉落，需高级角色 + 低级副本 + 无豁免道具
 - [ ] `dungeon_gate` — 持物进图限制，需先配置规则（当前规则表为空）
 
+## 4.6 旧入口补丁验证状态
+
+旧 dp2 入口 hook 已迁移到 `script/modules/legacy_patches.lua`，但默认关闭。
+
+- [x] 代码迁移：`CParty_UseAncientDungeonItems` 绝望之塔金币提示修复
+- [x] 代码迁移：`CUser_SaveTown` 城镇下线卡镇魂修复
+- [x] 代码迁移：`Open_Dungeon` 开放极限祭坛 / 指定副本
+- [ ] 默认关闭状态下启动验证：确认不会注册额外 hook
+- [ ] 测试服开启 `enable_tower_gold_notice_fix` 验证
+- [ ] 测试服开启 `enable_save_town_fix` 验证
+- [ ] 测试服开启 `enable_open_extra_dungeons` 验证
+
 ## 5. 当前偏航点
 
 ### 5.1 “尽量不改变行为”已经不完全准确
 
-当前重构为了安全，已经把 SQL、删除、shell 类功能默认改为关闭。
+当前重构为了安全，已经把 SQL、删除、shell 类功能默认改为关闭；旧入口补丁也默认关闭。
 
 这意味着：
 
 - 对安全可部署版，这是正确方向。
-- 对完全功能恢复版，还需要后续开启和测试风险开关。
+- 对完全功能恢复版，还需要后续开启和测试风险开关 / legacy patch 开关。
 
 ### 5.2 P4 JS 审查不应优先于服务器启动验证
 
@@ -158,6 +176,7 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [x] 检查模块注册顺序是否需要固定。
 - [x] 检查所有 handler 是否都有日志和失败返还。
 - [x] 补充代码自检记录：`docs/CODE_SELF_CHECK.md`。
+- [x] 将旧入口 hook 收敛为 `legacy_patches` 模块。
 
 ### Step 2：服务器烟测
 
@@ -168,6 +187,7 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [x] 验证 `UseItem1` 是普通右键消耗品入口。
 - [x] 正式接入 `UseItem1 -> item_handler` 分发。
 - [x] 拉取最新正式收敛代码后再次重启确认。
+- [ ] 重启确认 `legacy_patches` 默认关闭时不会注册额外 hook。
 
 ### Step 3：高风险默认关闭测试
 
@@ -195,13 +215,31 @@ risk = {
 
 逐项验证后再决定正式服默认值。
 
+### Step 6：逐项开启旧入口补丁
+
+仅在测试服开启：
+
+```lua
+features = {
+    enable_legacy_patches = true,
+}
+
+legacy_patches = {
+    enable_tower_gold_notice_fix = true,
+    enable_save_town_fix = true,
+    enable_open_extra_dungeons = true,
+}
+```
+
+逐项验证后再决定正式服默认值。
+
 ## 7. 进度口径
 
 后续汇报进度时分两条：
 
 ```text
-安全可部署版：92%
-完全功能恢复版：65%
+安全可部署版：93%
+完全功能恢复版：66%
 ```
 
 如果只说“总进度”，默认指安全可部署版。
