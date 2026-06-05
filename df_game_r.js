@@ -586,15 +586,15 @@ const CItem_GetItemName = new NativeFunction(ptr(0x811ED82), 'pointer', ['pointe
 
 //本地时间戳
 function get_timestamp() {
-	var date = new Date();
+	const date = new Date();
 	date = new Date(date.setHours(date.getHours())); //转换到本地时间
-	var year = date.getFullYear().toString();
-	var month = (date.getMonth() + 1).toString();
-	var day = date.getDate().toString();
-	var hour = date.getHours().toString();
-	var minute = date.getMinutes().toString();
-	var second = date.getSeconds().toString();
-	var ms = date.getMilliseconds().toString();
+	const year = date.getFullYear().toString();
+	const month = (date.getMonth() + 1).toString();
+	const day = date.getDate().toString();
+	const hour = date.getHours().toString();
+	const minute = date.getMinutes().toString();
+	const second = date.getSeconds().toString();
+	const ms = date.getMilliseconds().toString();
 	return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
 }
 
@@ -602,7 +602,7 @@ function get_timestamp() {
 function api_mkdir(path) {
 	const opendir = new NativeFunction(Module.getExportByName(null, 'opendir'), 'int', ['pointer'], { "abi": "sysv" });
 	const mkdir = new NativeFunction(Module.getExportByName(null, 'mkdir'), 'int', ['pointer', 'int'], { "abi": "sysv" });
-	var path_ptr = Memory.allocUtf8String(path);
+	const path_ptr = Memory.allocUtf8String(path);
 	if (opendir(path_ptr))
 		return true;
 	return mkdir(path_ptr, 0x1FF);
@@ -611,10 +611,10 @@ function api_mkdir(path) {
 //字符串压缩(返回压缩后的指针与长度)
 function api_compress_zip(s)
 {
-	var input = Memory.allocUtf8String(s);
-	var alloc_buf_size = 1000 + strlen(s)*2;
-	var output = Memory.alloc(alloc_buf_size);
-	var output_len = Memory.alloc(4);
+	const input = Memory.allocUtf8String(s);
+	const alloc_buf_size = 1000 + strlen(s)*2;
+	const output = Memory.alloc(alloc_buf_size);
+	const output_len = Memory.alloc(4);
 	output_len.writeInt(alloc_buf_size);
 	compress_zip(output, output_len, input, strlen(s));
 
@@ -624,9 +624,9 @@ function api_compress_zip(s)
 //二进制数据解压缩
 function api_uncompress_zip(p, len)
 {
-	var alloc_buf_size = 1000 + (len*10);
-	var output = Memory.alloc(alloc_buf_size);
-	var output_len = Memory.alloc(4);
+	const alloc_buf_size = 1000 + (len*10);
+	const output = Memory.alloc(alloc_buf_size);
+	const output_len = Memory.alloc(4);
 	output_len.writeInt(alloc_buf_size);
 	uncompress_zip(output, output_len, p, len);
 
@@ -635,7 +635,7 @@ function api_uncompress_zip(p, len)
 
 //获取当前频道名
 function api_CEnvironment_get_file_name() {
-	var filename = CEnvironment_get_file_name(G_CEnvironment());
+	const filename = CEnvironment_get_file_name(G_CEnvironment());
 	return filename.readUtf8String(-1);
 }
 
@@ -655,19 +655,19 @@ var villageAttackEventInfo = {
 }
 
 //文件记录日志
-var frida_log_dir_path = './frida_log/'
+const frida_log_dir_path = './frida_log/'
 var f_log = null;
 var log_day = null;
 function log(msg) {
-	var date = new Date();
+	const date = new Date();
 	date = new Date(date.setHours(date.getHours())); //转换到本地时间
-	var year = date.getFullYear().toString();
-	var month = (date.getMonth() + 1).toString();
-	var day = date.getDate().toString();
-	var hour = date.getHours().toString();
-	var minute = date.getMinutes().toString();
-	var second = date.getSeconds().toString();
-	var ms = date.getMilliseconds().toString();
+	const year = date.getFullYear().toString();
+	const month = (date.getMonth() + 1).toString();
+	const day = date.getDate().toString();
+	const hour = date.getHours().toString();
+	const minute = date.getMinutes().toString();
+	const second = date.getSeconds().toString();
+	const ms = date.getMilliseconds().toString();
 	//日志按日期记录
 	if ((f_log == null) || (log_day != day)) {
 		api_mkdir(frida_log_dir_path);
@@ -675,7 +675,7 @@ function log(msg) {
 		log_day = day;
 	}
 	//时间戳
-	var timestamp = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
+	const timestamp = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
 	//控制台日志
 	console.log('[' + get_timestamp() + '] [frida] [info] ' + msg + '\n');
 	//文件日志
@@ -686,9 +686,9 @@ function log(msg) {
 
 //内存十六进制打印
 function bin2hex(p, len) {
-	var hex = '';
+	const hex = '';
 	for (var i = 0; i < len; i++) {
-		var s = p.add(i).readU8().toString(16);
+		const s = p.add(i).readU8().toString(16);
 		if (s.length == 1)
 			s = '0' + s;
 		hex += s;
@@ -700,7 +700,7 @@ function bin2hex(p, len) {
 
 //获取道具名字
 function api_CItem_GetItemName(item_id) {
-	var citem = CDataManager_find_item(G_CDataManager(), item_id);
+	const citem = CDataManager_find_item(G_CDataManager(), item_id);
 	if (!citem.isNull()) {
 		return CItem_GetItemName(citem).readUtf8String(-1);
 	}
@@ -715,13 +715,13 @@ function get_random_int(min, max) {
 
 //读取文件
 function api_read_file(path, mode, len) {
-	var path_ptr = Memory.allocUtf8String(path);
-	var mode_ptr = Memory.allocUtf8String(mode);
-	var f = fopen(path_ptr, mode_ptr);
+	const path_ptr = Memory.allocUtf8String(path);
+	const mode_ptr = Memory.allocUtf8String(mode);
+	const f = fopen(path_ptr, mode_ptr);
 	if (f == 0)
 		return null;
-	var data = Memory.alloc(len);
-	var fread_ret = fread(data, 1, len, f);
+	const data = Memory.alloc(len);
+	const fread_ret = fread(data, 1, len, f);
 	fclose(f);
 	//返回字符串
 	if (mode == 'r')
@@ -732,14 +732,14 @@ function api_read_file(path, mode, len) {
 
 //加载本地配置文件(json格式)
 function load_config(path) {
-	var data = api_read_file(path, 'r', 10 * 1024 * 1024);
+	const data = api_read_file(path, 'r', 10 * 1024 * 1024);
 	global_config = JSON.parse(data);
 }
 
 // 动态加载外部 JS 模块（通过 api_read_file + eval）
 function dp_load(name) {
-	var path = '/dp2/script/js/' + name + '.js';
-	var code = api_read_file(path, 'r', 1024 * 1024);
+	const path = '/dp2/script/js/' + name + '.js';
+	const code = api_read_file(path, 'r', 1024 * 1024);
 	if (!code) {
 		console.log('[dp_load] FAILED: cannot read ' + path);
 		return false;
@@ -766,31 +766,31 @@ function find_item(item_id) {
 
 //邮件函数封装
 function CMailBoxHelperReqDBSendNewSystemMail(User, item_id, item_count, mail_title, mail_contact) {
-	var retitem = find_item(item_id);
+	const retitem = find_item(item_id);
 	if (retitem) {
-		var Inven_ItemPr = Memory.alloc(100);
+		const Inven_ItemPr = Memory.alloc(100);
 		Inven_Item(Inven_ItemPr); //清空道具
-		var itemid = GetItem_index(retitem);
-		var itemtype = retitem.add(8).readU8();
+		const itemid = GetItem_index(retitem);
+		const itemtype = retitem.add(8).readU8();
 		Inven_ItemPr.writeU8(itemtype);
 		Inven_ItemPr.add(2).writeInt(itemid);
 		Inven_ItemPr.add(7).writeInt(item_count);
 		// set_add_info(Inven_ItemPr, item_count);
-		var GoldValue = 0;
-		var TitlePr = Memory.allocUtf8String(mail_title);
-		var TxtValue = mail_contact;
-		var UserID = GetCurCharacNo(User);
-		var TxtValuePr = Memory.allocUtf8String(TxtValue);
-		var TxtValueLength = toString(TxtValue).length;
-		var ServerGroup = GetServerGroup(User);
-		var MailDate = 30;
+		const GoldValue = 0;
+		const TitlePr = Memory.allocUtf8String(mail_title);
+		const TxtValue = mail_contact;
+		const UserID = GetCurCharacNo(User);
+		const TxtValuePr = Memory.allocUtf8String(TxtValue);
+		const TxtValueLength = toString(TxtValue).length;
+		const ServerGroup = GetServerGroup(User);
+		const MailDate = 30;
 		ReqDBSendNewSystemMail(TitlePr, Inven_ItemPr, GoldValue, UserID, TxtValuePr, TxtValueLength, MailDate, ServerGroup, 0, 0);
 	}
 }
 
 //获取角色名字
 function api_CUserCharacInfo_getCurCharacName(user) {
-	var p = CUserCharacInfo_getCurCharacName(user);
+	const p = CUserCharacInfo_getCurCharacName(user);
 	if (p.isNull()) {
 		return '';
 	}
@@ -817,8 +817,8 @@ function api_recharge_cash_cera_point(user, amount) {
 //给角色发道具
 function api_CUser_AddItem(user, item_id, item_cnt)
 {
-	var item_space = Memory.alloc(4);
-	var slot = CUser_AddItem(user, item_id, item_cnt, 6, item_space, 0);
+	const item_space = Memory.alloc(4);
+	const slot = CUser_AddItem(user, item_id, item_cnt, 6, item_space, 0);
 
 	if(slot >= 0)
 	{
@@ -832,7 +832,7 @@ function api_CUser_AddItem(user, item_id, item_cnt)
 //抽取幸运在线玩家活动
 function on_event_lucky_online_user() {
 	//在线玩家数量
-	var online_player_cnt = GameWorld_get_UserCount_InWorld(G_GameWorld());
+	const online_player_cnt = GameWorld_get_UserCount_InWorld(G_GameWorld());
 
 	//没有在线玩家时跳过本轮活动
 	if (online_player_cnt > 0) {
@@ -840,11 +840,11 @@ function on_event_lucky_online_user() {
 		var lucky_user = null;
 
 		//遍历在线玩家列表
-		var it = api_gameworld_user_map_begin();
-		var end = api_gameworld_user_map_end();
+		const it = api_gameworld_user_map_begin();
+		const end = api_gameworld_user_map_end();
 
 		//随机抽取一名在线玩家
-		var user_index = get_random_int(0, online_player_cnt);
+		const user_index = get_random_int(0, online_player_cnt);
 
 		while (user_index >= 0) {
 			user_index--;
@@ -870,13 +870,13 @@ function on_event_lucky_online_user() {
 		//给幸运玩家发奖
 		if (lucky_user) {
 			//获取该活动配置文件
-			var config = global_config["lucky_online_user_event"];
+			const config = global_config["lucky_online_user_event"];
 
 			//道具奖励
-			var reward_msg = '';
+			const reward_msg = '';
 			for (var i = 0; i < config["reward_items_list"].length; ++i) {
-				var item_id = config["reward_items_list"][i][0];
-				var item_cnt = config["reward_items_list"][i][1];
+				const item_id = config["reward_items_list"][i][0];
+				const item_cnt = config["reward_items_list"][i][1];
 
 				api_CUser_AddItem(lucky_user, item_id, item_cnt);
 
@@ -900,10 +900,10 @@ function on_event_lucky_online_user() {
 //每小时开启抽取幸运在线玩家活动
 function start_event_lucky_online_user() {
 	//获取当前系统时间
-	var cur_time = api_CSystemTime_getCurSec();
+	const cur_time = api_CSystemTime_getCurSec();
 
 	//计算距离下次抽取幸运玩家时间(每小时执行一次)
-	var delay_time = 3600 - (cur_time % 3600) + 3;
+	const delay_time = 3600 - (cur_time % 3600) + 3;
 
 	//log('距离下次抽取幸运在线玩家还有:' + delay_time/60 + '分钟');
 
@@ -912,8 +912,8 @@ function start_event_lucky_online_user() {
 
 }
 
-	var a2 = Memory.alloc(4);
-	var a3 = Memory.alloc(4);
+	const a2 = Memory.alloc(4);
+	const a3 = Memory.alloc(4);
 
 // ===== Utils: GameWorld =====
 	CUser_gain_exp_sp(user, exp, a2, a3, 0, 0, 0);
@@ -921,14 +921,14 @@ function start_event_lucky_online_user() {
 
 //获取在线玩家列表表头
 function api_gameworld_user_map_begin() {
-	var begin = Memory.alloc(4);
+	const begin = Memory.alloc(4);
 	gameworld_user_map_begin(begin, G_GameWorld().add(308));
 	return begin;
 }
 
 //获取在线玩家列表表尾
 function api_gameworld_user_map_end() {
-	var end = Memory.alloc(4);
+	const end = Memory.alloc(4);
 	gameworld_user_map_end(end, G_GameWorld().add(308));
 	return end;
 }
@@ -940,7 +940,7 @@ function api_gameworld_user_map_get(it) {
 
 //遍历在线玩家列表
 function api_gameworld_user_map_next(it) {
-	var next = Memory.alloc(4);
+	const next = Memory.alloc(4);
 	gameworld_user_map_next(next, it);
 	return next;
 }
@@ -948,13 +948,13 @@ function api_gameworld_user_map_next(it) {
 //对全服在线玩家执行回调函数
 function api_gameworld_foreach(f, args) {
 	//遍历在线玩家列表
-	var it = api_gameworld_user_map_begin();
-	var end = api_gameworld_user_map_end();
+	const it = api_gameworld_user_map_begin();
+	const end = api_gameworld_user_map_end();
 
 	//判断在线玩家列表遍历是否已结束
 	while (gameworld_user_map_not_equal(it, end)) {
 		//当前被遍历到的玩家
-		var user = api_gameworld_user_map_get(it);
+		const user = api_gameworld_user_map_get(it);
 
 		//只处理已登录角色
 		if (CUser_get_state(user) >= 3) {
@@ -970,9 +970,9 @@ function api_gameworld_foreach(f, args) {
 
 //设置角色当前绝望之塔层数
 function api_TOD_UserState_setEnterLayer(user, layer) {
-	var tod_layer = Memory.alloc(100);
+	const tod_layer = Memory.alloc(100);
 	TOD_Layer_TOD_Layer(tod_layer, layer);
-	var expand_data = CUser_GetCharacExpandData(user, 13);
+	const expand_data = CUser_GetCharacExpandData(user, 13);
 	TOD_UserState_setEnterLayer(expand_data, tod_layer);
 }
 
@@ -982,7 +982,7 @@ function api_get_charac_name_by_charac_no(charac_no) {
 	if (api_MySQL_exec(mysql_taiwan_cain, "select charac_name from charac_info where charac_no=" + charac_no + ";")) {
 		if (MySQL_get_n_rows(mysql_taiwan_cain) == 1) {
 			if (MySQL_fetch(mysql_taiwan_cain)) {
-				var charac_name = api_MySQL_get_str(mysql_taiwan_cain, 0);
+				const charac_name = api_MySQL_get_str(mysql_taiwan_cain, 0);
 				return charac_name;
 			}
 		}
@@ -993,28 +993,28 @@ function api_get_charac_name_by_charac_no(charac_no) {
 //发系统邮件(多道具)(角色charac_no, 邮件标题, 邮件正文, 金币数量, 道具列表)
 function api_WongWork_CMailBoxHelper_ReqDBSendNewSystemMultiMail(target_charac_no, title, text, gold, item_list) {
 	//添加道具附件
-	var vector = Memory.alloc(100);
+	const vector = Memory.alloc(100);
 	std_vector_std_pair_int_int_vector(vector);
 	std_vector_std_pair_int_int_clear(vector);
 
 	for (var i = 0; i < item_list.length; ++i) {
-		var item_id = Memory.alloc(4); //道具id
-		var item_cnt = Memory.alloc(4); //道具数量
+		const item_id = Memory.alloc(4); //道具id
+		const item_cnt = Memory.alloc(4); //道具数量
 		item_id.writeInt(item_list[i][0]);
 		item_cnt.writeInt(item_list[i][1]);
-		var pair = Memory.alloc(100);
+		const pair = Memory.alloc(100);
 		std_make_pair_int_int(pair, item_id, item_cnt);
 		std_vector_std_pair_int_int_push_back(vector, pair);
 	}
 	//邮件支持10个道具附件格子
-	var addition_slots = Memory.alloc(1000);
+	const addition_slots = Memory.alloc(1000);
 	for (var i = 0; i < 10; ++i) {
 		Inven_Item_Inven_Item(addition_slots.add(i * 61));
 	}
 	WongWork_CMailBoxHelper_MakeSystemMultiMailPostal(vector, addition_slots, 10);
-	var title_ptr = Memory.allocUtf8String(title); //邮件标题
-	var text_ptr = Memory.allocUtf8String(text); //邮件正文
-	var text_len = strlen(text_ptr); //邮件正文长度
+	const title_ptr = Memory.allocUtf8String(title); //邮件标题
+	const text_ptr = Memory.allocUtf8String(text); //邮件正文
+	const text_len = strlen(text_ptr); //邮件正文长度
 	//发邮件给角色
 	WongWork_CMailBoxHelper_ReqDBSendNewSystemMultiMail(title_ptr, addition_slots, item_list.length, gold, target_charac_no, text_ptr, text_len, 0, 99, 1);
 }
@@ -1022,18 +1022,18 @@ function api_WongWork_CMailBoxHelper_ReqDBSendNewSystemMultiMail(target_charac_n
 //全服在线玩家发信
 function api_gameworld_send_mail(title, text, gold, item_list) {
 	//遍历在线玩家列表
-	var it = api_gameworld_user_map_begin();
-	var end = api_gameworld_user_map_end();
+	const it = api_gameworld_user_map_begin();
+	const end = api_gameworld_user_map_end();
 
 	//判断在线玩家列表遍历是否已结束
 	while (gameworld_user_map_not_equal(it, end)) {
 		//当前被遍历到的玩家
-		var user = api_gameworld_user_map_get(it);
+		const user = api_gameworld_user_map_get(it);
 
 		//只处理已登录角色
 		if (CUser_get_state(user) >= 3) {
 			//角色uid
-			var charac_no = CUserCharacInfo_getCurCharacNo(user);
+			const charac_no = CUserCharacInfo_getCurCharacNo(user);
 			//给角色发信
 			api_WongWork_CMailBoxHelper_ReqDBSendNewSystemMultiMail(charac_no, title, text, gold, item_list);
 		}
@@ -1044,14 +1044,14 @@ function api_gameworld_send_mail(title, text, gold, item_list) {
 
 //服务器组包
 function api_PacketGuard_PacketGuard() {
-	var packet_guard = Memory.alloc(0x20000);
+	const packet_guard = Memory.alloc(0x20000);
 	PacketGuard_PacketGuard(packet_guard);
 	return packet_guard;
 }
 
 //从客户端封包中读取数据(失败会抛异常, 调用方必须做异常处理)
 function api_PacketBuf_get_byte(packet_buf) {
-	var data = Memory.alloc(1);
+	const data = Memory.alloc(1);
 	if (PacketBuf_get_byte(packet_buf, data)) {
 		return data.readU8();
 	}
@@ -1059,7 +1059,7 @@ function api_PacketBuf_get_byte(packet_buf) {
 }
 
 function api_PacketBuf_get_short(packet_buf) {
-	var data = Memory.alloc(2);
+	const data = Memory.alloc(2);
 
 	if (PacketBuf_get_short(packet_buf, data)) {
 		return data.readShort();
@@ -1068,7 +1068,7 @@ function api_PacketBuf_get_short(packet_buf) {
 }
 
 function api_PacketBuf_get_int(packet_buf) {
-	var data = Memory.alloc(4);
+	const data = Memory.alloc(4);
 
 	if (PacketBuf_get_int(packet_buf, data)) {
 		return data.readInt();
@@ -1077,7 +1077,7 @@ function api_PacketBuf_get_int(packet_buf) {
 }
 
 function api_PacketBuf_get_binary(packet_buf, len) {
-	var data = Memory.alloc(len);
+	const data = Memory.alloc(len);
 
 	if (PacketBuf_get_binary(packet_buf, data, len)) {
 		return data.readByteArray(len);
@@ -1092,15 +1092,15 @@ function api_PacketBuf_get_buf(packet_buf) {
 
 //给角色发消息
 function api_CUser_SendNotiPacketMessage(user, msg, msg_type) {
-	var p = Memory.allocUtf8String(msg);
+	const p = Memory.allocUtf8String(msg);
 	CUser_SendNotiPacketMessage(user, p, msg_type);
 	return;
 }
 
 //发送字符串给客户端
 function api_InterfacePacketBuf_put_string(packet_guard, s) {
-	var p = Memory.allocUtf8String(s);
-	var len = strlen(p);
+	const p = Memory.allocUtf8String(s);
+	const len = strlen(p);
 	InterfacePacketBuf_put_int(packet_guard, len);
 	InterfacePacketBuf_put_binary(packet_guard, p, len);
 	return;
@@ -1108,7 +1108,7 @@ function api_InterfacePacketBuf_put_string(packet_guard, s) {
 
 //世界广播(频道内公告)
 function api_GameWorld_SendNotiPacketMessage(msg, msg_type) {
-	var packet_guard = api_PacketGuard_PacketGuard();
+	const packet_guard = api_PacketGuard_PacketGuard();
 	InterfacePacketBuf_put_header(packet_guard, 0, 12);
 	InterfacePacketBuf_put_byte(packet_guard, msg_type);
 	InterfacePacketBuf_put_short(packet_guard, 0);
@@ -1122,15 +1122,15 @@ function api_GameWorld_SendNotiPacketMessage(msg, msg_type) {
 //打开数据库
 function api_MYSQL_open(db_name, db_ip, db_port, db_account, db_password) {
 	//mysql初始化
-	var mysql = Memory.alloc(0x80000);
+	const mysql = Memory.alloc(0x80000);
 	MySQL_MySQL(mysql);
 	MySQL_init(mysql);
 	//连接数据库
-	var db_ip_ptr = Memory.allocUtf8String(db_ip);
-	var db_name_ptr = Memory.allocUtf8String(db_name);
-	var db_account_ptr = Memory.allocUtf8String(db_account);
-	var db_password_ptr = Memory.allocUtf8String(db_password);
-	var ret = MySQL_open(mysql, db_ip_ptr, db_port, db_name_ptr, db_account_ptr, db_password_ptr);
+	const db_ip_ptr = Memory.allocUtf8String(db_ip);
+	const db_name_ptr = Memory.allocUtf8String(db_name);
+	const db_account_ptr = Memory.allocUtf8String(db_account);
+	const db_password_ptr = Memory.allocUtf8String(db_password);
+	const ret = MySQL_open(mysql, db_ip_ptr, db_port, db_name_ptr, db_account_ptr, db_password_ptr);
 	if (ret) {
 		//log('Connect MYSQL DB <' + db_name + '> SUCCESS!');
 		return mysql;
@@ -1140,7 +1140,7 @@ function api_MYSQL_open(db_name, db_ip, db_port, db_account, db_password) {
 
 //mysql查询(返回mysql句柄)(注意线程安全)
 function api_MySQL_exec(mysql, sql) {
-	var sql_ptr = Memory.allocUtf8String(sql);
+	const sql_ptr = Memory.allocUtf8String(sql);
 	MySQL_set_query_2(mysql, sql_ptr);
 	return MySQL_exec(mysql, 1);
 }
@@ -1149,7 +1149,7 @@ function api_MySQL_exec(mysql, sql) {
 //使用前务必保证api_MySQL_exec返回0
 //并且MySQL_get_n_rows与预期一致
 function api_MySQL_get_int(mysql, field_index) {
-	var v = Memory.alloc(4);
+	const v = Memory.alloc(4);
 	if (1 == MySQL_get_int(mysql, field_index, v))
 		return v.readInt();
 	//log('api_MySQL_get_int Fail!!!');
@@ -1157,7 +1157,7 @@ function api_MySQL_get_int(mysql, field_index) {
 }
 
 function api_MySQL_get_uint(mysql, field_index) {
-	var v = Memory.alloc(4);
+	const v = Memory.alloc(4);
 	if (1 == MySQL_get_uint(mysql, field_index, v))
 		return v.readUInt();
 	//log('api_MySQL_get_uint Fail!!!');
@@ -1165,7 +1165,7 @@ function api_MySQL_get_uint(mysql, field_index) {
 }
 
 function api_MySQL_get_short(mysql, field_index) {
-	var v = Memory.alloc(4);
+	const v = Memory.alloc(4);
 	if (1 == MySQL_get_short(mysql, field_index, v))
 		return v.readShort();
 	//log('MySQL_get_short Fail!!!');
@@ -1173,7 +1173,7 @@ function api_MySQL_get_short(mysql, field_index) {
 }
 
 function api_MySQL_get_float(mysql, field_index) {
-	var v = Memory.alloc(4);
+	const v = Memory.alloc(4);
 	if (1 == MySQL_get_float(mysql, field_index, v))
 		return v.readFloat();
 	//log('MySQL_get_float Fail!!!');
@@ -1181,9 +1181,9 @@ function api_MySQL_get_float(mysql, field_index) {
 }
 
 function api_MySQL_get_str(mysql, field_index) {
-	var binary_length = MySQL_get_binary_length(mysql, field_index);
+	const binary_length = MySQL_get_binary_length(mysql, field_index);
 	if (binary_length > 0) {
-		var v = Memory.alloc(binary_length);
+		const v = Memory.alloc(binary_length);
 		if (1 == MySQL_get_binary(mysql, field_index, v, binary_length))
 			return v.readUtf8String(binary_length);
 	}
@@ -1192,9 +1192,9 @@ function api_MySQL_get_str(mysql, field_index) {
 }
 
 function api_MySQL_get_binary(mysql, field_index) {
-	var binary_length = MySQL_get_binary_length(mysql, field_index);
+	const binary_length = MySQL_get_binary_length(mysql, field_index);
 	if (binary_length > 0) {
-		var v = Memory.alloc(binary_length);
+		const v = Memory.alloc(binary_length);
 		if (1 == MySQL_get_binary(mysql, field_index, v, binary_length))
 			return v.readByteArray(binary_length);
 	}
@@ -1205,7 +1205,7 @@ function api_MySQL_get_binary(mysql, field_index) {
 //初始化数据库(打开数据库/建库建表/数据库字段扩展)
 function init_db() {
 	//配置文件
-	var config = global_config['db_config'];
+	const config = global_config['db_config'];
 	//打开数据库连接
 	if (mysql_taiwan_cain == null) {
 		mysql_taiwan_cain = api_MYSQL_open('taiwan_cain', '127.0.0.1', 3306, config['account'], config['password']);
@@ -1265,7 +1265,7 @@ function event_villageattack_load_from_db() {
 	if (api_MySQL_exec(mysql_frida, "select event_info from game_event where event_id = 'villageattack';")) {
 		if (MySQL_get_n_rows(mysql_frida) == 1) {
 			MySQL_fetch(mysql_frida);
-			var info = api_MySQL_get_str(mysql_frida, 0);
+			const info = api_MySQL_get_str(mysql_frida, 0);
 			villageAttackEventInfo = JSON.parse(info);
 		}
 	}
@@ -1274,30 +1274,30 @@ function event_villageattack_load_from_db() {
 //处理到期的自定义定时器
 function do_timer_dispatch() {
 	//当前待处理的定时器任务列表
-	var task_list = [];
+	const task_list = [];
 
 	//线程安全
-	var guard = api_Guard_Mutex_Guard();
+	const guard = api_Guard_Mutex_Guard();
 	//依次取出队列中的任务
 	while (timer_dispatcher_list.length > 0) {
 		//先入先出
-		var task = timer_dispatcher_list.shift();
+		const task = timer_dispatcher_list.shift();
 		task_list.push(task);
 	}
 	Destroy_Guard_Mutex_Guard(guard);
 	//执行任务
 	for (var i = 0; i < task_list.length; ++i) {
-		var task = task_list[i];
+		const task = task_list[i];
 
-		var f = task[0];
-		var args = task[1];
+		const f = task[0];
+		const args = task[1];
 		f.apply(null, args);
 	}
 }
 
 //申请锁(申请后务必手动释放!!!)
 function api_Guard_Mutex_Guard() {
-	var a1 = Memory.alloc(100);
+	const a1 = Memory.alloc(100);
 	Guard_Mutex_Guard(a1, G_TimerQueue().add(16));
 
 	return a1;
@@ -1320,7 +1320,7 @@ function hook_TimerDispatcher_dispatch() {
 //在dispatcher线程执行(args为函数f的参数组成的数组, 若f无参数args可为null)
 function api_scheduleOnMainThread(f, args) {
 	//线程安全
-	var guard = api_Guard_Mutex_Guard();
+	const guard = api_Guard_Mutex_Guard();
 	timer_dispatcher_list.push([f, args]);
 	Destroy_Guard_Mutex_Guard(guard);
 	return;
@@ -1349,14 +1349,14 @@ function event_villageattack_timer() {
 	if (villageAttackEventInfo.state == VILLAGEATTACK_STATE_END)
 		return;
 	//活动结束检测
-	var remain_time = event_villageattack_get_remain_time();
+	const remain_time = event_villageattack_get_remain_time();
 	if (remain_time <= 0) {
 		//活动结束
 		on_end_event_villageattack();
 		return;
 	}
 	//当前应扣除的PT
-	var damage = 0;
+	const damage = 0;
 	//P2/P3阶段GBL主教扣PT
 	if ((villageAttackEventInfo.state == VILLAGEATTACK_STATE_P2) || (villageAttackEventInfo.state == VILLAGEATTACK_STATE_P3)) {
 		for (var i = 0; i < villageAttackEventInfo.gbl_cnt; ++i) {
@@ -1389,7 +1389,7 @@ function event_villageattack_timer() {
 //开启怪物攻城活动
 function start_villageattack() {
 	console.log('start_villageattack-------------');
-	var a3 = Memory.alloc(100);
+	const a3 = Memory.alloc(100);
 	a3.add(10).writeInt(EVENT_VILLAGEATTACK_TOTAL_TIME); //活动剩余时间
 	a3.add(14).writeInt(villageAttackEventInfo.score); //当前频道PT点数
 	a3.add(18).writeInt(EVENT_VILLAGEATTACK_TARGET_SCORE[2]); //成功防守所需点数
@@ -1411,9 +1411,9 @@ function on_start_event_villageattack() {
 //开启怪物攻城活动定时器
 function start_event_villageattack_timer() {
 	//获取当前系统时间
-	var cur_time = api_CSystemTime_getCurSec();
+	const cur_time = api_CSystemTime_getCurSec();
 	//计算距离下次开启怪物攻城活动的时间
-	var delay_time = (3600 * EVENT_VILLAGEATTACK_START_HOUR) - (cur_time % (3600 * 24));
+	const delay_time = (3600 * EVENT_VILLAGEATTACK_START_HOUR) - (cur_time % (3600 * 24));
 	if (delay_time <= 0)
 		delay_time += 3600 * 24;
 	//delay_time = 10;
@@ -1454,19 +1454,19 @@ function event_villageattack_broadcast_difficulty() {
 
 //计算活动剩余时间
 function event_villageattack_get_remain_time() {
-	var cur_time = api_CSystemTime_getCurSec();
-	var event_end_time = villageAttackEventInfo.start_time + EVENT_VILLAGEATTACK_TOTAL_TIME;
-	var remain_time = event_end_time - cur_time;
+	const cur_time = api_CSystemTime_getCurSec();
+	const event_end_time = villageAttackEventInfo.start_time + EVENT_VILLAGEATTACK_TOTAL_TIME;
+	const remain_time = event_end_time - cur_time;
 	return remain_time;
 }
 
 //更新怪物攻城当前进度(广播给频道内在线玩家)
 function gameworld_update_villageattack_score() {
 	//计算活动剩余时间
-	var remain_time = event_villageattack_get_remain_time();
+	const remain_time = event_villageattack_get_remain_time();
 	if ((remain_time <= 0) || (villageAttackEventInfo.state == VILLAGEATTACK_STATE_END))
 		return;
-	var packet_guard = api_PacketGuard_PacketGuard();
+	const packet_guard = api_PacketGuard_PacketGuard();
 	InterfacePacketBuf_put_header(packet_guard, 0, 247); //协议: ENUM_NOTIPACKET_UPDATE_VILLAGE_ATTACKED
 	InterfacePacketBuf_put_int(packet_guard, remain_time); //活动剩余时间
 	InterfacePacketBuf_put_int(packet_guard, villageAttackEventInfo.score); //当前频道PT点数
@@ -1479,17 +1479,17 @@ function gameworld_update_villageattack_score() {
 //通知玩家怪物攻城进度
 function notify_villageattack_score(user) {
 	//玩家当前PT点
-	var charac_no = CUserCharacInfo_getCurCharacNo(user).toString();
-	var villageattack_pt = 0;
+	const charac_no = CUserCharacInfo_getCurCharacNo(user).toString();
+	const villageattack_pt = 0;
 	if (charac_no in villageAttackEventInfo.user_pt_info)
 		villageattack_pt = villageAttackEventInfo.user_pt_info[charac_no][1];
 	//计算活动剩余时间
-	var remain_time = event_villageattack_get_remain_time();
+	const remain_time = event_villageattack_get_remain_time();
 	//log("remain_time=" + remain_time);
 	if ((remain_time <= 0) || (villageAttackEventInfo.state == VILLAGEATTACK_STATE_END))
 		return;
 	//发包通知角色打开怪物攻城UI并更新当前进度
-	var packet_guard = api_PacketGuard_PacketGuard();
+	const packet_guard = api_PacketGuard_PacketGuard();
 	InterfacePacketBuf_put_header(packet_guard, 0, 248); //协议: ENUM_NOTIPACKET_STARTED_VILLAGE_ATTACKED
 	InterfacePacketBuf_put_int(packet_guard, remain_time); //活动剩余时间
 	InterfacePacketBuf_put_int(packet_guard, villageAttackEventInfo.score); //当前频道PT点数
@@ -1531,19 +1531,19 @@ function hook_VillageAttack() {
 					if (villageAttackEventInfo.state == VILLAGEATTACK_STATE_END) //攻城活动已结束
 						return;
 					//当前杀死的攻城怪物id
-					var village_monster_id = this.village_monster.add(2).readUShort();
+					const village_monster_id = this.village_monster.add(2).readUShort();
 					//当前阶段杀死每只攻城怪物PT点数奖励: (1, 2, 4, 8, 16)
-					var bonus_pt = 2 ** villageAttackEventInfo.difficult;
+					const bonus_pt = 2 ** villageAttackEventInfo.difficult;
 					//玩家所在队伍
-					var party = CUser_GetParty(this.user);
+					const party = CUser_GetParty(this.user);
 					if (party.isNull())
 						return;
 					//更新队伍中的所有玩家PT点数
 					for (var i = 0; i < 4; ++i) {
-						var user = CParty_get_user(party, i);
+						const user = CParty_get_user(party, i);
 						if (!user.isNull()) {
 							//角色当前PT点数(游戏中的原始PT数据记录在village_attack_dungeon表中)
-							var charac_no = CUserCharacInfo_getCurCharacNo(user).toString();
+							const charac_no = CUserCharacInfo_getCurCharacNo(user).toString();
 							if (!(charac_no in villageAttackEventInfo.user_pt_info))
 								villageAttackEventInfo.user_pt_info[charac_no] = [CUser_get_acc_id(user), 0]; //记录角色accid, 方便离线充值
 							//更新角色当前PT点数
@@ -1587,8 +1587,8 @@ function hook_VillageAttack() {
 					} else if (villageAttackEventInfo.state == VILLAGEATTACK_STATE_P2) //怪物攻城二阶段
 					{
 						//计算连杀时间
-						var cur_time = api_CSystemTime_getCurSec();
-						var diff_time = cur_time - villageAttackEventInfo.p2_last_killed_monster_time;
+						const cur_time = api_CSystemTime_getCurSec();
+						const diff_time = cur_time - villageAttackEventInfo.p2_last_killed_monster_time;
 
 						//1分钟内连续击杀相同攻城怪物
 						if ((diff_time < 60) && (village_monster_id == villageAttackEventInfo.last_killed_monster_id)) {
@@ -1642,7 +1642,7 @@ function hook_VillageAttack() {
 					gameworld_update_villageattack_score();
 					//通知队伍中的所有玩家更新PT点数
 					for (var i = 0; i < 4; ++i) {
-						var user = CParty_get_user(party, i);
+						const user = CParty_get_user(party, i);
 						if (!user.isNull()) {
 							notify_villageattack_score(user);
 						}
@@ -1666,7 +1666,7 @@ function hook_VillageAttack() {
 				if (retval != 0) {
 					//下一只刷新的攻城怪物
 					const next_village_monster = ptr(retval);
-					var next_village_monster_id = next_village_monster.readUShort();
+					const next_village_monster_id = next_village_monster.readUShort();
 
 					//当前刷新的怪物为机制怪物
 					if ((next_village_monster_id == TAU_META_COW_MONSTER_ID) || (next_village_monster_id == TAU_CAPTAIN_MONSTER_ID)) {
@@ -1697,9 +1697,9 @@ function hook_VillageAttack() {
 			}
 		});
 	//当前正在处理挑战的攻城怪物请求
-	var state_on_fighting = false;
+	const state_on_fighting = false;
 	//当前正在被挑战的怪物id
-	var on_fighting_village_monster_id = 0;
+	const on_fighting_village_monster_id = 0;
 	//hook 挑战攻城怪物函数 控制副本刷怪流程
 	//CParty::OnFightVillageMonster
 	Interceptor.attach(ptr(0x085B9596),
@@ -1718,7 +1718,7 @@ function hook_VillageAttack() {
 		{
 			onEnter: function (args) {
 				if (state_on_fighting) {
-					var village_monster = args[0];
+					const village_monster = args[0];
 
 					//记录当前正在挑战的攻城怪物id
 					on_fighting_village_monster_id = village_monster.add(2).readU16();
@@ -1777,11 +1777,11 @@ function hook_VillageAttack() {
 					read_f(map_info, monster);
 					//刷新额外的怪物(同一张地图内, 怪物index和怪物uid必须唯一, 这里为怪物分配新的index和uid)
 					//额外刷新怪物数量
-					var cnt = 1;
+					const cnt = 1;
 					//新的怪物uid偏移
-					var uid_offset = 1000;
+					const uid_offset = 1000;
 					//返回值
-					var ret = 0;
+					const ret = 0;
 					while (cnt > 0) {
 						--cnt;
 						//新增怪物index
@@ -1805,11 +1805,11 @@ function hook_VillageAttack() {
 					read_f(map_info, monster);
 					//刷新额外的怪物(同一张地图内, 怪物index和怪物uid必须唯一, 这里为怪物分配新的index和uid)
 					//额外刷新怪物数量
-					var cnt = 3;
+					const cnt = 3;
 					//新的怪物uid偏移
-					var uid_offset = 1000;
+					const uid_offset = 1000;
 					//返回值
-					var ret = 0;
+					const ret = 0;
 					while (cnt > 0) {
 						--cnt;
 						//新增怪物index
@@ -1840,14 +1840,14 @@ function hook_VillageAttack() {
 					//挑战成功
 					if (this.result) {
 						//玩家所在队伍
-						var party = CUser_GetParty(this.user);
+						const party = CUser_GetParty(this.user);
 						//怪物攻城挑战成功, 给队伍中所有成员发送额外通关发经验
 						for (var i = 0; i < 4; ++i) {
-							var user = CParty_get_user(party, i);
+							const user = CParty_get_user(party, i);
 							if (!user.isNull()) {
 								//随机经验奖励
-								var cur_level = CUserCharacInfo_get_charac_level(user);
-								var reward_exp = Math.floor(CUserCharacInfo_get_level_up_exp(user, cur_level) * get_random_int(0, 1000) / 1000000);
+								const cur_level = CUserCharacInfo_get_charac_level(user);
+								const reward_exp = Math.floor(CUserCharacInfo_get_level_up_exp(user, cur_level) * get_random_int(0, 1000) / 1000000);
 								//发经验
 								api_CUser_gain_exp_sp(user, reward_exp);
 								//通知玩家获取额外奖励
@@ -1877,8 +1877,8 @@ function on_end_event_villageattack() {
 	if (villageAttackEventInfo.defend_success) {
 		//频道内在线玩家发奖
 		//发信奖励: 金币+道具
-		var reward_gold = 1000000 * (1 + villageAttackEventInfo.difficult); //金币
-		var reward_item_list =
+		const reward_gold = 1000000 * (1 + villageAttackEventInfo.difficult); //金币
+		const reward_item_list =
 			[
 				[7745, 5 * (1 + villageAttackEventInfo.difficult)], //士气冲天
 				[2600028, 5 * (1 + villageAttackEventInfo.difficult)], //天堂痊愈
@@ -1892,15 +1892,15 @@ function on_end_event_villageattack() {
 			//设置绝望之塔当前层数为100层
 			api_TOD_UserState_setEnterLayer(user, 99);
 			//随机选择一件穿戴中的装备
-			var inven = CUserCharacInfo_getCurCharacInvenW(user);
-			var slot = get_random_int(10, 21); //12件装备slot范围10-21
-			var equ = CInventory_GetInvenRef(inven, INVENTORY_TYPE_BODY, slot);
+			const inven = CUserCharacInfo_getCurCharacInvenW(user);
+			const slot = get_random_int(10, 21); //12件装备slot范围10-21
+			const equ = CInventory_GetInvenRef(inven, INVENTORY_TYPE_BODY, slot);
 			if (Inven_Item_getKey(equ)) {
 				//读取装备强化等级
-				var upgrade_level = equ.add(6).readU8();
+				const upgrade_level = equ.add(6).readU8();
 				if (upgrade_level < 31) {
 					//提升装备的强化/增幅等级
-					var bonus_level = get_random_int(1, 1 + villageAttackEventInfo.difficult);
+					const bonus_level = get_random_int(1, 1 + villageAttackEventInfo.difficult);
 					upgrade_level += bonus_level;
 					if (upgrade_level >= 31)
 						upgrade_level = 31;
@@ -1912,16 +1912,16 @@ function on_end_event_villageattack() {
 			}
 		}, null);
 		//榜一大哥
-		var rank_first_charac_no = 0;
-		var rank_first_account_id = 0;
-		var max_pt = 0;
+		const rank_first_charac_no = 0;
+		const rank_first_account_id = 0;
+		const max_pt = 0;
 		//论功行赏
 		for (var charac_no in villageAttackEventInfo.user_pt_info) {
 			//发点券
-			var account_id = villageAttackEventInfo.user_pt_info[charac_no][0];
-			var pt = villageAttackEventInfo.user_pt_info[charac_no][1];
-			var reward_cera = pt * 10; //点券奖励 = 个人PT * 10
-			var user_pr = GameWorld_find_user_from_world_byaccid(G_GameWorld(), account_id);
+			const account_id = villageAttackEventInfo.user_pt_info[charac_no][0];
+			const pt = villageAttackEventInfo.user_pt_info[charac_no][1];
+			const reward_cera = pt * 10; //点券奖励 = 个人PT * 10
+			const user_pr = GameWorld_find_user_from_world_byaccid(G_GameWorld(), account_id);
 			api_recharge_cash_cera(user_pr, reward_cera);
 			//找出榜一大哥
 			if (pt > max_pt) {
@@ -1934,23 +1934,23 @@ function on_end_event_villageattack() {
 		api_GameWorld_SendNotiPacketMessage('<怪物攻城活动> 防守成功, 奖励已发送!', 14);
 		if (rank_first_charac_no) {
 			//个人积分排行榜第一名 额外获得10倍点券奖励
-			var user_pr = GameWorld_find_user_from_world_byaccid(G_GameWorld(), rank_first_account_id);
+			const user_pr = GameWorld_find_user_from_world_byaccid(G_GameWorld(), rank_first_account_id);
 			api_recharge_cash_cera(user_pr, max_pt * 10);
 
 			//频道内广播本轮活动排行榜第一名玩家名字
-			var rank_first_charac_name = api_get_charac_name_by_charac_no(rank_first_charac_no);
+			const rank_first_charac_name = api_get_charac_name_by_charac_no(rank_first_charac_no);
 			api_GameWorld_SendNotiPacketMessage('<怪物攻城活动> 恭喜勇士 [' + rank_first_charac_name + '] 成为个人积分排行榜第一名(' + max_pt + 'pt)!', 14);
 		}
 	} else {
 		//防守失败
 		api_gameworld_foreach(function (user, args) {
 			//获取角色背包
-			var inven = CUserCharacInfo_getCurCharacInvenW(user);
+			const inven = CUserCharacInfo_getCurCharacInvenW(user);
 			//在线玩家被攻城怪物随机掠夺一件穿戴中的装备
 			if (get_random_int(0, 100) < 7) {
 				//随机删除一件穿戴中的装备
-				var slot = get_random_int(10, 21); //12件装备slot范围10-21
-				var equ = CInventory_GetInvenRef(inven, INVENTORY_TYPE_BODY, slot);
+				const slot = get_random_int(10, 21); //12件装备slot范围10-21
+				const equ = CInventory_GetInvenRef(inven, INVENTORY_TYPE_BODY, slot);
 
 				if (Inven_Item_getKey(equ)) {
 					Inven_Item_reset(equ);
@@ -1959,9 +1959,9 @@ function on_end_event_villageattack() {
 				}
 			}
 			//在线玩家被攻城怪物随机掠夺1%-10%所持金币
-			var rate = get_random_int(1, 11);
-			var cur_gold = CInventory_get_money(inven);
-			var tax = Math.floor((rate / 100) * cur_gold);
+			const rate = get_random_int(1, 11);
+			const cur_gold = CInventory_get_money(inven);
+			const tax = Math.floor((rate / 100) * cur_gold);
 			CInventory_use_money(inven, tax, 0, 0);
 			//通知客户端更新金币数量
 			CUser_SendUpdateItemList(user, 1, 0, 0);
@@ -2001,22 +2001,22 @@ function api_force_clear_quest(user, quest_id) {
 //完成指定任务并领取奖励
 function clear_doing_questEx(user, quest_id) { //完成指定任务并领取奖励1
 	//玩家任务信息
-	var user_quest = CUser_getCurCharacQuestW(user);
+	const user_quest = CUser_getCurCharacQuestW(user);
 	//玩家已完成任务信息
-	var WongWork_CQuestClear = user_quest.add(4);
+	const WongWork_CQuestClear = user_quest.add(4);
 	//pvf数据
-	var data_manager = G_CDataManager();
+	const data_manager = G_CDataManager();
 	//跳过已完成的任务
 	if (!WongWork_CQuestClear_isClearedQuest(WongWork_CQuestClear, quest_id)) {
 		//获取pvf任务数据
-		var quest = CDataManager_find_quest(data_manager, quest_id);
+		const quest = CDataManager_find_quest(data_manager, quest_id);
 		if (!quest.isNull()) {
 			//无条件完成指定任务并领取奖励
 			api_force_clear_quest(user, quest_id);
 			//通知客户端更新已完成任务列表
 			CUser_send_clear_quest_list(user);
 			//通知客户端更新任务列表
-			var packet_guard = api_PacketGuard_PacketGuard();
+			const packet_guard = api_PacketGuard_PacketGuard();
 			UserQuest_get_quest_info(user_quest, packet_guard);
 			CUser_Send(user, packet_guard);
 			Destroy_PacketGuard_PacketGuard(packet_guard);
@@ -2035,28 +2035,28 @@ const QUEST_GRADE_EPIC = 0;
 function clear_all_quest_by_character_level(user)
 {
 	//玩家任务信息
-	var user_quest = CUser_getCurCharacQuestW(user);
+	const user_quest = CUser_getCurCharacQuestW(user);
 	//玩家已完成任务信息
-	var WongWork_CQuestClear = user_quest.add(4);
+	const WongWork_CQuestClear = user_quest.add(4);
 	//玩家当前等级
-	var charac_lv = CUserCharacInfo_get_charac_level(user);
+	const charac_lv = CUserCharacInfo_get_charac_level(user);
 
 	//本次完成任务数量
-	var clear_quest_cnt = 0;
+	const clear_quest_cnt = 0;
 
 	//pvf数据
-	var data_manager = G_CDataManager();
+	const data_manager = G_CDataManager();
 
 	//首先完成当前已接任务
 	clear_doing_quest(user);
 
 	//完成当前等级所有任务总经验奖励
-	var total_exp_bonus = 0;
+	const total_exp_bonus = 0;
 	//完成当前等级所有任务总金币奖励
-	var total_gold_bonus = 0;
+	const total_gold_bonus = 0;
 	//任务点奖励
-	var total_quest_point_bonus = 0;
-	var total_quest_piece_bonus = 0;
+	const total_quest_point_bonus = 0;
+	const total_quest_piece_bonus = 0;
 
 	//任务最大编号: 29999
 	for(var quest_id=1; quest_id<30000; quest_id++)
@@ -2066,11 +2066,11 @@ function clear_all_quest_by_character_level(user)
 			continue;
 
 		//获取任务数据
-		var quest = CDataManager_find_quest(data_manager, quest_id);
+		const quest = CDataManager_find_quest(data_manager, quest_id);
 		if(!quest.isNull())
 		{
 			//任务类型
-			var quest_grade = quest.add(8).readInt();
+			const quest_grade = quest.add(8).readInt();
 
 			//跳过grade为[common unique]类型的任务(转职等任务)
 			//跳过可重复提交的任务
@@ -2083,22 +2083,22 @@ function clear_all_quest_by_character_level(user)
 				//if(Quest_check_possible(quest, stSelectQuestParam))
 
 				//只判断任务最低等级要求 忽略 职业/前置 等任务要求 可一次性完成当前等级所有任务
-				var quest_min_lv = quest.add(0x20).readInt();
+				const quest_min_lv = quest.add(0x20).readInt();
 				if(quest_min_lv <= charac_lv)
 				{
 					//获取该任务的基础奖励
-					var exp_bonus = Memory.alloc(4);
-					var gold_bonus = Memory.alloc(4);
-					var quest_point_bonus = Memory.alloc(4);
-					var quest_piece_bonus = Memory.alloc(4);
+					const exp_bonus = Memory.alloc(4);
+					const gold_bonus = Memory.alloc(4);
+					const quest_point_bonus = Memory.alloc(4);
+					const quest_piece_bonus = Memory.alloc(4);
 					//QP奖励已直接发送到角色 经验/金币只返回结果  需要手动发送
 					CUser_quest_basic_reward(user,quest, exp_bonus, gold_bonus, quest_point_bonus, quest_piece_bonus, 1);
 
 					//统计本次自动完成任务的基础奖励
-					var exp = exp_bonus.readInt();
-					var gold = gold_bonus.readInt();
-					var quest_point = quest_point_bonus.readInt();
-					var quest_piece = quest_piece_bonus.readInt();
+					const exp = exp_bonus.readInt();
+					const gold = gold_bonus.readInt();
+					const quest_point = quest_point_bonus.readInt();
+					const quest_piece = quest_piece_bonus.readInt();
 					if(exp > 0)
 						total_exp_bonus += exp;
 					if(gold > 0)
@@ -2143,7 +2143,7 @@ function clear_all_quest_by_character_level(user)
 		CUser_send_clear_quest_list(user);
 
 		//通知客户端更新任务列表
-		var packet_guard = api_PacketGuard_PacketGuard();
+		const packet_guard = api_PacketGuard_PacketGuard();
 		UserQuest_get_quest_info(user_quest, packet_guard);
 		CUser_Send(user, packet_guard);
 		Destroy_PacketGuard_PacketGuard(packet_guard);
@@ -2168,7 +2168,7 @@ function fix_TOD(skip_user_apc) {
 			{
 				onEnter: function (args) {
 					//绝望之塔当前层数
-					var today_enter_layer = args[1].add(0x14).readShort();
+					const today_enter_layer = args[1].add(0x14).readShort();
 
 					if (((today_enter_layer % 10) == 9) && (today_enter_layer > 0) && (today_enter_layer < 100)) {
 						//当前层数为10的倍数时  直接进入下一层
@@ -2186,7 +2186,7 @@ function fix_TOD(skip_user_apc) {
 	const CParty_UseAncientDungeonItems = new NativeFunction(CParty_UseAncientDungeonItems_ptr, 'int', ['pointer', 'pointer', 'pointer', 'pointer'], { "abi": "sysv" });
 	Interceptor.replace(CParty_UseAncientDungeonItems_ptr, new NativeCallback(function (party, dungeon, inven_item, a4) {
 		//当前进入的地下城id
-		var dungeon_index = CDungeon_get_index(dungeon);
+		const dungeon_index = CDungeon_get_index(dungeon);
 		//根据地下城id判断是否为绝望之塔
 		if ((dungeon_index >= 11008) && (dungeon_index <= 11107)) {
 			//绝望之塔 不再扣除金币
@@ -2222,55 +2222,55 @@ function fix_use_emblem() {
 		{
 			onEnter: function (args) {
 				try {
-					var user = args[1];
-					var packet_buf = args[2];
+					const user = args[1];
+					const packet_buf = args[2];
 					//校验角色状态是否允许镶嵌
-					var state = CUser_get_state(user);
+					const state = CUser_get_state(user);
 					if (state != 3) {
 						return;
 					}
 					//解析packet_buf
 					//时装所在的背包槽
-					var avatar_inven_slot = api_PacketBuf_get_short(packet_buf);
+					const avatar_inven_slot = api_PacketBuf_get_short(packet_buf);
 					//时装item_id
-					var avatar_item_id = api_PacketBuf_get_int(packet_buf);
+					const avatar_item_id = api_PacketBuf_get_int(packet_buf);
 					//本次镶嵌徽章数量
-					var emblem_cnt = api_PacketBuf_get_byte(packet_buf);
+					const emblem_cnt = api_PacketBuf_get_byte(packet_buf);
 					//获取时装道具
-					var inven = CUserCharacInfo_getCurCharacInvenW(user);
-					var avatar = CInventory_GetInvenRef(inven, INVENTORY_TYPE_AVATAR, avatar_inven_slot);
+					const inven = CUserCharacInfo_getCurCharacInvenW(user);
+					const avatar = CInventory_GetInvenRef(inven, INVENTORY_TYPE_AVATAR, avatar_inven_slot);
 					//校验时装 数据是否合法
 					if (Inven_Item_isEmpty(avatar) || (Inven_Item_getKey(avatar) != avatar_item_id) || CUser_CheckItemLock(user, 2, avatar_inven_slot)) {
 						return;
 					}
 					//获取时装插槽数据
-					var avatar_add_info = Inven_Item_get_add_info(avatar);
-					var inven_avatar_mgr = CInventory_GetAvatarItemMgrR(inven);
-					var jewel_socket_data = WongWork_CAvatarItemMgr_getJewelSocketData(inven_avatar_mgr, avatar_add_info);
+					const avatar_add_info = Inven_Item_get_add_info(avatar);
+					const inven_avatar_mgr = CInventory_GetAvatarItemMgrR(inven);
+					const jewel_socket_data = WongWork_CAvatarItemMgr_getJewelSocketData(inven_avatar_mgr, avatar_add_info);
 
 					if (jewel_socket_data.isNull()) {
 						return;
 					}
 					//最多只支持3个插槽
 					if (emblem_cnt <= 3) {
-						var emblems = {};
+						const emblems = {};
 						for (var i = 0; i < emblem_cnt; i++) {
 							//徽章所在的背包槽
-							var emblem_inven_slot = api_PacketBuf_get_short(packet_buf);
+							const emblem_inven_slot = api_PacketBuf_get_short(packet_buf);
 							//徽章item_id
-							var emblem_item_id = api_PacketBuf_get_int(packet_buf);
+							const emblem_item_id = api_PacketBuf_get_int(packet_buf);
 							//该徽章镶嵌的时装插槽id
-							var avatar_socket_slot = api_PacketBuf_get_byte(packet_buf);
+							const avatar_socket_slot = api_PacketBuf_get_byte(packet_buf);
 							//log('emblem_inven_slot=' + emblem_inven_slot + ', emblem_item_id=' + emblem_item_id + ', avatar_socket_slot=' + avatar_socket_slot);
 							//获取徽章道具
-							var emblem = CInventory_GetInvenRef(inven, INVENTORY_TYPE_ITEM, emblem_inven_slot);
+							const emblem = CInventory_GetInvenRef(inven, INVENTORY_TYPE_ITEM, emblem_inven_slot);
 							//校验徽章及插槽数据是否合法
 							if (Inven_Item_isEmpty(emblem) || (Inven_Item_getKey(emblem) != emblem_item_id) || (avatar_socket_slot >= 3)) {
 								return;
 							}
 							//校验徽章是否满足时装插槽颜色要求
 							//获取徽章pvf数据
-							var citem = CDataManager_find_item(G_CDataManager(), emblem_item_id);
+							const citem = CDataManager_find_item(G_CDataManager(), emblem_item_id);
 							if (citem.isNull()) {
 								return;
 							}
@@ -2279,9 +2279,9 @@ function fix_use_emblem() {
 								return;
 							}
 							//获取徽章支持的插槽
-							var emblem_socket_type = CStackableItem_getJewelTargetSocket(citem);
+							const emblem_socket_type = CStackableItem_getJewelTargetSocket(citem);
 							//获取要镶嵌的时装插槽类型
-							var avatar_socket_type = jewel_socket_data.add(avatar_socket_slot * 6).readShort()
+							const avatar_socket_type = jewel_socket_data.add(avatar_socket_slot * 6).readShort()
 							if (!(emblem_socket_type & avatar_socket_type)) {
 								//插槽类型不匹配
 								//log('socket type not match!');
@@ -2292,10 +2292,10 @@ function fix_use_emblem() {
 						//开始镶嵌
 						for (var avatar_socket_slot in emblems) {
 							//删除徽章
-							var emblem_inven_slot = emblems[avatar_socket_slot][0];
+							const emblem_inven_slot = emblems[avatar_socket_slot][0];
 							CInventory_delete_item(inven, 1, emblem_inven_slot, 1, 8, 1);
 							//设置时装插槽数据
-							var emblem_item_id = emblems[avatar_socket_slot][1];
+							const emblem_item_id = emblems[avatar_socket_slot][1];
 							api_set_JewelSocketData(jewel_socket_data, avatar_socket_slot, emblem_item_id);
 							//log('徽章item_id=' + emblem_item_id + '已成功镶嵌进avatar_socket_slot=' + avatar_socket_slot + '的槽内!');
 						}
@@ -2304,7 +2304,7 @@ function fix_use_emblem() {
 						//通知客户端时装数据已更新
 						CUser_SendUpdateItemList(user, 1, 1, avatar_inven_slot);
 						//回包给客户端
-						var packet_guard = api_PacketGuard_PacketGuard();
+						const packet_guard = api_PacketGuard_PacketGuard();
 						InterfacePacketBuf_put_header(packet_guard, 1, 204);
 						InterfacePacketBuf_put_int(packet_guard, 1);
 						InterfacePacketBuf_finalize(packet_guard, 1);
@@ -2330,31 +2330,31 @@ function hook_history_log() {
 		{
 			onEnter: function (args) {
 				//解析日志内容: "18000008",18000008,D,145636,"nickname",1,72,8,0,192.168.200.1,192.168.200.1,50963,11, DungeonLeave,"龍人之塔",0,0,"aabb","aabb","N/A","N/A","N/A"
-				var history_log = args[1].readUtf8String(-1);
-				var group = history_log.split(',');
+				const history_log = args[1].readUtf8String(-1);
+				const group = history_log.split(',');
 				//角色信息
-				var account_id = parseInt(group[1]);
-				var time_hh_mm_ss = group[3];
-				var charac_name = group[4];
-				var charac_no = group[5];
-				var charac_level = group[6];
-				var charac_job = group[7];
-				var charac_growtype = group[8];
-				var user_web_address = group[9];
-				var user_peer_ip2 = group[10];
-				var user_port = group[11];
-				var channel_index = group[12]; //当前频道id
+				const account_id = parseInt(group[1]);
+				const time_hh_mm_ss = group[3];
+				const charac_name = group[4];
+				const charac_no = group[5];
+				const charac_level = group[6];
+				const charac_job = group[7];
+				const charac_growtype = group[8];
+				const user_web_address = group[9];
+				const user_peer_ip2 = group[10];
+				const user_port = group[11];
+				const channel_index = group[12]; //当前频道id
 				//玩家游戏事件
-				var game_event = group[13].slice(1); //删除多余空格
+				const game_event = group[13].slice(1); //删除多余空格
 				//触发游戏事件的角色
-				var user = GameWorld_find_user_from_world_byaccid(G_GameWorld(), account_id);
+				const user = GameWorld_find_user_from_world_byaccid(G_GameWorld(), account_id);
 				if (user.isNull())
 					return;
 				//道具减少:  Item-,1,10000113,63,1,3,63,0,0,0,0,0,0000000000000000000000000000,0,0,00000000000000000000
 				if (game_event == 'Item-') {
-					var item_id = parseInt(group[15]); //本次操作道具id
-					var item_cnt = parseInt(group[17]); //本次操作道具数量
-					var reason = parseInt(group[18]); //本次操作原因
+					const item_id = parseInt(group[15]); //本次操作道具id
+					const item_cnt = parseInt(group[17]); //本次操作道具数量
+					const reason = parseInt(group[18]); //本次操作原因
 					//log('玩家[' + charac_name + '道具减少, 原因:' + reason + '(道具id=' + item_id + ', 使用数量=' + item_cnt
 					if (5 == reason) {
 						//丢弃道具
@@ -2370,8 +2370,8 @@ function hook_history_log() {
 				}
 				//道具增加:  Item-,
 				else if (game_event == 'Item+') {
-					var item_id = parseInt(group[15]);
-					var group_18 = parseInt(group[18]);
+					const item_id = parseInt(group[15]);
+					const group_18 = parseInt(group[18]);
 					if (group_18 == 4) {
 						//processing_data(item_id, user, 3257, 2500, get_random_int(50, 888));
 					}
@@ -2381,9 +2381,9 @@ function hook_history_log() {
 					//魔法封印装备词条升级
 					//boost_random_option_equ(user);
 				} else if (game_event == 'Money+') {
-					var cur_money = parseInt(group[14]); //当前持有的金币数量
-					var add_money = parseInt(group[15]); //本次获得金币数量
-					var reason = parseInt(group[16]); //本次获得金币原因
+					const cur_money = parseInt(group[14]); //当前持有的金币数量
+					const add_money = parseInt(group[15]); //本次获得金币数量
+					const reason = parseInt(group[16]); //本次获得金币原因
 					//log('玩家[' + charac_name + ']获取金币, 原因:' + reason + '(当前持有金币=' + cur_money + ', 本次获得金币数量=' + add_money);
 					if (4 == reason) {
 						//副本拾取
@@ -2403,8 +2403,8 @@ function hook_history_log() {
 function processing_data(item_id, user, award_item_id, award_item_count, count) {
 	const itemName = api_CItem_GetItemName(item_id);
 	//pvf中获取装备数据
-	var citem = CDataManager_find_item(G_CDataManager(), item_id);
-	var rarity = CItem_get_rarity(citem);
+	const citem = CDataManager_find_item(G_CDataManager(), item_id);
+	const rarity = CItem_get_rarity(citem);
 	if( parseInt(rarity) >= 3){
 		api_GameWorld_SendNotiPacketMessage("恭喜玩家[" +
 		"" + api_CUserCharacInfo_getCurCharacName(user) + "" +
@@ -2445,7 +2445,7 @@ function hook_user_inout_game_world() {
 	Interceptor.attach(ptr(0x86C5288),
 		{
 			onEnter: function (args) {
-				var user = args[1];
+				const user = args[1];
 				//console.log('[GameWorld::leave_game_world] user=' + user);
 			},
 			onLeave: function (retval) { }
@@ -2454,9 +2454,9 @@ function hook_user_inout_game_world() {
 
 //怪物攻城副本回调奖励处理函数
 function VillageAttackedRewardSendReward(user) {
-	var VAttackCount = GetCurVAttackCount(user);
-	var mail_title = "GM"
-	var mail_contact = "怪物攻城奖励："
+	const VAttackCount = GetCurVAttackCount(user);
+	const mail_title = "GM"
+	const mail_contact = "怪物攻城奖励："
 	switch (VAttackCount) {
 		case 1:
 			CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
@@ -2577,15 +2577,15 @@ function _boost_random_option_equ(inven_item) {
 	if (Inven_Item_isEmpty(inven_item))
 		return false;
 	//获取装备当前魔法封印属性
-	var random_option = inven_item.add(37);
+	const random_option = inven_item.add(37);
 	//随机选取一个词条槽
-	var random_option_slot = get_random_int(0, 3);
+	const random_option_slot = get_random_int(0, 3);
 	//若词条槽已有魔法封印
 	if (random_option.add(3 * random_option_slot).readU8()) {
 		//每个词条有2个属性值
-		var value_slot = get_random_int(1, 3);
+		const value_slot = get_random_int(1, 3);
 		//当前词条等级
-		var random_option_level = random_option.add(3 * random_option_slot + value_slot).readU8();
+		const random_option_level = random_option.add(3 * random_option_slot + value_slot).readU8();
 		if (random_option_level < 0xFF) {
 			//1%概率词条等级+1
 			if (get_random_int(random_option_level, 100000) < 1000) {
@@ -2600,9 +2600,9 @@ function _boost_random_option_equ(inven_item) {
 //穿戴中的魔法封印装备词条升级
 function boost_random_option_equ(user) {
 	//遍历身上的装备 为拥有魔法封印属性的装备提升魔法封印等级
-	var inven = CUserCharacInfo_getCurCharacInvenW(user);
+	const inven = CUserCharacInfo_getCurCharacInvenW(user);
 	for (var slot = 10; slot <= 21; slot++) {
-		var inven_item = CInventory_GetInvenRef(inven, INVENTORY_TYPE_BODY, slot);
+		const inven_item = CInventory_GetInvenRef(inven, INVENTORY_TYPE_BODY, slot);
 		if (_boost_random_option_equ(inven_item)) {
 			//通知客户端更新
 			CUser_SendUpdateItemList(user, 1, 3, slot);
@@ -2629,7 +2629,7 @@ function change_random_option_inherit() {
 				//魔法封印转换成功
 				if (retval == 1) {
 					//获取未被附魔的魔法封印槽
-					var index = -1;
+					const index = -1;
 					if (this.random_option.add(0).readU8() == 0)
 						index = 0;
 					else if (this.random_option.add(3).readU8() == 0)
@@ -2675,31 +2675,31 @@ function auto_unseal_random_option_equipment(user) {
 			},
 			onLeave: function (retval) {
 				//物品栏新增物品的位置
-				var slot = retval.toInt32();
+				const slot = retval.toInt32();
 				if (slot > 0) {
 					//获取道具的角色
-					var user = this.user;
+					const user = this.user;
 					//角色背包
-					var inven = CUserCharacInfo_getCurCharacInvenW(user);
+					const inven = CUserCharacInfo_getCurCharacInvenW(user);
 					//背包中新增的道具
-					var inven_item = CInventory_GetInvenRef(inven, INVENTORY_TYPE_ITEM, slot);
+					const inven_item = CInventory_GetInvenRef(inven, INVENTORY_TYPE_ITEM, slot);
 					//过滤道具类型
 					if (!Inven_Item_isEquipableItemType(inven_item))
 						return;
 					//装备id
-					var item_id = Inven_Item_getKey(inven_item);
+					const item_id = Inven_Item_getKey(inven_item);
 					//pvf中获取装备数据
-					var citem = CDataManager_find_item(G_CDataManager(), item_id);
+					const citem = CDataManager_find_item(G_CDataManager(), item_id);
 					//检查装备是否为魔法封印类型
 					if (!CEquipItem_IsRandomOption(citem))
 						return;
 					//是否已被解除魔法封印（魔法封印前10个字节是否为0）
-					var random_option = inven_item.add(37);
+					const random_option = inven_item.add(37);
 					if (random_option.readU32() || random_option.add(4).readU32() || random_option.add(8).readShort()) {
 						return;
 					}
 					//尝试解除魔法封印
-					var ret = random_option_CRandomOptionItemHandle_give_option(ptr(0x941F820).readPointer(), item_id, CItem_get_rarity(citem), CItem_getUsableLevel(citem), CItem_getItemGroupName(citem), CEquipItem_GetRandomOptionGrade(citem), inven_item.add(37));
+					const ret = random_option_CRandomOptionItemHandle_give_option(ptr(0x941F820).readPointer(), item_id, CItem_get_rarity(citem), CItem_getUsableLevel(citem), CItem_getItemGroupName(citem), CEquipItem_GetRandomOptionGrade(citem), inven_item.add(37));
 					if (ret) {
 						//通知客户端有装备更新
 						CUser_SendUpdateItemList(user, 1, 0, slot);
@@ -2729,7 +2729,7 @@ function api_CUserCharacInfo_SetCurCharacLuckPoint(user, new_luck_point) {
 //当前角色幸运点拉满GM命令: //max lp
 function use_ftcoin_change_luck_point(user) {
 	//抛命运硬币
-	var rand = get_random_int(0, 100);
+	const rand = get_random_int(0, 100);
 
 	//当前幸运点数
 	var new_luck_point = null;
@@ -2790,7 +2790,7 @@ function enable_drop_use_luck_point() {
 		//使用角色幸运值roll点代替纯随机roll点
 		if (cur_luck_user) {
 			//获取当前角色幸运值
-			var luck_point = CUserCharacInfo_GetCurCharacLuckPoint(cur_luck_user);
+			const luck_point = CUserCharacInfo_GetCurCharacLuckPoint(cur_luck_user);
 
 			//roll点范围1-100W, roll点越大, 出货率越高
 			//角色幸运值范围1-10W
@@ -2798,10 +2798,10 @@ function enable_drop_use_luck_point() {
 			roll = get_random_int(luck_point * 10, 1000000);
 		}
 		//执行原始计算爆装品质函数
-		var rarity = CLuckPoint_GetItemRarity(a1, a2, roll, a4);
+		const rarity = CLuckPoint_GetItemRarity(a1, a2, roll, a4);
 		//调整角色幸运值
 		if (cur_luck_user) {
-			var rate = 1.0;
+			const rate = 1.0;
 
 			//出货粉装以上, 降低角色幸运值
 			if (rarity >= 3) {
@@ -2813,7 +2813,7 @@ function enable_drop_use_luck_point() {
 				rate = 1.01;
 			}
 			//设置新的幸运值
-			var new_luck_point = Math.floor(CUserCharacInfo_GetCurCharacLuckPoint(cur_luck_user) * rate);
+			const new_luck_point = Math.floor(CUserCharacInfo_GetCurCharacLuckPoint(cur_luck_user) * rate);
 			api_CUserCharacInfo_SetCurCharacLuckPoint(cur_luck_user, new_luck_point);
 		}
 		return rarity;
@@ -2826,7 +2826,7 @@ function enable_drop_use_luck_point() {
 function InterSelectMobileAuthReward() {
 	//还原 InterSelectMobileAuthReward::dispatch_sig 函数
 	const Defptr = ptr(0x08161384);
-	var value = Defptr.readU8()
+	const value = Defptr.readU8()
 	if (value != 0x0F) {
 		Memory.protect(Defptr, 10, 'rwx');
 		Defptr.writeShort(0x840F);
@@ -2836,7 +2836,7 @@ function InterSelectMobileAuthReward() {
 	const Inter_Dispatch = new NativeFunction(Inter_DispatchPr, 'int', ['pointer', 'pointer', 'pointer'], { "abi": "sysv" });
 	Interceptor.replace(Inter_DispatchPr, new NativeCallback(function (InterSelectMobileAuthReward, CUser, a3) {
 		//var Inter_DispatchOpen = true;
-		var Inter_DispatchOpen = false;
+		const Inter_DispatchOpen = false;
 		if (Inter_DispatchOpen) {
 			a3.add(4).writeInt(0);
 			return Inter_Dispatch(InterSelectMobileAuthReward, CUser, a3); //执行原函数发送成长契约
@@ -2935,7 +2935,7 @@ function start() {
 
 	// 加载配置文件（由 Lua bootstrap 自动生成，包含 features 开关）
 	load_config('/dp2/frida/frida_config.json');
-	var cfg = (global_config && global_config.features) ? global_config.features : {};
+	const cfg = (global_config && global_config.features) ? global_config.features : {};
 
 	// 绝望之塔金币修复
 	if (cfg.enable_tod_fix !== false) { fix_TOD(true); }
@@ -3012,7 +3012,7 @@ function start() {
 
 // 回归勇士时间设置（来源：dp2/frida.js）
 function set_return_user(day) {
-	var time = day * 86400;
+	const time = day * 86400;
 	Memory.protect(ptr(0x84C753D), 32, 'rwx');
 	ptr(0x84C753D).writeU32(time);
 }
@@ -3056,7 +3056,7 @@ var ranklist = {
 
 // 获取战力排名分数（来源：dp2/frida.js）
 function GetRankNumber(charac_no) {
-	var insertQuery = "SELECT ZLZ FROM frida.battle WHERE CID='" + charac_no + "';";
+	const insertQuery = "SELECT ZLZ FROM frida.battle WHERE CID='" + charac_no + "';";
 	if (api_MySQL_exec(mysql_taiwan_cain, insertQuery)) {
 		if (MySQL_get_n_rows(mysql_taiwan_cain) == 1) {
 			MySQL_fetch(mysql_taiwan_cain);
@@ -3067,8 +3067,8 @@ function GetRankNumber(charac_no) {
 
 // 获取自身排行榜数据（来源：dp2/frida.js）
 function GetMyEquInfo(user) {
-	var MyRanklist = { "rank": 0, "characname": "", "job": 0, "lev": 0, "Grow": 0, "Guilkey": 0, "Guilname": "", "str": "", "equip": [] };
-	var charac_no = CUserCharacInfo_getCurCharacNo(user);
+	const MyRanklist = { "rank": 0, "characname": "", "job": 0, "lev": 0, "Grow": 0, "Guilkey": 0, "Guilname": "", "str": "", "equip": [] };
+	const charac_no = CUserCharacInfo_getCurCharacNo(user);
 	MyRanklist.rank = GetRankNumber(charac_no);
 	MyRanklist.characname = api_CUserCharacInfo_getCurCharacName(user) + "";
 	MyRanklist.job = CUserCharacInfo_get_charac_job(user);
@@ -3077,10 +3077,10 @@ function GetMyEquInfo(user) {
 	MyRanklist.Guilkey = CUserCharacInfo_get_charac_guildkey(user);
 	MyRanklist.Guilname = api_CUser_GetGuildName(user);
 	if (!MyRanklist.Guilname) { MyRanklist.Guilname = '未加入公会'; }
-	var InvenW = CUserCharacInfo_getCurCharacInvenW(user);
+	const InvenW = CUserCharacInfo_getCurCharacInvenW(user);
 	for (var i = 0; i <= 10; i++) {
 		if (i != 9) {
-			var inven_item = CInventory_GetInvenRef(InvenW, INVENTORY_TYPE_BODY, i);
+			const inven_item = CInventory_GetInvenRef(InvenW, INVENTORY_TYPE_BODY, i);
 			MyRanklist.equip.push(Inven_Item_getKey(inven_item));
 		} else {
 			MyRanklist.equip.push(-1);
@@ -3091,18 +3091,18 @@ function GetMyEquInfo(user) {
 
 // 保存排名并重新排序（来源：dp2/frida.js）
 function SetRanking(user) {
-	var MyRanklist = GetMyEquInfo(user);
-	var existingIndex = Object.values(ranklist).findIndex(function(item) { return item.characname === MyRanklist.characname; });
+	const MyRanklist = GetMyEquInfo(user);
+	const existingIndex = Object.values(ranklist).findIndex(function(item) { return item.characname === MyRanklist.characname; });
 	if (MyRanklist.rank) {
 		if (existingIndex !== -1) {
 			ranklist[existingIndex + 1] = MyRanklist;
 		} else {
 			ranklist["4"] = MyRanklist;
 		}
-		var rankArray = Object.values(ranklist);
+		const rankArray = Object.values(ranklist);
 		rankArray.sort(function(a, b) { return b.rank - a.rank; });
-		var topThree = rankArray.slice(0, 3);
-		var tmp = {};
+		const topThree = rankArray.slice(0, 3);
+		const tmp = {};
 		topThree.forEach(function(item, index) { tmp[(index + 1).toString()] = item; });
 		delete ranklist["4"];
 		ranklist = tmp;
@@ -3111,7 +3111,7 @@ function SetRanking(user) {
 
 // 下发排行榜数据到客户端（来源：dp2/frida.js）
 function SendRankLits(user, all) {
-	var packet_guard = api_PacketGuard_PacketGuard();
+	const packet_guard = api_PacketGuard_PacketGuard();
 	InterfacePacketBuf_put_header(packet_guard, 0, 182);
 	InterfacePacketBuf_put_byte(packet_guard, Object.keys(ranklist).length);
 	for (var key in ranklist) {
@@ -3138,7 +3138,7 @@ function event_rankinfo_load_from_db() {
 	if (api_MySQL_exec(mysql_frida, "select event_info from game_event where event_id = 'rankinfo';")) {
 		if (MySQL_get_n_rows(mysql_frida) == 1) {
 			MySQL_fetch(mysql_frida);
-			var info = api_MySQL_get_str(mysql_frida, 0);
+			const info = api_MySQL_get_str(mysql_frida, 0);
 			ranklist = JSON.parse(info);
 		}
 	}
@@ -3169,8 +3169,8 @@ function getQuestIds5() { return [8896]; }
 
 // 检查任务完成状态（来源：dp2/df_game_r.js）
 function Inspection_tasks(user, quest_ids) {
-	var WongWork_CQuestClear = CUser_getCurCharacQuestW(user).add(4);
-	var completedQuests = [];
+	const WongWork_CQuestClear = CUser_getCurCharacQuestW(user).add(4);
+	const completedQuests = [];
 	for (var i = 0; i < quest_ids.length; i++) {
 		if (WongWork_CQuestClear_isClearedQuest(WongWork_CQuestClear, quest_ids[i])) {
 			completedQuests.push(quest_ids[i]);
@@ -3184,12 +3184,12 @@ function vip_Login() {
 	Interceptor.attach(ptr(0x86C4E50), {
 		onEnter: function (args) { this.user = args[1]; },
 		onLeave: function (retval) {
-			var user = this.user;
-			var c1 = Inspection_tasks(user, getQuestIds1()).length;
-			var c2 = Inspection_tasks(user, getQuestIds2()).length;
-			var c3 = Inspection_tasks(user, getQuestIds3()).length;
-			var c4 = Inspection_tasks(user, getQuestIds4()).length;
-			var c5 = Inspection_tasks(user, getQuestIds5()).length;
+			const user = this.user;
+			const c1 = Inspection_tasks(user, getQuestIds1()).length;
+			const c2 = Inspection_tasks(user, getQuestIds2()).length;
+			const c3 = Inspection_tasks(user, getQuestIds3()).length;
+			const c4 = Inspection_tasks(user, getQuestIds4()).length;
+			const c5 = Inspection_tasks(user, getQuestIds5()).length;
 			if (c5 > 0) { api_gameWorld_SendNotiPacketMessage('尊贵的心悦Vip5玩家[' + api_CUserCharacInfo_getCurCharacName(this.user) + ']上线了！！！', 14); }
 			else if (c4 > 0) { api_gameWorld_SendNotiPacketMessage('尊贵的心悦Vip4玩家[' + api_CUserCharacInfo_getCurCharacName(this.user) + ']上线了！！！', 14); }
 			else if (c3 > 0) { api_gameWorld_SendNotiPacketMessage('尊贵的心悦Vip3玩家[' + api_CUserCharacInfo_getCurCharacName(this.user) + ']上线了！！！', 14); }
@@ -3211,7 +3211,7 @@ function api_CUser_Add_Item_list(user, item_list) {
 
 // 获取道具时使用 UI 显示（来源：dp2/df_game_r.js）
 function SendItemWindowNotification(user, item_list) {
-	var packet_guard = api_PacketGuard_PacketGuard();
+	const packet_guard = api_PacketGuard_PacketGuard();
 	InterfacePacketBuf_put_header(packet_guard, 1, 163);
 	InterfacePacketBuf_put_byte(packet_guard, 1);
 	InterfacePacketBuf_put_short(packet_guard, 0);
