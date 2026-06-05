@@ -31,7 +31,7 @@
   - tower gold notice fix
   - save-town fix
   - open extra dungeons
-- Added hot reload module `script/modules/hot_reload.lua` for test-server `Work_Reload.lua` reloading.
+- Added hot reload module `script/modules/hot_reload.lua` for config-driven runtime tuning.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -53,22 +53,29 @@
   - PVP experience book requires both shell and SQL risk switches.
 - Added business-level success/failure logging to quest, job, misc, inherit, cleanup, and PVP handlers.
 - Wired `legacy_patches` through bootstrap and config; the module and all sub-features are disabled by default.
-- Wired `hot_reload` through bootstrap and config; the module is disabled by default and exposes `dp/dpx/game/world/logger/item_handler/utils/config` to the reload script.
+- Reworked `hot_reload` to watch only `script/config.lua`; `Work_Reload.lua` script execution was removed.
+- Reorganized `script/config.lua` by reload scope:
+  - `hot` for supported runtime hot-config values.
+  - `[BOOT]` sections for restart-required registration, startup, risk, and JS/Frida settings.
 - Synced `DP2_UNMIGRATED_FEATURES.md`, `HANDLER_MIGRATION_MAP.md`, and `ROADMAP.md` after the implementation audit.
 
 ### Fixed
 
 - Fixed level cap startup wiring to call `dpx.set_max_level(...)` instead of `dpx.set_auction_min_level(...)`.
-- Fixed the fallback startup path in `df_game_r.lua` to use `dpx.set_max_level(95)`.
+- Fixed the fallback startup path in `df_game_r.lua` to use `dpx.set_max_level(85)`.
 - Fixed `features.enable_item_handlers` so it now actually disables handler registration.
 - Fixed `item_query` GmInput passthrough calls to use `fnext()` consistently.
 - Fixed `finish_back_home` so `mode=0` is fully inert and does not grant points or trigger return/disjoint/sell behavior.
 - Fixed `finish_back_home` GameEvent handling to avoid calling `fnext()` twice for dungeon-finish events.
+
+### Removed
+
+- Removed `script/Work_Reload.lua`; config hot reload is now handled directly through `script/config.lua`.
 
 ### Notes
 
 - The migration branch now contains runtime entry wiring and modular handler loading.
 - High-risk handlers are present but gated by config switches and still require real item/PVF validation.
 - Legacy entry patches are present but disabled by default and require test-server validation before enabling.
-- Hot reload is present but disabled by default and should only be enabled on test/dev servers.
+- Hot reload is enabled by default and currently applies only explicitly supported runtime config, starting with `hot.finish_back_home`.
 - `frida.js` is not treated as part of the default DP loading chain; DP defaults to `df_game_r.lua` and `df_game_r.js`.
