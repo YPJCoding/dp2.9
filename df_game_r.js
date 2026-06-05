@@ -688,7 +688,7 @@ function log(msg) {
 function bin2hex(p, len) {
 	var hex = '';
 	for (var i = 0; i < len; i++) {
-		const s = p.add(i).readU8().toString(16);
+		var s = p.add(i).readU8().toString(16);
 		if (s.length == 1)
 			s = '0' + s;
 		hex += s;
