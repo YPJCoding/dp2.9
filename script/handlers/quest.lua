@@ -4,6 +4,33 @@
 
 local M = {}
 
+local function log_item_return(ctx, user, item_id, reason)
+    local logger = ctx.logger
+    if logger then
+        logger.info(
+            "[useitem][return] module=quest acc=%d chr=%d item_id=%d reason=%s",
+            user:GetAccId(),
+            user:GetCharacNo(),
+            item_id,
+            tostring(reason or "unknown")
+        )
+    end
+end
+
+local function log_success(ctx, user, item_id, quest_type, count)
+    local logger = ctx.logger
+    if logger then
+        logger.info(
+            "[useitem][quest_clear] acc=%d chr=%d item_id=%d quest_type=%s count=%d",
+            user:GetAccId(),
+            user:GetCharacNo(),
+            item_id,
+            tostring(quest_type),
+            count or 0
+        )
+    end
+end
+
 local function clear_quest_by_type(user, item_id, ctx, quest_type, success_label, fail_label)
     local dpx = ctx.dpx
     local quest = dpx.quest
@@ -24,9 +51,11 @@ local function clear_quest_by_type(user, item_id, ctx, quest_type, success_label
     if q > 0 then
         quest.update(user.cptr)
         user:SendNotiPacketMessage(string.format("恭喜： %d个%s 成功！", q, success_label))
+        log_success(ctx, user, item_id, quest_type, q)
     else
         user:SendNotiPacketMessage(string.format("注意： %s 失败！", fail_label))
         dpx.item.add(user.cptr, item_id)
+        log_item_return(ctx, user, item_id, "no_matching_quest")
     end
 end
 
