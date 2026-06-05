@@ -1,6 +1,6 @@
 -- dp2.9 中心配置文件
 -- 所有功能开关、DPX 启动配置、风险控制、数值限制均集中于此。
--- 修改后重启频道生效。
+-- 部分配置支持测试服热应用；涉及启动类 DPX 开关仍需重启频道生效。
 
 local config = {
 
@@ -76,7 +76,7 @@ local config = {
     ------------------------------------------------
     exp_dungeon = {
         dungeon_id = 5000,      -- 经验副本 ID
-        level_cap = 90,         -- 等级上限（达到后不再获得经验）
+        level_cap = 85,         -- 等级上限（达到后不再获得经验）
         exp_percent = 0.01,     -- 每次获得的经验比例（1%）
         token_amount = 60,      -- 每次获得的代币数量
         interval_ms = 60000,    -- 执行间隔（毫秒），60000=每分钟
@@ -95,6 +95,7 @@ local config = {
     },
 
     finish_back_home = {
+        -- 支持 hot_reload 热应用。
         default_mode = "0",     -- 默认模式：0=关 1=回城 2=诺顿分解+回城 3=玩家分解机+回城 4=出售+回城
         point_min = 100,        -- 随机点券最小值
         point_max = 1000,       -- 随机点券最大值
@@ -117,9 +118,13 @@ local config = {
     },
 
     hot_reload = {
-        -- 测试服 Lua 热加载模块，默认关闭。
-        -- 生产环境不建议开启。
-        enabled = false,
+        -- 测试服 Lua 热加载模块，默认开启。
+        -- 监听 config.lua 做配置热应用；Work_Reload.lua 保留为可选调试脚本入口。
+        enabled = true,
+        watch_config = true,
+        config_filename = "/dp2/script/config.lua",
+        config_module = "script.config",
+        watch_script = true,
         filename = "/dp2/script/Work_Reload.lua",
         start_delay_ms = 10000,
         interval_ms = 5000,
@@ -131,9 +136,9 @@ local config = {
     -- [RISK:HIGH] 标注意味着开启后影响范围大，需确认后果
     ------------------------------------------------
     dpx_startup = {
-        -- 等级上限
+        -- 当前游戏内容等级上限
         set_level_cap = true,
-        level_cap = 95,
+        level_cap = 85,
 
         -- 开启缔造者创建接口
         enable_creator = true,
