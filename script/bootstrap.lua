@@ -28,6 +28,7 @@ local infra_modules = {
     { key = 'drop_rules', module = 'script.modules.drop_rules' },
     { key = 'finish_back_home', module = 'script.modules.finish_back_home' },
     { key = 'legacy_patches', module = 'script.modules.legacy_patches' },
+    { key = 'hot_reload', module = 'script.modules.hot_reload' },
 }
 
 local function safe_require(module_name, logger)
@@ -108,6 +109,10 @@ local function is_module_enabled(ctx, module_key)
     end
     if module_key == 'legacy_patches' then
         return features.enable_legacy_patches == true
+    end
+    if module_key == 'hot_reload' then
+        local hot_reload = config.hot_reload or {}
+        return hot_reload.enabled == true
     end
     return false
 end
@@ -387,6 +392,7 @@ end
 
 function M.setup(item_handler, base_ctx)
     local ctx = M.build_ctx(base_ctx)
+    ctx.item_handler = item_handler
     M.install_utils(ctx)
     M.load_modules(ctx)
     M.write_js_config(ctx)
