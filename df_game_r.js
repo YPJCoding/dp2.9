@@ -4047,12 +4047,11 @@ function start() {
 	load_config('/dp2/frida/frida_config.json');
 	var cfg = (global_config && global_config.features) ? global_config.features : {};
 
-	// TEST: 验证 Frida require() 是否可用
+	// TEST: 验证 eval() 是否可用
 	try {
-		var testMod = require('./script/js/test_require');
-		testMod.hello();
+		eval('console.log("[test_eval] eval works!")');
 	} catch (e) {
-		console.log('[test_require] FAILED: ' + e.message);
+		console.log('[test_eval] FAILED: ' + e.message);
 	}
 
 	// 绝望之塔金币修复
