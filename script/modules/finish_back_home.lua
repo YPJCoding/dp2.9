@@ -1,7 +1,7 @@
 -- 翻牌回城模块
 --
--- 副本完成后：随机点券奖励 + 可选的自动回城/分解/出售。
--- 模式通过 //finishBackHome<mode> 指令切换。
+-- 副本完成后：按配置模式发放随机点券，并可选自动回城/分解/出售。
+-- 模式通过配置控制：0=完全关闭，1=奖励+回城，2=奖励+诺顿分解+回城，3=奖励+玩家分解机+回城，4=奖励+出售+回城。
 -- 依赖 online.lua（模式3查找在线玩家分解机）。
 
 local M = {}
@@ -89,6 +89,20 @@ local function sell_equipment(user)
     end
 end
 
+local function reward_party(party)
+    party:ForEachMember(function(user, pos)
+        local point = math.random(point_min, point_max)
+        user:ChargeCera(point)
+        user:SendNotiPacketMessage(
+            string.format("通关奖励%d点券", point), 14)
+        if logger then
+            logger.info("[finish_back_home][reward] acc=%d chr=%d point=%d mode=%s",
+                user:GetAccId(), user:GetCharacNo(), point, tostring(mode))
+        end
+        return true
+    end)
+end
+
 -- GameEvent hook 回调
 local function on_game_event(fnext, event_type, _party, param)
     -- 只处理副本完成事件 PARTY_DUNGEON_FINISH = 7
@@ -96,26 +110,21 @@ local function on_game_event(fnext, event_type, _party, param)
         return fnext()
     end
 
-    fnext()
-
-    local party = game.fac.party(_party)
-    if not party then
+    -- mode=0 为完全关闭，不发点券、不回城、不分解/出售。
+    if mode == "0" then
         return fnext()
     end
 
-    -- 随机点券奖励（所有模式都发放）
-    party:ForEachMember(function(user, pos)
-        local point = math.random(point_min, point_max)
-        user:ChargeCera(point)
-        user:SendNotiPacketMessage(
-            string.format("通关奖励%d点券", point), 14)
-        return true
-    end)
+    local result = fnext()
 
-    -- 模式处理
-    if mode == "0" then
-        -- 无操作
-    elseif mode == "1" then
+    local party = game.fac.party(_party)
+    if not party then
+        return result
+    end
+
+    reward_party(party)
+
+    if mode == "1" then
         party:ReturnToVillage()
     elseif mode == "2" or mode == "3" or mode == "4" then
         party:ForEachMember(function(user, pos)
@@ -129,9 +138,13 @@ local function on_game_event(fnext, event_type, _party, param)
             return true
         end)
         party:ReturnToVillage()
+    else
+        if logger then
+            logger.warn("[finish_back_home] unknown mode=%s", tostring(mode))
+        end
     end
 
-    return fnext()
+    return result
 end
 
 function M.setup(ctx, deps)
