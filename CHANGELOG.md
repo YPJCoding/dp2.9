@@ -31,6 +31,7 @@
   - tower gold notice fix
   - save-town fix
   - open extra dungeons
+- Added hot reload module `script/modules/hot_reload.lua` for test-server `Work_Reload.lua` reloading.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -52,10 +53,12 @@
   - PVP experience book requires both shell and SQL risk switches.
 - Added business-level success/failure logging to quest, job, misc, inherit, cleanup, and PVP handlers.
 - Wired `legacy_patches` through bootstrap and config; the module and all sub-features are disabled by default.
+- Wired `hot_reload` through bootstrap and config; the module is disabled by default and exposes `dp/dpx/game/world/logger/item_handler/utils/config` to the reload script.
 
 ### Notes
 
 - The migration branch now contains runtime entry wiring and modular handler loading.
 - High-risk handlers are present but gated by config switches and still require real item/PVF validation.
 - Legacy entry patches are present but disabled by default and require test-server validation before enabling.
+- Hot reload is present but disabled by default and should only be enabled on test/dev servers.
 - `frida.js` is not treated as part of the default DP loading chain; DP defaults to `df_game_r.lua` and `df_game_r.js`.
