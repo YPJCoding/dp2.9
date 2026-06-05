@@ -44,6 +44,7 @@
 - [x] 再次拉取最新代码并重启，确认 `UseItem1` / `UseItem2` 正式注册日志正常。
 - [x] 高风险 handler 默认拒绝并返还道具：代码级确认完成。
 - [x] Phase 1 基础设施模块：全部 4 个模块（online/broadcast/gm_permissions/item_query）服务器验证通过。
+- [x] 配置口径收敛：SQL、删除、shell handler 均默认关闭。
 
 还缺：
 
@@ -55,7 +56,7 @@
 
 目标：原 `df_game_r.lua` 中所有道具功能都能按预期工作，包括 SQL、删除、shell 类功能。
 
-当前估算进度：约 61%。
+当前估算进度：约 65%。
 
 还缺：
 
@@ -88,19 +89,19 @@
 - [ ] `2023458001`~`2023458004` 转职任务获取券（job.lua）
 - [ ] `2023629237`、`2023458063`、`2023458064`、`2023629238` 转职任务获取券（job.lua）
 
-### 4.2 SQL 类道具（需 enable_sql_handlers，当前已开启）
+### 4.2 SQL 类道具（需 enable_sql_handlers，当前默认关闭）
 
 - [ ] `2021458807` 女鬼剑职业转换（job.lua）— 需 1 级角色
 - [ ] `2023458801` 角色出战（misc.lua）
 - [ ] `2023458803` 装备设计图熟练度（misc.lua）
 
-### 4.3 删除类道具（需 enable_delete_handlers）
+### 4.3 删除类道具（需 enable_delete_handlers，当前默认关闭）
 
 - [ ] `2021458806` 宠物清理券（item_cleanup.lua）
 - [ ] `2022110503` 时装清理券（item_cleanup.lua）
 - [ ] `2022110504` 副职业一键分解券（item_cleanup.lua）
 
-### 4.4 Shell 类道具（需 enable_shell_handlers）
+### 4.4 Shell 类道具（需 enable_shell_handlers，当前默认关闭）
 
 - [ ] `2541121` PVP 经验书（pvp.lua）
 
