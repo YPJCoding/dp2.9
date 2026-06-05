@@ -1,16 +1,14 @@
--- 测试服 Lua 热加载模块
+-- 测试服配置热加载模块
 --
--- 默认监听两个文件：
--- 1. /dp2/script/config.lua：配置热应用入口，适合切换已支持热配置的模块。
--- 2. /dp2/script/Work_Reload.lua：可选调试脚本入口，适合临时执行测试逻辑。
+-- 默认只监听 /dp2/script/config.lua。
+-- 修改 config.lua 后，本模块会重新加载 script.config，并把支持热应用的配置同步到运行中模块。
 --
 -- 注意：本模块不会自动重载所有 Lua 文件。原因：require 有缓存，且 dpx.hook/timer
--- 等副作用不能简单重复注册。需要热更新的模块应提供 M.configure(...) 等安全接口。
+-- 等副作用不能简单重复注册。需要热更新的模块必须提供 M.configure(...) 等安全接口。
 
 local M = {}
 
 local timer = nil
-local last_script_mtime = nil
 local last_config_mtime = nil
 local missing_logged = {}
 
@@ -38,26 +36,6 @@ local function close_timer(logger)
     timer = nil
 end
 
-local function build_env(ctx)
-    local env = {}
-    setmetatable(env, { __index = _G })
-
-    env.dp = ctx.dp
-    env.dpx = ctx.dpx
-    env.game = ctx.game
-    env.world = ctx.world
-    env.logger = ctx.logger
-    env.item_handler = ctx.item_handler
-    env.utils = ctx.utils
-    env.config = ctx.config
-
-    if ctx.frida then
-        env.frida = ctx.frida
-    end
-
-    return env
-end
-
 local function read_mtime(lfs, filename, logger)
     local ok, mtime_or_err = pcall(function()
         return lfs.attributes(filename, "modification")
@@ -72,7 +50,7 @@ local function read_mtime(lfs, filename, logger)
 
     if not mtime_or_err then
         if logger and not missing_logged[filename] then
-            logger.info("[hot_reload] watched file not found file=%s", tostring(filename))
+            logger.info("[hot_reload] watched config not found file=%s", tostring(filename))
             missing_logged[filename] = true
         end
         return nil
@@ -80,50 +58,6 @@ local function read_mtime(lfs, filename, logger)
 
     missing_logged[filename] = false
     return mtime_or_err
-end
-
-local function compile_script(filename, env, logger)
-    local ok, chunk_or_err = pcall(function()
-        return loadfile(filename, "t", env)
-    end)
-
-    if not ok then
-        if logger then
-            logger.error("[hot_reload] compile failed file=%s err=%s", tostring(filename), tostring(chunk_or_err))
-        end
-        return nil
-    end
-
-    if type(chunk_or_err) ~= "function" then
-        if logger then
-            logger.error("[hot_reload] compile returned no chunk file=%s", tostring(filename))
-        end
-        return nil
-    end
-
-    return chunk_or_err
-end
-
-local function run_script(filename, ctx, logger)
-    local env = build_env(ctx)
-    local chunk = compile_script(filename, env, logger)
-    if not chunk then
-        return false
-    end
-
-    local ok, err = pcall(chunk)
-    if not ok then
-        if logger then
-            logger.error("[hot_reload] execute failed file=%s err=%s", tostring(filename), tostring(err))
-        end
-        return false
-    end
-
-    if logger then
-        logger.info("[hot_reload] execute success file=%s", tostring(filename))
-    end
-
-    return true
 end
 
 local function reload_config_module(module_name, logger)
@@ -142,57 +76,38 @@ local function reload_config_module(module_name, logger)
     return module_or_err
 end
 
+local function get_finish_back_home_config(new_config)
+    if new_config.hot and new_config.hot.finish_back_home then
+        return new_config.hot.finish_back_home
+    end
+    return new_config.finish_back_home
+end
+
 local function apply_hot_config(ctx, new_config)
     local logger = ctx.logger
     ctx.config = new_config
 
     local features = new_config.features or {}
+    local fbh_config = get_finish_back_home_config(new_config)
 
     -- 当前支持安全热应用的模块：finish_back_home。
     -- 只更新模块运行时配置，不重复注册 GameEvent hook。
-    if features.enable_finish_back_home == true and new_config.finish_back_home then
+    if features.enable_finish_back_home == true and fbh_config then
         local ok, finish_back_home_or_err = pcall(require, "script.modules.finish_back_home")
         if ok and finish_back_home_or_err and type(finish_back_home_or_err.configure) == "function" then
-            finish_back_home_or_err.configure(new_config.finish_back_home)
+            finish_back_home_or_err.configure(fbh_config)
         elseif logger then
             logger.error("[hot_reload] finish_back_home hot configure failed: %s", tostring(finish_back_home_or_err))
         end
     end
 
     if logger then
-        local hot_cfg = new_config.hot_reload or {}
         logger.info(
-            "[hot_reload] config applied level_cap=%s finish_back_home_mode=%s hot_reload_enabled=%s",
-            tostring(new_config.dpx_startup and new_config.dpx_startup.level_cap),
-            tostring(new_config.finish_back_home and new_config.finish_back_home.default_mode),
-            tostring(hot_cfg.enabled)
+            "[hot_reload] config applied finish_back_home_mode=%s point=%s-%s",
+            tostring(fbh_config and (fbh_config.default_mode or fbh_config.mode)),
+            tostring(fbh_config and fbh_config.point_min),
+            tostring(fbh_config and fbh_config.point_max)
         )
-    end
-end
-
-local function check_script_reload(lfs, filename, ctx, logger)
-    if not filename or filename == "" then
-        return
-    end
-
-    local mtime = read_mtime(lfs, filename, logger)
-    if not mtime then
-        return
-    end
-
-    if last_script_mtime == nil then
-        last_script_mtime = mtime
-        return
-    end
-
-    if mtime ~= last_script_mtime then
-        if logger then
-            logger.info("[hot_reload] detected script change file=%s old=%s new=%s", tostring(filename), tostring(last_script_mtime), tostring(mtime))
-        end
-
-        if run_script(filename, ctx, logger) then
-            last_script_mtime = mtime
-        end
     end
 end
 
@@ -222,26 +137,6 @@ local function check_config_reload(lfs, filename, ctx, logger, module_name)
             last_config_mtime = mtime
         end
     end
-end
-
-function M.reload_now(ctx)
-    local logger = ctx.logger
-    local reload_config = get_config(ctx)
-    local script_filename = reload_config.filename or "/dp2/script/Work_Reload.lua"
-
-    local ok_lfs, lfs = pcall(require, "lfs")
-    if not ok_lfs then
-        if logger then
-            logger.error("[hot_reload] lfs module not available, reload skipped")
-        end
-        return false
-    end
-
-    local ok = run_script(script_filename, ctx, logger)
-    if ok then
-        last_script_mtime = read_mtime(lfs, script_filename, logger)
-    end
-    return ok
 end
 
 function M.reload_config_now(ctx)
@@ -297,44 +192,26 @@ function M.setup(ctx)
 
     close_timer(logger)
 
-    local script_filename = config.filename or "/dp2/script/Work_Reload.lua"
     local config_filename = config.config_filename or "/dp2/script/config.lua"
     local config_module = config.config_module or "script.config"
-    local watch_script = config.watch_script ~= false
-    local watch_config = config.watch_config ~= false
     local start_delay_ms = tonumber(config.start_delay_ms) or 10000
     local interval_ms = tonumber(config.interval_ms) or 5000
-    local run_on_start = config.run_on_start == true
 
     missing_logged = {}
-    last_script_mtime = read_mtime(lfs, script_filename, logger)
     last_config_mtime = read_mtime(lfs, config_filename, logger)
-
-    if run_on_start and watch_script then
-        run_script(script_filename, ctx, logger)
-        last_script_mtime = read_mtime(lfs, script_filename, logger)
-    end
 
     timer = luv.new_timer()
     timer:start(start_delay_ms, interval_ms, function()
-        if watch_config then
-            check_config_reload(lfs, config_filename, ctx, logger, config_module)
-        end
-        if watch_script then
-            check_script_reload(lfs, script_filename, ctx, logger)
-        end
+        check_config_reload(lfs, config_filename, ctx, logger, config_module)
     end)
 
     if logger then
         logger.info(
-            "[hot_reload] watching config=%s script=%s watch_config=%s watch_script=%s start_delay_ms=%d interval_ms=%d run_on_start=%s",
+            "[hot_reload] watching config=%s module=%s start_delay_ms=%d interval_ms=%d",
             tostring(config_filename),
-            tostring(script_filename),
-            tostring(watch_config),
-            tostring(watch_script),
+            tostring(config_module),
             start_delay_ms,
-            interval_ms,
-            tostring(run_on_start)
+            interval_ms
         )
     end
 
