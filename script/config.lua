@@ -65,6 +65,10 @@ local config = {
 
         -- 翻牌回城模块（副本完成后随机点券 + 自动回城/分解/出售）
         enable_finish_back_home = true,
+
+        -- 旧 dp2 入口补丁迁移模块。
+        -- 默认关闭；测试服逐项确认后再开启子功能。
+        enable_legacy_patches = false,
     },
 
     ------------------------------------------------
@@ -94,6 +98,22 @@ local config = {
         default_mode = "0",     -- 默认模式：0=关 1=回城 2=诺顿分解+回城 3=玩家分解机+回城 4=出售+回城
         point_min = 100,        -- 随机点券最小值
         point_max = 1000,       -- 随机点券最大值
+    },
+
+    legacy_patches = {
+        -- 修复绝望之塔卡金币 / 金币提示异常。
+        enable_tower_gold_notice_fix = false,
+        tower_dungeon_min_id = 11008,
+        tower_dungeon_max_id = 11107,
+
+        -- 城镇下线卡镇魂修复：保存城镇 13 时改为 11。
+        enable_save_town_fix = false,
+        save_town_from_id = 13,
+        save_town_to_id = 11,
+
+        -- 开放指定副本，例如 11007 极限祭坛。
+        enable_open_extra_dungeons = false,
+        open_dungeon_ids = {11007},
     },
 
     ------------------------------------------------
