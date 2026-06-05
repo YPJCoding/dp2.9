@@ -15,7 +15,8 @@
 - SQL、删除、shell 类高风险能力仍默认关闭。
 - 已完成 handler 日志和组合风险开关收敛。
 - 已新增 `script/modules/legacy_patches.lua`，迁移旧 dp2 入口 hook：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛。
-- `legacy_patches` 模块和三个子功能默认关闭，待测试服逐项开启验证。
+- 已新增 `script/modules/hot_reload.lua`，迁移旧 dp2 的 `Work_Reload.lua` 热加载机制。
+- `legacy_patches` 和 `hot_reload` 均默认关闭，待测试服逐项开启验证。
 - 服务器实测确认普通右键消耗品走 `UseItem1`，并已正式接入 `UseItem1 -> item_handler` 分发。
 - `UseItem2` 保留作为兼容入口。
 - 1034-1037 临时 debug handler 已关闭。
@@ -48,20 +49,23 @@
 - [x] Phase 1 基础设施模块：全部 4 个模块（online/broadcast/gm_permissions/item_query）服务器验证通过。
 - [x] 配置口径收敛：SQL、删除、shell handler 均默认关闭。
 - [x] 旧入口补丁迁移为 `legacy_patches` 模块，默认关闭。
+- [x] 测试服热加载迁移为 `hot_reload` 模块，默认关闭。
 
 还缺：
 
 - [ ] 高风险 handler 默认拒绝并返还道具：真实道具实测（需 PVF 加入道具 ID）。
 - [ ] `legacy_patches` 模块加载验证：默认关闭时不注册 hook。
+- [ ] `hot_reload` 默认关闭启动验证：确认不会创建 timer。
 - [ ] `legacy_patches` 三个子功能测试服逐项开启验证。
+- [ ] `hot_reload` 测试服开启验证：文件不存在、编译失败、执行失败、修改后 reload。
 
 完成后可以作为“安全默认底板”部署。
 
 ## 3. 目标 B：完全功能恢复版
 
-目标：原 `df_game_r.lua` 中所有道具功能和入口补丁都能按预期工作，包括 SQL、删除、shell 类功能。
+目标：原 `df_game_r.lua` 中所有道具功能、入口补丁和开发辅助能力都能按预期工作，包括 SQL、删除、shell 类功能。
 
-当前估算进度：约 66%。
+当前估算进度：约 67%。
 
 还缺：
 
@@ -71,6 +75,7 @@
 - [ ] 对 PVP shell handler 确认脚本路径、脚本输出和 SQL 安全性。
 - [x] 为 PVP shell 功能补失败保护和日志。
 - [x] 将旧入口 hook 迁移为可配置模块：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛。
+- [x] 将旧 `Work_Reload.lua` 热加载机制迁移为可配置模块。
 - [ ] 在测试服逐项开启风险开关验证。
 - [ ] 决定正式服默认是否保持关闭。
 
@@ -134,16 +139,31 @@
 - [ ] 测试服开启 `enable_save_town_fix` 验证
 - [ ] 测试服开启 `enable_open_extra_dungeons` 验证
 
+## 4.7 热加载模块验证状态
+
+旧 dp2 的 `Work_Reload.lua` 热加载逻辑已迁移到 `script/modules/hot_reload.lua`，但默认关闭。
+
+- [x] 代码迁移：`lfs.attributes` 检测文件修改时间
+- [x] 代码迁移：`loadfile(filename, "t", env)` 执行隔离环境脚本
+- [x] 代码迁移：注入 `dp/dpx/game/world/logger/item_handler/utils/config`
+- [x] 接入 bootstrap：加载模块前注入 `ctx.item_handler`
+- [x] 配置化：`hot_reload.enabled/filename/start_delay_ms/interval_ms/run_on_start`
+- [ ] 默认关闭状态下启动验证：确认不会创建 timer
+- [ ] 文件不存在验证：只记录日志，不影响启动
+- [ ] 编译失败验证：记录错误，不更新修改时间
+- [ ] 执行失败验证：记录错误，不更新修改时间
+- [ ] 修改后 reload 验证：成功执行后更新修改时间
+
 ## 5. 当前偏航点
 
 ### 5.1 “尽量不改变行为”已经不完全准确
 
-当前重构为了安全，已经把 SQL、删除、shell 类功能默认改为关闭；旧入口补丁也默认关闭。
+当前重构为了安全，已经把 SQL、删除、shell 类功能默认改为关闭；旧入口补丁和热加载也默认关闭。
 
 这意味着：
 
 - 对安全可部署版，这是正确方向。
-- 对完全功能恢复版，还需要后续开启和测试风险开关 / legacy patch 开关。
+- 对完全功能恢复版，还需要后续开启和测试风险开关 / legacy patch 开关 / hot reload 开关。
 
 ### 5.2 P4 JS 审查不应优先于服务器启动验证
 
@@ -177,6 +197,7 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [x] 检查所有 handler 是否都有日志和失败返还。
 - [x] 补充代码自检记录：`docs/CODE_SELF_CHECK.md`。
 - [x] 将旧入口 hook 收敛为 `legacy_patches` 模块。
+- [x] 将热加载收敛为 `hot_reload` 模块。
 
 ### Step 2：服务器烟测
 
@@ -188,6 +209,7 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [x] 正式接入 `UseItem1 -> item_handler` 分发。
 - [x] 拉取最新正式收敛代码后再次重启确认。
 - [ ] 重启确认 `legacy_patches` 默认关闭时不会注册额外 hook。
+- [ ] 重启确认 `hot_reload` 默认关闭时不会创建 timer。
 
 ### Step 3：高风险默认关闭测试
 
@@ -233,13 +255,29 @@ legacy_patches = {
 
 逐项验证后再决定正式服默认值。
 
+### Step 7：测试服开启热加载
+
+仅在测试服开启：
+
+```lua
+hot_reload = {
+    enabled = true,
+    filename = "/dp2/script/Work_Reload.lua",
+    start_delay_ms = 10000,
+    interval_ms = 5000,
+    run_on_start = false,
+}
+```
+
+验证文件不存在、编译失败、执行失败、成功 reload 四种路径后再保留为测试服工具。
+
 ## 7. 进度口径
 
 后续汇报进度时分两条：
 
 ```text
 安全可部署版：93%
-完全功能恢复版：66%
+完全功能恢复版：67%
 ```
 
 如果只说“总进度”，默认指安全可部署版。
