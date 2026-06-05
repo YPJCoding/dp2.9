@@ -143,7 +143,7 @@ local my_useitem2 = function(_user, item_id)
 end
 
 local function apply_dpx_startup_fallback()
-    dpx.set_max_level(95)
+    dpx.set_max_level(85)
     dpx.enable_creator()
     dpx.set_unlimit_towerofdespair()
     dpx.disable_item_routing()
