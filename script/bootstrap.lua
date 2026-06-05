@@ -27,6 +27,7 @@ local infra_modules = {
     { key = 'dungeon_gate', module = 'script.modules.dungeon_gate' },
     { key = 'drop_rules', module = 'script.modules.drop_rules' },
     { key = 'finish_back_home', module = 'script.modules.finish_back_home' },
+    { key = 'legacy_patches', module = 'script.modules.legacy_patches' },
 }
 
 local function safe_require(module_name, logger)
@@ -104,6 +105,9 @@ local function is_module_enabled(ctx, module_key)
     end
     if module_key == 'finish_back_home' then
         return features.enable_finish_back_home == true
+    end
+    if module_key == 'legacy_patches' then
+        return features.enable_legacy_patches == true
     end
     return false
 end
