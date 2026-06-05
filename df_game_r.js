@@ -586,7 +586,7 @@ const CItem_GetItemName = new NativeFunction(ptr(0x811ED82), 'pointer', ['pointe
 
 //本地时间戳
 function get_timestamp() {
-	const date = new Date();
+	var date = new Date();
 	date = new Date(date.setHours(date.getHours())); //转换到本地时间
 	const year = date.getFullYear().toString();
 	const month = (date.getMonth() + 1).toString();
@@ -659,7 +659,7 @@ const frida_log_dir_path = './frida_log/'
 var f_log = null;
 var log_day = null;
 function log(msg) {
-	const date = new Date();
+	var date = new Date();
 	date = new Date(date.setHours(date.getHours())); //转换到本地时间
 	const year = date.getFullYear().toString();
 	const month = (date.getMonth() + 1).toString();
@@ -1770,7 +1770,7 @@ function hook_VillageAttack() {
 					read_f(map_info, monster);
 					//刷新额外的怪物(同一张地图内, 怪物index和怪物uid必须唯一, 这里为怪物分配新的index和uid)
 					//额外刷新怪物数量
-					const cnt = 1;
+					var cnt = 1;
 					//新的怪物uid偏移
 					const uid_offset = 1000;
 					//返回值
@@ -1798,7 +1798,7 @@ function hook_VillageAttack() {
 					read_f(map_info, monster);
 					//刷新额外的怪物(同一张地图内, 怪物index和怪物uid必须唯一, 这里为怪物分配新的index和uid)
 					//额外刷新怪物数量
-					const cnt = 3;
+					var cnt = 3;
 					//新的怪物uid偏移
 					const uid_offset = 1000;
 					//返回值
@@ -2794,7 +2794,7 @@ function enable_drop_use_luck_point() {
 		const rarity = CLuckPoint_GetItemRarity(a1, a2, roll, a4);
 		//调整角色幸运值
 		if (cur_luck_user) {
-			const rate = 1.0;
+			var rate = 1.0;
 
 			//出货粉装以上, 降低角色幸运值
 			if (rarity >= 3) {
@@ -3282,7 +3282,7 @@ function dp2_lua_call(arg1, arg2, _arg3) {
 // 准备工作
 function setup() {
 	//dp 安装 frida的
-	const addr = Module.getExportByName('libdp2.so', 'dp2_frida_resolver');
+	var addr = Module.getExportByName('libdp2.so', 'dp2_frida_resolver');
 	__dp2_resolver = new NativeFunction(addr, 'pointer', ['pointer']);
 
 	addr = dp2_resolver('lua.call');
