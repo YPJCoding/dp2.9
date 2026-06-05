@@ -1,299 +1,386 @@
 -- dp2.9 中心配置文件
--- 所有功能开关、DPX 启动配置、风险控制、数值限制均集中于此。
--- 部分配置支持测试服热应用；涉及启动类 DPX 开关仍需重启频道生效。
+--
+-- 本文件按“是否支持热更新”分区：
+--
+-- 1. hot：支持热更新的运行时配置。
+--    hot_reload 会监听 /dp2/script/config.lua，配置变更后自动应用到支持热配置的模块。
+--    当前支持热应用的模块：finish_back_home。
+--
+-- 2. boot：必须重启频道才会生效的配置。
+--    包括 handler/module 注册、DPX 启动开关、风险开关、JS/Frida 配置写入等。
+--
+-- 3. 为兼容现有模块，文件末尾会把 boot/hot 中的配置映射到旧字段名。
 
 local config = {
 
     ------------------------------------------------
-    -- 调试开关
+    -- [HOT] 支持热更新的运行时配置
     ------------------------------------------------
-    debug = {
-        -- 开启调试日志（输出更多细节）
-        enable_debug_log = false,
+    hot = {
+        finish_back_home = {
+            -- 副本完成后的自动处理模式。
+            -- 修改后由 hot_reload 自动调用 finish_back_home.configure(...) 生效，无需重启。
+            -- 0 = 完全关闭：不发点券、不回城、不分解、不出售。
+            -- 1 = 发放随机点券 + 回城。
+            -- 2 = 发放随机点券 + 使用诺顿分解装备 + 回城。
+            -- 3 = 发放随机点券 + 尝试使用在线玩家分解机 + 回城。
+            -- 4 = 发放随机点券 + 出售装备 + 回城。
+            default_mode = "0",
 
-        -- 开启调试 hook（临时排查用，生产环境不要开）
-        enable_debug_hooks = false,
+            -- 副本完成后随机点券下限。
+            -- 仅在 default_mode 不为 0 时生效。
+            point_min = 100,
 
-        -- 临时 UseItem 链路测试 handler。
-        -- 默认关闭，避免正式环境劫持 1034-1037 等已有道具。
-        enable_test_useitem_handler = false,
-        test_useitem_ids = {1034, 1035, 1036, 1037},
-        test_useitem_return_item = true,
-
-        -- UseItem trace：每次使用道具时打印详细日志。
-        -- 需要排查道具入口时可临时开启，平时关闭减少日志量。
-        enable_useitem_trace = false,
+            -- 副本完成后随机点券上限。
+            -- 仅在 default_mode 不为 0 时生效。
+            point_max = 1000,
+        },
     },
 
     ------------------------------------------------
-    -- 功能模块开关
+    -- [BOOT] 调试与热加载开关（多数需要重启）
+    ------------------------------------------------
+    debug = {
+        -- 输出更详细的调试日志。
+        -- 当前仅作为统一调试开关预留，具体模块是否读取该开关取决于模块实现。
+        enable_debug_log = false,
+
+        -- 临时调试 hook 总开关。
+        -- 生产环境不要开启。
+        enable_debug_hooks = false,
+
+        -- 临时 UseItem 链路测试 handler。
+        -- 开启后会注册 test_useitem_ids 中的道具 ID，用于确认 UseItem1/UseItem2 入口是否可用。
+        -- 默认关闭，避免正式环境劫持 1034-1037 等已有道具。
+        enable_test_useitem_handler = false,
+
+        -- 临时测试道具 ID 列表。
+        -- 仅 enable_test_useitem_handler=true 时生效。
+        test_useitem_ids = {1034, 1035, 1036, 1037},
+
+        -- 测试 handler 执行后是否返还测试道具。
+        test_useitem_return_item = true,
+
+        -- UseItem trace 日志。
+        -- 开启后每次使用道具都会打印 item_id、slot、是否命中 handler。
+        -- 排查道具入口时临时开启，平时关闭减少日志量。
+        enable_useitem_trace = false,
+    },
+
+    hot_reload = {
+        -- 配置热加载模块总开关。
+        -- true = 启动后监听 config.lua 修改时间，并热应用支持的运行时配置。
+        -- false = 不创建热加载 timer。
+        enabled = true,
+
+        -- 被监听的配置文件路径。
+        config_filename = "/dp2/script/config.lua",
+
+        -- 被重新 require 的配置模块名。
+        -- 通常不需要修改。
+        config_module = "script.config",
+
+        -- 启动后首次开始检查前的延迟，单位毫秒。
+        start_delay_ms = 10000,
+
+        -- 检查 config.lua 修改时间的间隔，单位毫秒。
+        interval_ms = 5000,
+    },
+
+    ------------------------------------------------
+    -- [BOOT] 模块/handler 注册开关（需要重启）
     ------------------------------------------------
     features = {
-        -- 道具 handler 总开关（关闭后所有道具券失效）
+        -- 道具 handler 总开关。
+        -- false 时不会注册任何 script/handlers/*.lua 中的道具券逻辑。
         enable_item_handlers = true,
 
-        -- 模块化 handler 总开关（关闭后不再加载 script/handlers/）
+        -- 模块化 handler 总开关。
+        -- false 时保留 item_handler 表，但不加载模块化 handler。
         enable_modular_handlers = true,
 
-        -- 各 handler 模块独立开关，可单独关闭某个模块
+        -- 各 handler 模块独立开关。
+        -- 修改后需要重启频道，避免运行中 handler 表残留旧注册。
         modular_handlers = {
-            quest = true,         -- 任务清理券
-            job = true,           -- 转职/觉醒券
-            item_cleanup = true,  -- 宠物/时装/装备清理券
-            inherit = true,       -- 装备继承券
-            pvp = true,           -- PVP 经验书
-            misc = true,          -- 跨界石/异界重置/出战等
+            quest = true,         -- 任务清理券：主线/支线/每日/成就任务清理。
+            job = true,           -- 职业/觉醒/转职：女鬼剑转换、觉醒券、转职任务券。
+            item_cleanup = true,  -- 宠物/时装/装备清理：包含删除类高风险逻辑。
+            inherit = true,       -- 装备继承券。
+            pvp = true,           -- PVP 经验书：shell + SQL 组合高风险逻辑。
+            misc = true,          -- 跨界石、异界重置、角色出战、设计图熟练度等。
         },
 
-        -- 在线玩家表模块（login/logout 记录、在线查询）
+        -- 在线玩家表模块。
+        -- 注册上线/下线 hook，维护在线角色表，供广播、分解机等模块复用。
         enable_online_module = true,
 
-        -- 全服广播模块（依赖 online，带频率限制）
+        -- 全服广播模块。
+        -- 依赖 online 模块，提供在线玩家广播能力，并受 limits.broadcast_rate_per_min 限制。
         enable_broadcast_module = true,
 
-        -- 物品查询指令模块（//viewid / //viewname，所有人可用）
+        -- 物品查询模块。
+        -- 注册 GmInput hook，提供 //viewid / //viewname 只读查询。
         enable_item_query = true,
 
-        -- 经验副本/泡点模块（在线玩家在指定副本中每分钟获得经验和代币）
+        -- 经验副本/泡点模块。
+        -- 定时检查在线玩家是否在指定副本，满足条件时发经验和代币。
         enable_exp_dungeon = true,
 
-        -- 持物进图模块（进入指定副本需要持有指定道具）
+        -- 持物进图模块。
+        -- 根据 dungeon_gate.rules 检查进入指定副本所需道具。
         enable_dungeon_gate = true,
 
-        -- 等级差限制掉落模块（高等级刷低级图不掉落，持豁免道具可绕过）
+        -- 等级差限制掉落模块。
+        -- 高等级角色刷低等级副本时限制掉落，持豁免道具可绕过。
         enable_drop_rules = true,
 
-        -- 翻牌回城模块（副本完成后随机点券 + 自动回城/分解/出售）
+        -- 翻牌回城模块。
+        -- 模块注册需要重启；运行时 mode/点券范围可通过 hot.finish_back_home 热更新。
         enable_finish_back_home = true,
 
-        -- 旧 dp2 入口补丁迁移模块。
-        -- 默认关闭；测试服逐项确认后再开启子功能。
+        -- 旧 dp2 入口补丁模块。
+        -- 包含绝望之塔金币提示修复、城镇保存修复、开放指定副本。
+        -- 默认关闭，测试服逐项确认后再开启。
         enable_legacy_patches = false,
     },
 
     ------------------------------------------------
-    -- 玩法模块参数配置
+    -- [BOOT] 玩法模块参数（多数需要重启）
     ------------------------------------------------
     exp_dungeon = {
-        dungeon_id = 5000,      -- 经验副本 ID
-        level_cap = 85,         -- 等级上限（达到后不再获得经验）
-        exp_percent = 0.01,     -- 每次获得的经验比例（1%）
-        token_amount = 60,      -- 每次获得的代币数量
-        interval_ms = 60000,    -- 执行间隔（毫秒），60000=每分钟
+        -- 经验副本 ID。
+        -- 当前 PVF 若不存在该副本，模块不会产生有效奖励。
+        dungeon_id = 5000,
+
+        -- 泡点奖励等级上限。
+        -- 达到该等级后不再通过泡点获得经验。
+        level_cap = 85,
+
+        -- 每次发放的经验比例，例如 0.01 = 1%。
+        exp_percent = 0.01,
+
+        -- 每次发放的代币数量。
+        token_amount = 60,
+
+        -- 检查间隔，单位毫秒。
+        interval_ms = 60000,
     },
 
     dungeon_gate = {
+        -- 持物进图规则。
+        -- 为空时 dungeon_gate 模块不会注册 GameEvent hook。
+        -- 示例：{dungeon_id = 5000, item_id = 80206, message = "持有特殊凭证才能进入此副本！"}
         rules = {
-            -- {dungeon_id = 5000, item_id = 80206, message = "持有特殊凭证才能进入此副本！"},
         },
     },
 
     drop_rules = {
-        level_gap = 20,             -- 等级差阈值（角色等级 - 副本等级 > 此值时限制掉落）
-        bypass_item_id = 80207,     -- 豁免道具 ID（背包中有此道具时不受限制）
+        -- 等级差阈值。
+        -- 角色等级 - 副本等级 > level_gap 时限制掉落。
+        level_gap = 20,
+
+        -- 豁免道具 ID。
+        -- 背包中持有该道具时不受等级差掉落限制。
+        bypass_item_id = 80207,
+
+        -- 掉落被限制时发送给玩家的提示。
         message = "此副本等级过低，掉落物品已被系统收回！",
     },
 
-    finish_back_home = {
-        -- 支持 hot_reload 热应用。
-        default_mode = "0",     -- 默认模式：0=关 1=回城 2=诺顿分解+回城 3=玩家分解机+回城 4=出售+回城
-        point_min = 100,        -- 随机点券最小值
-        point_max = 1000,       -- 随机点券最大值
-    },
-
     legacy_patches = {
-        -- 修复绝望之塔卡金币 / 金币提示异常。
+        -- 绝望之塔金币提示/卡金币修复。
+        -- 对 tower_dungeon_min_id ~ tower_dungeon_max_id 范围内副本的 CParty_UseAncientDungeonItems 直接返回 true。
         enable_tower_gold_notice_fix = false,
         tower_dungeon_min_id = 11008,
         tower_dungeon_max_id = 11107,
 
-        -- 城镇下线卡镇魂修复：保存城镇 13 时改为 11。
+        -- 城镇下线卡镇魂修复。
+        -- 保存城镇为 save_town_from_id 时改为 save_town_to_id。
         enable_save_town_fix = false,
         save_town_from_id = 13,
         save_town_to_id = 11,
 
-        -- 开放指定副本，例如 11007 极限祭坛。
+        -- 开放指定副本。
+        -- Open_Dungeon 遇到 open_dungeon_ids 中的副本 ID 时返回 true。
         enable_open_extra_dungeons = false,
         open_dungeon_ids = {11007},
     },
 
-    hot_reload = {
-        -- 测试服 Lua 热加载模块，默认开启。
-        -- 监听 config.lua 做配置热应用；Work_Reload.lua 保留为可选调试脚本入口。
-        enabled = true,
-        watch_config = true,
-        config_filename = "/dp2/script/config.lua",
-        config_module = "script.config",
-        watch_script = true,
-        filename = "/dp2/script/Work_Reload.lua",
-        start_delay_ms = 10000,
-        interval_ms = 5000,
-        run_on_start = false,
-    },
-
     ------------------------------------------------
-    -- DPX 启动配置（影响服务端全局行为）
-    -- [RISK:HIGH] 标注意味着开启后影响范围大，需确认后果
+    -- [BOOT] DPX 启动配置（必须重启）
     ------------------------------------------------
     dpx_startup = {
-        -- 当前游戏内容等级上限
+        -- 当前游戏内容等级上限。
+        -- 启动时调用 dpx.set_max_level(level_cap)。当前版本内容为 85 级。
         set_level_cap = true,
         level_cap = 85,
 
-        -- 开启缔造者创建接口
+        -- 开启缔造者创建接口。
         enable_creator = true,
 
-        -- 绝望之塔通关后仍可继续挑战（需门票）
+        -- 绝望之塔通关后仍可继续挑战，仍需门票。
         enable_unlimit_towerofdespair = true,
 
-        -- 史诗免确认提示框
+        -- 史诗掉落免确认提示框。
         disable_item_routing = true,
 
-        -- [RISK:HIGH] 解除 100 级以上限制
+        -- [RISK:HIGH] 解除 100 级以上限制。
+        -- 会影响服务端安全限制，修改前需确认版本兼容。
         disable_security_protection = true,
 
-        -- 扩展移动药剂可用范围
+        -- 扩展移动药剂可用范围。
         extend_teleport_item = true,
 
-        -- 解除交易限额
+        -- 解除交易限额。
         disable_trade_limit = true,
 
-        -- 拍卖行最低使用等级
+        -- 设置拍卖行最低使用等级。
         set_auction_min_level = true,
         auction_min_level = 10,
 
-        -- 修复拍卖行消耗品上架最大总价
+        -- 修复拍卖行消耗品上架最大总价。
         fix_auction_regist_item = true,
         auction_max_total_price = 200000000,
 
-        -- 解除魔法封印合成品级限制
+        -- 解除魔法封印合成品级限制。
         liberate_random_option = true,
 
-        -- 关闭 NPC 回购（禁用志愿兵）
+        -- 关闭 NPC 回购。
+        -- 注释保留旧口径：禁用志愿兵相关入口。
         disable_redeem_item = true,
 
-        -- 新创建角色不发送成长契约邮件
+        -- 新创建角色不发送成长契约邮件。
         disable_mobile_rewards = true,
 
-        -- 装备解锁时间（天），1=立即解锁
+        -- 设置装备解锁时间，单位天。1 = 立即/快速解锁。
         set_item_unlock_time = true,
         item_unlock_time = 1,
 
         -- [RISK:HIGH] 开启 GM 模式。
         -- 需要将账号 UID 添加到 taiwan_login.gm_manifest 表。
-        -- 开启后 GmInput hook、GM 指令等特权功能生效。
+        -- 开启后 GmInput hook、GM 指令等特权功能才有意义。
         enable_game_master = true,
 
-        -- [RISK:HIGH] 退出副本后角色不虚弱
+        -- [RISK:HIGH] 退出副本后角色不虚弱。
         disable_giveup_panalty = false,
     },
 
     ------------------------------------------------
-    -- 高风险能力开关（默认全部关闭）
-    -- 逐项在测试服验证后再考虑开启，开启前务必备份数据库
+    -- [BOOT] 高风险能力开关（必须重启，默认关闭）
     ------------------------------------------------
     risk = {
-        -- [RISK:HIGH][SQL] 允许道具直接执行 SQL（改库操作）
-        -- 影响：女鬼剑职业转换、角色出战、装备设计图熟练度
+        -- [RISK:HIGH][SQL] 允许道具 handler 直接执行 SQL。
+        -- 影响：女鬼剑职业转换、角色出战、装备设计图熟练度。
+        -- 开启前必须备份数据库并准备回滚方案。
         enable_sql_handlers = false,
 
-        -- [RISK:HIGH][DELETE] 允许道具删除角色物品
-        -- 影响：宠物清理、时装清理、副职业一键分解
+        -- [RISK:HIGH][DELETE] 允许道具 handler 删除角色物品。
+        -- 影响：宠物清理、时装清理、副职业一键分解。
+        -- 宠物/时装清理还需要同时开启 enable_sql_handlers。
         enable_delete_handlers = false,
 
-        -- [RISK:HIGH] 绕过安全限制（预留）
+        -- [RISK:HIGH] 绕过安全限制。
+        -- 预留开关，当前不建议开启。
         enable_security_bypass = false,
 
-        -- [RISK:HIGH][SHELL] 允许道具执行外部 shell 脚本
-        -- 影响：PVP 经验书
+        -- [RISK:HIGH][SHELL] 允许道具 handler 执行外部 shell 脚本。
+        -- 影响：PVP 经验书。PVP 经验书还需要同时开启 enable_sql_handlers。
         enable_shell_handlers = false,
     },
 
     ------------------------------------------------
-    -- 数值限制
+    -- [BOOT] 通用数值限制（多数需要重启）
     ------------------------------------------------
     limits = {
-        -- 拍卖行最高总价
+        -- 拍卖行最高总价。
         auction_max_total_price = 200000000,
 
-        -- 拍卖行最低使用等级
+        -- 拍卖行最低使用等级。
         auction_min_level = 10,
 
-        -- 装备解锁时间（天）
+        -- 装备解锁时间，单位天。
         item_unlock_time = 1,
 
-        -- 全服广播每分钟最大次数
+        -- 全服广播每分钟最大次数。
         broadcast_rate_per_min = 5,
     },
 
     ------------------------------------------------
-    -- JS/Frida 功能开关（df_game_r.js setup() 读取）
-    -- 修改后重启频道生效
+    -- [BOOT] JS/Frida 功能开关（需要重启）
     ------------------------------------------------
     js_features = {
-        -- 绝望之塔金币修复（当前启用）
+        -- 绝望之塔金币修复。
         enable_tod_fix = true,
 
-        -- 时装镶嵌修复（当前启用）
+        -- 时装镶嵌修复。
         enable_emblem_fix = true,
 
-        -- 历史日志追踪（当前启用）
+        -- 历史日志追踪。
         enable_history_log = true,
 
-        -- 解除每日创建角色数量限制（当前启用）
+        -- 解除每日创建角色数量限制。
         enable_create_character_unlimit = true,
 
-        -- +13以上强化券自动刷新物品栏（当前启用）
+        -- +13 以上强化券自动刷新物品栏。
         enable_strengthen_refresh = true,
 
-        -- 黑暗武士技能栏修复（当前启用）
+        -- 黑暗武士技能栏修复。
         enable_dark_knight_skill_fix = true,
 
-        -- [RISK:CRITICAL] 账号仓库扩展至128格
+        -- [RISK:CRITICAL] 账号仓库扩展至 128 格。
         enable_account_cargo = false,
 
-        -- [RISK:HIGH] 怪物攻城活动
+        -- [RISK:HIGH] 怪物攻城活动。
         enable_village_attack = false,
 
-        -- [RISK:HIGH] 幸运在线玩家
+        -- [RISK:HIGH] 幸运在线玩家。
         enable_lucky_online = false,
 
-        -- [RISK:HIGH] 在线奖励（发点券）
+        -- [RISK:HIGH] 在线奖励，可能发点券。
         enable_online_reward = false,
 
-        -- [RISK:HIGH] 随机属性继承
+        -- [RISK:HIGH] 随机属性继承。
         enable_random_option_inherit = false,
 
-        -- [RISK:HIGH] 自动解封随机属性装备
+        -- [RISK:HIGH] 自动解封随机属性装备。
         enable_auto_unseal = false,
 
-        -- [RISK:HIGH] 幸运点影响掉落率
+        -- [RISK:HIGH] 幸运点影响掉落率。
         enable_luck_point_drop = false,
 
-        -- [RISK:HIGH] 取消新账号成长契约
+        -- [RISK:HIGH] 取消新账号成长契约。
         enable_mobile_auth = false,
 
-        -- [RISK:HIGH] 上下线处理（幸运点+怪物攻城UI）
+        -- [RISK:HIGH] 上下线处理，涉及幸运点和怪物攻城 UI。
         enable_user_inout_hook = false,
 
-        -- [RISK:HIGH] 战力排行榜系统
+        -- [RISK:HIGH] 战力排行榜系统。
         enable_ranking = false,
 
-        -- [RISK:HIGH] 时装潜能系统
+        -- [RISK:HIGH] 时装潜能系统。
         enable_hidden_option = false,
 
-        -- [RISK:HIGH] 回归勇士时间设置
+        -- [RISK:HIGH] 回归勇士时间设置。
         enable_return_user = true,
 
-        -- [RISK:HIGH] 史诗/传说掉落全服公告+奖励
+        -- [RISK:HIGH] 史诗/传说掉落全服公告和奖励。
         enable_drop_announce = false,
 
-        -- [RISK:HIGH] VIP 等级登录公告
+        -- [RISK:HIGH] VIP 等级登录公告。
         enable_vip_login = false,
 
-        -- 批量物品添加 UI 通知
+        -- 批量物品添加 UI 通知。
         enable_batch_item_add = false,
     },
 }
+
+------------------------------------------------
+-- 兼容字段映射
+--
+-- 现有模块仍读取 config.finish_back_home。
+-- 新结构中热更新配置放在 config.hot.finish_back_home，
+-- 这里保持旧字段别名，避免改动所有模块。
+------------------------------------------------
+config.finish_back_home = config.hot.finish_back_home
 
 return config
