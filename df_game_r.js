@@ -4047,11 +4047,16 @@ function start() {
 	load_config('/dp2/frida/frida_config.json');
 	var cfg = (global_config && global_config.features) ? global_config.features : {};
 
-	// TEST: 验证 eval() 是否可用
+	// TEST: 验证 api_read_file + eval 能否加载外部 JS 文件
 	try {
-		eval('console.log("[test_eval] eval works!")');
+		var testCode = api_read_file('/dp2/script/js/test_require.js', 'r', 1024 * 1024);
+		if (testCode) {
+			eval(testCode);
+		} else {
+			console.log('[test_eval_file] FAILED: cannot read file');
+		}
 	} catch (e) {
-		console.log('[test_eval] FAILED: ' + e.message);
+		console.log('[test_eval_file] FAILED: ' + e.message);
 	}
 
 	// 绝望之塔金币修复
