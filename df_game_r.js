@@ -736,6 +736,24 @@ function load_config(path) {
 	global_config = JSON.parse(data);
 }
 
+// 动态加载外部 JS 模块（通过 api_read_file + eval）
+function dp_load(name) {
+	var path = '/dp2/script/js/' + name + '.js';
+	var code = api_read_file(path, 'r', 1024 * 1024);
+	if (!code) {
+		console.log('[dp_load] FAILED: cannot read ' + path);
+		return false;
+	}
+	try {
+		eval(code);
+		console.log('[dp_load] loaded: ' + name + '.js');
+		return true;
+	} catch (e) {
+		console.log('[dp_load] FAILED: ' + name + '.js - ' + e.message);
+		return false;
+	}
+}
+
 //获取系统UTC时间(秒)
 function api_CSystemTime_getCurSec() {
 	return GlobalData_s_systemTime_.readInt();
@@ -4047,18 +4065,6 @@ function start() {
 	load_config('/dp2/frida/frida_config.json');
 	var cfg = (global_config && global_config.features) ? global_config.features : {};
 
-	// TEST: 验证 api_read_file + eval 能否加载外部 JS 文件
-	try {
-		var testCode = api_read_file('/dp2/script/js/test_require.js', 'r', 1024 * 1024);
-		if (testCode) {
-			eval(testCode);
-		} else {
-			console.log('[test_eval_file] FAILED: cannot read file');
-		}
-	} catch (e) {
-		console.log('[test_eval_file] FAILED: ' + e.message);
-	}
-
 	// 绝望之塔金币修复
 	if (cfg.enable_tod_fix !== false) { fix_TOD(true); }
 
@@ -4117,7 +4123,7 @@ function start() {
 	if (cfg.enable_hidden_option === true) { start_hidden_option(); }
 
 	// 回归勇士
-	if (cfg.enable_return_user === true) { set_return_user(15); }
+	if (cfg.enable_return_user === true) { dp_load('return_user'); set_return_user(15); }
 
 	// VIP 登录公告（依赖 enable_user_inout_hook）
 	if (cfg.enable_vip_login === true) { vip_Login(); }
