@@ -11,16 +11,16 @@
 - `df_game_r.lua` 已经瘦身为轻量入口。
 - 所有 `item_handler` 旧实现已经从 `df_game_r.lua` 移除。
 - 所有 handler 模块已经通过 `script/bootstrap.lua` 接入加载链路。
-- `script/config.lua` 已经开启全部 handler 模块。
+- `features.enable_item_handlers` 和 `features.enable_modular_handlers` 现在都会影响 handler 注册。
 - SQL、删除、shell 类高风险能力仍默认关闭。
 - 已完成 handler 日志和组合风险开关收敛。
+- DPX 启动配置已集中到 `script/config.lua` 和 `bootstrap.apply_dpx_startup`，等级上限使用 `dpx.set_max_level`。
 - 已新增 `script/modules/legacy_patches.lua`，迁移旧 dp2 入口 hook：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛。
 - 已新增 `script/modules/hot_reload.lua`，迁移旧 dp2 的 `Work_Reload.lua` 热加载机制。
 - `legacy_patches` 和 `hot_reload` 均默认关闭，待测试服逐项开启验证。
 - 服务器实测确认普通右键消耗品走 `UseItem1`，并已正式接入 `UseItem1 -> item_handler` 分发。
 - `UseItem2` 保留作为兼容入口。
 - 1034-1037 临时 debug handler 已关闭。
-- 拉取正式收敛代码后已再次重启确认，`UseItem1` / `UseItem2` 注册正常，`enable_useitem_trace=false` 生效。
 - 当前 PVF 暂不添加 DP 正式道具，正式道具验证移到最后阶段。
 
 因此，后续 TODO 不能继续只按旧的 P0-P7 文档阶段推进，需要拆成两个目标：
@@ -44,12 +44,13 @@
 - [x] 在 `df_game_r.lua` 中正式接入 `UseItem1 -> item_handler` 分发。
 - [x] 保留 `UseItem2` 兼容入口。
 - [x] 关闭 1034-1037 临时 debug handler。
-- [x] 再次拉取最新代码并重启，确认 `UseItem1` / `UseItem2` 正式注册日志正常。
 - [x] 高风险 handler 默认拒绝并返还道具：代码级确认完成。
-- [x] Phase 1 基础设施模块：全部 4 个模块（online/broadcast/gm_permissions/item_query）服务器验证通过。
+- [x] Phase 1 基础设施模块：online/broadcast/gm_permissions/item_query 已迁移。
 - [x] 配置口径收敛：SQL、删除、shell handler 均默认关闭。
-- [x] 旧入口补丁迁移为 `legacy_patches` 模块，默认关闭。
-- [x] 测试服热加载迁移为 `hot_reload` 模块，默认关闭。
+- [x] `features.enable_item_handlers` 已真正接入 handler 总开关。
+- [x] `legacy_patches` 模块已迁移，默认关闭。
+- [x] `hot_reload` 模块已迁移，默认关闭。
+- [x] `finish_back_home` 已修正为 `mode=0` 完全关闭，并避免副本完成事件重复调用 `fnext()`。
 
 还缺：
 
@@ -97,7 +98,7 @@
 - [ ] `2021458801` 跨界石（misc.lua）
 - [ ] `10157835` 一次觉醒完成券（job.lua）
 - [ ] `10157836` 二次觉醒完成券（job.lua）
-- [ ] `2023458001`~`2023458004` 转职任务获取券（job.lua）
+- [ ] `2023458001`~`2023458003` 转职任务获取券（job.lua）
 - [ ] `2023629237`、`2023458063`、`2023458064`、`2023629238` 转职任务获取券（job.lua）
 
 ### 4.2 SQL 类道具（需 enable_sql_handlers，当前默认关闭）
@@ -120,9 +121,9 @@
 
 ## 4.5 Phase 3 玩法模块验证状态
 
-四个玩法模块已部署到服务器，`finish_back_home` 已验证通过。
+四个玩法模块已部署到服务器，`finish_back_home` 已做代码级修正，仍需复测。
 
-- [x] `finish_back_home` — 副本通关随机点券，已验证
+- [~] `finish_back_home` — 代码已迁移并修正，需复测 mode=0、mode=1~4
 - [ ] `exp_dungeon` — 经验副本泡点，需副本 5000 存在（当前 PVF 无此副本）
 - [ ] `drop_rules` — 等级差限制掉落，需高级角色 + 低级副本 + 无豁免道具
 - [ ] `dungeon_gate` — 持物进图限制，需先配置规则（当前规则表为空）
@@ -165,19 +166,7 @@
 - 对安全可部署版，这是正确方向。
 - 对完全功能恢复版，还需要后续开启和测试风险开关 / legacy patch 开关 / hot reload 开关。
 
-### 5.2 P4 JS 审查不应优先于服务器启动验证
-
-`df_game_r.js` 审查仍重要，但当前最大的未知风险是 Lua 入口能否在真实服务器加载：
-
-- Lua require 路径
-- bootstrap 加载
-- handler 注册
-- DPX API 调用
-- Frida 回调
-
-因此下一步优先级应从“继续写文档/审查 JS”调整为“服务器启动验证”。
-
-### 5.3 README TODO 需要继续保留，但不应作为唯一进度依据
+### 5.2 README TODO 需要继续保留，但不应作为唯一进度依据
 
 README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收。
 
@@ -198,6 +187,11 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [x] 补充代码自检记录：`docs/CODE_SELF_CHECK.md`。
 - [x] 将旧入口 hook 收敛为 `legacy_patches` 模块。
 - [x] 将热加载收敛为 `hot_reload` 模块。
+- [x] 修复 `features.enable_item_handlers` 未生效问题。
+- [x] 修复等级上限误调用 `set_auction_min_level` 问题。
+- [x] 修复 `finish_back_home` 重复 `fnext()` 与 mode=0 仍发点券问题。
+- [x] 修复 `item_query` GmInput 透传参数口径。
+- [x] 同步 `DP2_UNMIGRATED_FEATURES.md` 和 `HANDLER_MIGRATION_MAP.md` 状态。
 
 ### Step 2：服务器烟测
 
@@ -207,7 +201,8 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [x] 登录角色验证上线提示。
 - [x] 验证 `UseItem1` 是普通右键消耗品入口。
 - [x] 正式接入 `UseItem1 -> item_handler` 分发。
-- [x] 拉取最新正式收敛代码后再次重启确认。
+- [ ] 重启确认 `features.enable_item_handlers=false` 时 handler 不注册。
+- [ ] 重启确认等级上限配置调用正常。
 - [ ] 重启确认 `legacy_patches` 默认关闭时不会注册额外 hook。
 - [ ] 重启确认 `hot_reload` 默认关闭时不会创建 timer。
 
@@ -236,40 +231,6 @@ risk = {
 ```
 
 逐项验证后再决定正式服默认值。
-
-### Step 6：逐项开启旧入口补丁
-
-仅在测试服开启：
-
-```lua
-features = {
-    enable_legacy_patches = true,
-}
-
-legacy_patches = {
-    enable_tower_gold_notice_fix = true,
-    enable_save_town_fix = true,
-    enable_open_extra_dungeons = true,
-}
-```
-
-逐项验证后再决定正式服默认值。
-
-### Step 7：测试服开启热加载
-
-仅在测试服开启：
-
-```lua
-hot_reload = {
-    enabled = true,
-    filename = "/dp2/script/Work_Reload.lua",
-    start_delay_ms = 10000,
-    interval_ms = 5000,
-    run_on_start = false,
-}
-```
-
-验证文件不存在、编译失败、执行失败、成功 reload 四种路径后再保留为测试服工具。
 
 ## 7. 进度口径
 
