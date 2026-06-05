@@ -19,10 +19,10 @@
 | item_id | 原功能 | 目标模块 | 状态 | 风险 | 当前说明 / 后续动作 |
 |---:|---|---|---|---|---|
 | `2021458801` | 装备跨界石，背包装备栏第 1 格移动到账号金库 | `script/handlers/misc.lua` | `migrated` | `MEDIUM` | 已迁入 misc，失败返还道具并记录日志 |
-| `2021458802` | 主线任务清理 | `script/handlers/quest.lua` | `migrated` | `MEDIUM` | 已迁入 quest，待 PVF 正式道具验证 |
-| `2021458803` | 支线/普通任务清理 | `script/handlers/quest.lua` | `migrated` | `HIGH` | 已迁入 quest；会影响转职/觉醒任务，待真实道具验证 |
-| `2021458808` | 每日任务清理 | `script/handlers/quest.lua` | `migrated` | `MEDIUM` | 已迁入 quest，待 PVF 正式道具验证 |
-| `2021458809` | 成就任务清理 | `script/handlers/quest.lua` | `migrated` | `MEDIUM` | 已迁入 quest，待 PVF 正式道具验证 |
+| `2021458802` | 主线任务清理 | `script/handlers/quest.lua` | `migrated` | `MEDIUM` | 已迁入 quest，成功/失败均记录日志，待 PVF 正式道具验证 |
+| `2021458803` | 支线/普通任务清理 | `script/handlers/quest.lua` | `migrated` | `HIGH` | 已迁入 quest；会影响转职/觉醒任务，成功/失败均记录日志，待真实道具验证 |
+| `2021458808` | 每日任务清理 | `script/handlers/quest.lua` | `migrated` | `MEDIUM` | 已迁入 quest，成功/失败均记录日志，待 PVF 正式道具验证 |
+| `2021458809` | 成就任务清理 | `script/handlers/quest.lua` | `migrated` | `MEDIUM` | 已迁入 quest，成功/失败均记录日志，待 PVF 正式道具验证 |
 | `2021458807` | 女鬼剑职业转换 | `script/handlers/job.lua` | `gated` | `HIGH` | 已迁入 job；受 `config.risk.enable_sql_handlers` 控制，默认关闭 |
 | `2023458801` | 角色出战 | `script/handlers/misc.lua` | `gated` | `HIGH` | 已迁入 misc；受 `config.risk.enable_sql_handlers` 控制，默认关闭 |
 | `2023458803` | 装备设计图熟练度提升 | `script/handlers/misc.lua` | `gated` | `HIGH` | 已迁入 misc；受 `config.risk.enable_sql_handlers` 控制，默认关闭 |
@@ -35,13 +35,13 @@
 | `2023458063` | 转职任务获取券，任务 ID：5160 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
 | `2023458064` | 转职任务获取券，任务 ID：5163 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
 | `2023629238` | 转职任务获取券，任务 ID：12592 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
-| `2541121` | PVP 经验书 | `script/handlers/pvp.lua` | `gated` | `HIGH` | 已迁入 pvp；受 `config.risk.enable_shell_handlers` 控制，默认关闭 |
-| `2021458806` | 宠物清理券 | `script/handlers/item_cleanup.lua` | `gated` | `HIGH` | 已迁入 item_cleanup；受 `config.risk.enable_delete_handlers` 控制，默认关闭 |
-| `2022110503` | 时装清理券 | `script/handlers/item_cleanup.lua` | `gated` | `HIGH` | 已迁入 item_cleanup；受 `config.risk.enable_delete_handlers` 控制，默认关闭 |
+| `2541121` | PVP 经验书 | `script/handlers/pvp.lua` | `gated` | `HIGH` | 已迁入 pvp；需要同时开启 `enable_shell_handlers` 与 `enable_sql_handlers`，默认关闭 |
+| `2021458806` | 宠物清理券 | `script/handlers/item_cleanup.lua` | `gated` | `HIGH` | 已迁入 item_cleanup；需要同时开启 `enable_delete_handlers` 与 `enable_sql_handlers`，默认关闭 |
+| `2022110503` | 时装清理券 | `script/handlers/item_cleanup.lua` | `gated` | `HIGH` | 已迁入 item_cleanup；需要同时开启 `enable_delete_handlers` 与 `enable_sql_handlers`，默认关闭 |
 | `2022110504` | 副职业一键分解券 | `script/handlers/item_cleanup.lua` | `gated` | `HIGH` | 已迁入 item_cleanup；受 `config.risk.enable_delete_handlers` 控制，默认关闭 |
 | `2021458804` | 异界 E2 重置券 | `script/handlers/misc.lua` | `migrated` | `MEDIUM` | 已迁入 misc，待真实道具验证 |
 | `2021458805` | 异界 E3 重置券 | `script/handlers/misc.lua` | `migrated` | `MEDIUM` | 已迁入 misc，待真实道具验证 |
-| `2022110505` | 装备继承券 | `script/handlers/inherit.lua` | `migrated` | `HIGH` | 已迁入 inherit，待真实道具验证 |
+| `2022110505` | 装备继承券 | `script/handlers/inherit.lua` | `migrated` | `HIGH` | 已迁入 inherit，成功/失败均记录日志，待真实道具验证 |
 
 ## 非 item_handler 但相关的运行逻辑
 
@@ -61,6 +61,7 @@
 
 - 合并重复任务清理逻辑为统一清理函数。
 - 覆盖主线、支线/普通、每日、成就任务清理。
+- 成功会记录清理任务类型和数量；失败会返还道具并记录原因。
 - 支线/普通任务清理仍标记为高风险，因为可能影响转职/觉醒任务。
 
 ### `job.lua`
@@ -71,18 +72,21 @@
 ### `item_cleanup.lua`
 
 - 迁移宠物清理、时装清理、一键分解。
-- 删除类能力受 `config.risk.enable_delete_handlers` 控制，默认关闭。
+- 宠物/时装清理属于 `[DELETE][SQL]` 组合风险，需要同时开启 `enable_delete_handlers` 与 `enable_sql_handlers`。
+- 一键分解属于删除/清理类风险，受 `enable_delete_handlers` 控制。
+- 成功/失败均记录日志，失败返还道具。
 
 ### `inherit.lua`
 
 - 迁移装备继承券。
+- 成功记录源槽位和目标槽位；失败返还道具并记录原因。
 - 仍需真实道具验证装备槽位、参数、失败返还逻辑。
 
 ### `pvp.lua`
 
 - 迁移 PVP 经验书。
-- shell 执行能力受 `config.risk.enable_shell_handlers` 控制，默认关闭。
-- 已增加 shell 失败保护和日志。
+- 该 handler 属于 `[SHELL][SQL]` 组合风险，需要同时开启 `enable_shell_handlers` 与 `enable_sql_handlers`。
+- 已增加 shell 失败保护、空 SQL 保护、角色编号校验和日志。
 
 ### `misc.lua`
 
