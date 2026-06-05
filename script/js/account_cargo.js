@@ -1,6 +1,3 @@
-// ===== Hook: Account Cargo (账号仓库扩展) =====
-}
-
 // 存放所有用户的账号金库数据
 var accountCargfo = {};
 function setMaxCAccountCargoSolt(maxSolt) {

@@ -912,13 +912,6 @@ function start_event_lucky_online_user() {
 
 }
 
-	const a2 = Memory.alloc(4);
-	const a3 = Memory.alloc(4);
-
-// ===== Utils: GameWorld =====
-	CUser_gain_exp_sp(user, exp, a2, a3, 0, 0, 0);
-}
-
 //获取在线玩家列表表头
 function api_gameworld_user_map_begin() {
 	const begin = Memory.alloc(4);
