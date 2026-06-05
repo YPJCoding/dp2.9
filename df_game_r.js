@@ -1413,7 +1413,7 @@ function start_event_villageattack_timer() {
 	//获取当前系统时间
 	const cur_time = api_CSystemTime_getCurSec();
 	//计算距离下次开启怪物攻城活动的时间
-	const delay_time = (3600 * EVENT_VILLAGEATTACK_START_HOUR) - (cur_time % (3600 * 24));
+	var delay_time = (3600 * EVENT_VILLAGEATTACK_START_HOUR) - (cur_time % (3600 * 24));
 	if (delay_time <= 0)
 		delay_time += 3600 * 24;
 	//delay_time = 10;
@@ -1697,7 +1697,7 @@ function hook_VillageAttack() {
 			}
 		});
 	//当前正在处理挑战的攻城怪物请求
-	const state_on_fighting = false;
+	var state_on_fighting = false;
 	//当前正在被挑战的怪物id
 	var on_fighting_village_monster_id = 0;
 	//hook 挑战攻城怪物函数 控制副本刷怪流程
@@ -1897,7 +1897,7 @@ function on_end_event_villageattack() {
 			const equ = CInventory_GetInvenRef(inven, INVENTORY_TYPE_BODY, slot);
 			if (Inven_Item_getKey(equ)) {
 				//读取装备强化等级
-				const upgrade_level = equ.add(6).readU8();
+				var upgrade_level = equ.add(6).readU8();
 				if (upgrade_level < 31) {
 					//提升装备的强化/增幅等级
 					const bonus_level = get_random_int(1, 1 + villageAttackEventInfo.difficult);
@@ -2629,7 +2629,7 @@ function change_random_option_inherit() {
 				//魔法封印转换成功
 				if (retval == 1) {
 					//获取未被附魔的魔法封印槽
-					const index = -1;
+					var index = -1;
 					if (this.random_option.add(0).readU8() == 0)
 						index = 0;
 					else if (this.random_option.add(3).readU8() == 0)
