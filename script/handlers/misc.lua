@@ -24,6 +24,19 @@ local function log_item_return(ctx, user, item_id, reason)
     end
 end
 
+local function log_success(ctx, user, item_id, action)
+    local logger = ctx.logger
+    if logger then
+        logger.info(
+            "[useitem][misc] action=%s acc=%d chr=%d item_id=%d",
+            tostring(action),
+            user:GetAccId(),
+            user:GetCharacNo(),
+            item_id
+        )
+    end
+end
+
 local function reject_sql_disabled(user, item_id, ctx, message, reason)
     local dpx = ctx.dpx
     local logger = ctx.logger
@@ -56,6 +69,7 @@ function M.register(item_handler, ctx)
             log_item_return(ctx, user, item_id, "move_to_account_cargo_failed")
         else
             user:SendNotiPacketMessage("恭喜： 装备栏第一格装备跨界 成功！")
+            log_success(ctx, user, item_id, "move_to_account_cargo")
         end
     end
 
@@ -79,7 +93,7 @@ function M.register(item_handler, ctx)
             return reject_sql_disabled(user, item_id, ctx, "注意： 装备设计图熟练度功能未开启！", "design_skill_sql_disabled")
         end
 
-        dpx.sqlexec(game.DBType.taiwan_cain, "INSERT INTO item_making_skill_info (charac_no, weapon, cloth, leather, light_armor, heavy_armor, plate, amulet, wrist, ring, support, magic_stone) VALUES (" .. user:GetCharacNo() .. ", 140, 140, 140, 140, 140, 140, 140, 140, 140, 140, 140) ON DUPLICATE KEY UPDATE weapon = VALUES(weapon),cloth = VALUES(cloth), leather = VALUES(leather), light_armor = VALUES(light_armor), plate = VALUES(plate), amulet = VALUES(amulet), wrist = VALUES(wrist), ring = VALUES(ring), support = VALUES(support), magic_stone = VALUES(magic_stone)")
+        dpx.sqlexec(game.DBType.taiwan_cain, "INSERT INTO item_making_skill_info (charac_no, weapon, cloth, leather, light_armor, heavy_armor, plate, amulet, wrist, ring, support, magic_stone) VALUES (" .. user:GetCharacNo() .. ", 140, 140, 140, 140, 140, 140, 140, 140, 140, 140, 140) ON DUPLICATE KEY UPDATE weapon = VALUES(weapon),cloth = VALUES(cloth), leather = VALUES(leather), light_armor = VALUES(light_armor), heavy_armor = VALUES(heavy_armor), plate = VALUES(plate), amulet = VALUES(amulet), wrist = VALUES(wrist), ring = VALUES(ring), support = VALUES(support), magic_stone = VALUES(magic_stone)")
         user:SendNotiPacketMessage("恭喜： 角色装备设计图熟练度提升成功！")
 
         if logger then
@@ -93,6 +107,7 @@ function M.register(item_handler, ctx)
         user:ResetDimensionInout(1)
         user:ResetDimensionInout(2)
         user:SendNotiPacketMessage("恭喜： 异界E2重置 成功！")
+        log_success(ctx, user, item_id, "reset_dimension_e2")
     end
 
     -- [RISK:MEDIUM] 异界 E3 重置券
@@ -101,6 +116,7 @@ function M.register(item_handler, ctx)
         user:ResetDimensionInout(4)
         user:ResetDimensionInout(5)
         user:SendNotiPacketMessage("恭喜： 异界E3重置 成功！")
+        log_success(ctx, user, item_id, "reset_dimension_e3")
     end
 end
 
