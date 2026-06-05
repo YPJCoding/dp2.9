@@ -54,6 +54,16 @@
 - Added business-level success/failure logging to quest, job, misc, inherit, cleanup, and PVP handlers.
 - Wired `legacy_patches` through bootstrap and config; the module and all sub-features are disabled by default.
 - Wired `hot_reload` through bootstrap and config; the module is disabled by default and exposes `dp/dpx/game/world/logger/item_handler/utils/config` to the reload script.
+- Synced `DP2_UNMIGRATED_FEATURES.md`, `HANDLER_MIGRATION_MAP.md`, and `ROADMAP.md` after the implementation audit.
+
+### Fixed
+
+- Fixed level cap startup wiring to call `dpx.set_max_level(...)` instead of `dpx.set_auction_min_level(...)`.
+- Fixed the fallback startup path in `df_game_r.lua` to use `dpx.set_max_level(95)`.
+- Fixed `features.enable_item_handlers` so it now actually disables handler registration.
+- Fixed `item_query` GmInput passthrough calls to use `fnext()` consistently.
+- Fixed `finish_back_home` so `mode=0` is fully inert and does not grant points or trigger return/disjoint/sell behavior.
+- Fixed `finish_back_home` GameEvent handling to avoid calling `fnext()` twice for dungeon-finish events.
 
 ### Notes
 
