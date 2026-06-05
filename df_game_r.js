@@ -844,7 +844,7 @@ function on_event_lucky_online_user() {
 		const end = api_gameworld_user_map_end();
 
 		//随机抽取一名在线玩家
-		const user_index = get_random_int(0, online_player_cnt);
+		var user_index = get_random_int(0, online_player_cnt);
 
 		while (user_index >= 0) {
 			user_index--;
