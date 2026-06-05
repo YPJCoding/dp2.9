@@ -12,522 +12,522 @@ function dp2_log() { if (DP2_DEBUG) console.log.apply(console, arguments); }
 const getCurSec = new NativeFunction(Module.getExportByName(null, 'time'), 'int', ['pointer'], {"abi":"sysv"});
 
 //根据server_id查找user
-var GameWorld_find_from_world = new NativeFunction(ptr(0x86C4B9C), 'pointer', ['pointer', 'int'], {"abi":"sysv"});
+const GameWorld_find_from_world = new NativeFunction(ptr(0x86C4B9C), 'pointer', ['pointer', 'int'], {"abi":"sysv"});
 //城镇瞬移
-var GameWorld_move_area = new NativeFunction(ptr(0x86C5A84), 'pointer', ['pointer', 'pointer', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'], {"abi":"sysv"});
+const GameWorld_move_area = new NativeFunction(ptr(0x86C5A84), 'pointer', ['pointer', 'pointer', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'], {"abi":"sysv"});
 
 
-var G_CGameManager = new NativeFunction(ptr(0x080cc18e), 'pointer', [], {"abi":"sysv"});
-var CGameManager_GetPremiumLetheManager = new NativeFunction(ptr(0x08298e88), 'int', ['pointer'], {"abi":"sysv"});
-var CEventManager_GetRepeatEvent = new NativeFunction(ptr(0x08115998), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var EventClassify_CEventScriptMng_process_level_up_reward = new NativeFunction(ptr(0x0810bf56), 'pointer', ['pointer','pointer','int'], {"abi":"sysv"});
-var GuildParameterScript_getGuildLevelUpParam = new NativeFunction(ptr(0x08979648), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var GuildParameterScript_getGuildExpBook = new NativeFunction(ptr(0x08979672), 'int', ['pointer','int'], {"abi":"sysv"});
+const G_CGameManager = new NativeFunction(ptr(0x080cc18e), 'pointer', [], {"abi":"sysv"});
+const CGameManager_GetPremiumLetheManager = new NativeFunction(ptr(0x08298e88), 'int', ['pointer'], {"abi":"sysv"});
+const CEventManager_GetRepeatEvent = new NativeFunction(ptr(0x08115998), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const EventClassify_CEventScriptMng_process_level_up_reward = new NativeFunction(ptr(0x0810bf56), 'pointer', ['pointer','pointer','int'], {"abi":"sysv"});
+const GuildParameterScript_getGuildLevelUpParam = new NativeFunction(ptr(0x08979648), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const GuildParameterScript_getGuildExpBook = new NativeFunction(ptr(0x08979672), 'int', ['pointer','int'], {"abi":"sysv"});
 
 //道具是否为消耗品
-var CItem_GetIncreaseStatusIntData = new NativeFunction(ptr(0x08694658), 'int', ['pointer','int','pointer'], {"abi":"sysv"});
-var CItem_GetIncreaseStatusType =  new NativeFunction(ptr(0x086946b6), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetUsablePvPRank = new NativeFunction(ptr(0x086946c4), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetIncreaseStatusIntData = new NativeFunction(ptr(0x08694658), 'int', ['pointer','int','pointer'], {"abi":"sysv"});
+const CItem_GetIncreaseStatusType = new NativeFunction(ptr(0x086946b6), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetUsablePvPRank = new NativeFunction(ptr(0x086946c4), 'int', ['pointer'], {"abi":"sysv"});
 
 
-var CMonitorServerProxy_SendCharLevelGrowType = new NativeFunction(ptr(0x08470c04), 'int', ['pointer','int','int','int','int'], {"abi":"sysv"});
-var CMonitorServerProxy_SendPacket = new NativeFunction(ptr(0x08470df4), 'int', ['pointer','pointer','int'], {"abi":"sysv"});
-var CServerProxyMgr_CMonitorServerProxy_GetServerProxy = new NativeFunction(ptr(0x0811208a), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var CServerProxyMgr_CGuildServerProxy_GetServerProxy = new NativeFunction(ptr(0x0811d3b8), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var CGuildServerProxy_SendCharLevelGrowType = new NativeFunction(ptr(0x0846da9a), 'int', ['pointer','int','int','int','int'], {"abi":"sysv"});
+const CMonitorServerProxy_SendCharLevelGrowType = new NativeFunction(ptr(0x08470c04), 'int', ['pointer','int','int','int','int'], {"abi":"sysv"});
+const CMonitorServerProxy_SendPacket = new NativeFunction(ptr(0x08470df4), 'int', ['pointer','pointer','int'], {"abi":"sysv"});
+const CServerProxyMgr_CMonitorServerProxy_GetServerProxy = new NativeFunction(ptr(0x0811208a), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const CServerProxyMgr_CGuildServerProxy_GetServerProxy = new NativeFunction(ptr(0x0811d3b8), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const CGuildServerProxy_SendCharLevelGrowType = new NativeFunction(ptr(0x0846da9a), 'int', ['pointer','int','int','int','int'], {"abi":"sysv"});
 
 //执行debug命令
-var DoUserDefineCommand = new NativeFunction(ptr(0x0820BA90), 'int', ['pointer', 'int', 'pointer'], {"abi":"sysv"});
+const DoUserDefineCommand = new NativeFunction(ptr(0x0820BA90), 'int', ['pointer', 'int', 'pointer'], {"abi":"sysv"});
 
 //设置角色等级(最高70级)
-var DisPatcher_DebugCommand__debugCommandSetLevel = new NativeFunction(ptr(0x0858EFDE), 'int', ['pointer', 'pointer', 'int'], {"abi":"sysv"});//需要临时开GM权限
+const DisPatcher_DebugCommand__debugCommandSetLevel = new NativeFunction(ptr(0x0858EFDE), 'int', ['pointer', 'pointer', 'int'], {"abi":"sysv"});//需要临时开GM权限
 
 //获取队伍中玩家
-var CParty_send_to_party = new NativeFunction(ptr(0x0859d14e), 'int', ['pointer','pointer'], {"abi":"sysv"});
+const CParty_send_to_party = new NativeFunction(ptr(0x0859d14e), 'int', ['pointer','pointer'], {"abi":"sysv"});
 
-var cMyTrace_cMyTrace = new NativeFunction(ptr(0x0854f718), 'void', ['pointer','pointer','int','int'], {"abi":"sysv"});
-var cMyTrace_operator = new NativeFunction(ptr(0x0854f788), 'void', ['int','pointer','pointer'], {"abi":"sysv"});
+const cMyTrace_cMyTrace = new NativeFunction(ptr(0x0854f718), 'void', ['pointer','pointer','int','int'], {"abi":"sysv"});
+const cMyTrace_operator = new NativeFunction(ptr(0x0854f788), 'void', ['int','pointer','pointer'], {"abi":"sysv"});
 
-var CGuildServerProxy_SendIncreaseGuildExp = new NativeFunction(ptr(0x0846ece2), 'int', ['pointer','int','int','int','int'], {"abi":"sysv"});
-var PvPSkillTreeParameterScript_getPvPSkillPoint = new NativeFunction(ptr(0x08a5dd62), 'int', ['pointer','int','int','int','int','int'], {"abi":"sysv"});
-var ServerParameterScript_isDungeonOpen  = new NativeFunction(ptr(0x082687fc), 'int', [], {"abi":"sysv"});
-var XNuclear_CHades_ExpUp = new NativeFunction(ptr(0x084b953e), 'int', ['pointer','int'], {"abi":"sysv"});
-var WarRoom_SendToRoom = new NativeFunction(ptr(0x086be0cc), 'int', ['pointer','pointer'], {"abi":"sysv"});
+const CGuildServerProxy_SendIncreaseGuildExp = new NativeFunction(ptr(0x0846ece2), 'int', ['pointer','int','int','int','int'], {"abi":"sysv"});
+const PvPSkillTreeParameterScript_getPvPSkillPoint = new NativeFunction(ptr(0x08a5dd62), 'int', ['pointer','int','int','int','int','int'], {"abi":"sysv"});
+const ServerParameterScript_isDungeonOpen = new NativeFunction(ptr(0x082687fc), 'int', [], {"abi":"sysv"});
+const XNuclear_CHades_ExpUp = new NativeFunction(ptr(0x084b953e), 'int', ['pointer','int'], {"abi":"sysv"});
+const WarRoom_SendToRoom = new NativeFunction(ptr(0x086be0cc), 'int', ['pointer','pointer'], {"abi":"sysv"});
 
-var CCharacterView_enableSaveCharacView =  new NativeFunction(ptr(0x0822fbda), 'pointer', ['pointer'], {"abi":"sysv"});
-var CLevelDungeonPlayStatistic_IncreaseLevelDungeonPlay = new NativeFunction(ptr(0x0860ecc6), 'pointer', ['pointer','int','int'], {"abi":"sysv"});
-var expert_job_CExpertJob_IncreaseExpertJobExp =  new NativeFunction(ptr(0x08375026), 'void', ['pointer','pointer'], {"abi":"sysv"});
-var APSystem_CUserProc_ClearActionAndSendtoUser = new NativeFunction(ptr(0x08122390), 'void', ['pointer','int','int','int'], {"abi":"sysv"});
-var DB_InsertUnlimitSupportLog_makeRequest = new NativeFunction(ptr(0x080cbc9e), 'void', ['pointer','int','pointer'], {"abi":"sysv"});
-var DB_InsertArchieveEventLog_makeRequest = new NativeFunction(ptr(0x08115998), 'void', ['int','int','int'], {"abi":"sysv"});
-var RDARScriptStringManager_findString = new NativeFunction(ptr(0x08aa57fe), 'pointer', ['pointer','int','pointer','int'], {"abi":"sysv"});
-var ImportSpPerLevelReferenceTable =  new NativeFunction(ptr(0x08910505), 'int', ['pointer','pointer'], {"abi":"sysv"});
-var stSpPerLevelTable =  new NativeFunction(ptr(0x0837f544), 'void', ['pointer'], {"abi":"sysv"});
+const CCharacterView_enableSaveCharacView = new NativeFunction(ptr(0x0822fbda), 'pointer', ['pointer'], {"abi":"sysv"});
+const CLevelDungeonPlayStatistic_IncreaseLevelDungeonPlay = new NativeFunction(ptr(0x0860ecc6), 'pointer', ['pointer','int','int'], {"abi":"sysv"});
+const expert_job_CExpertJob_IncreaseExpertJobExp = new NativeFunction(ptr(0x08375026), 'void', ['pointer','pointer'], {"abi":"sysv"});
+const APSystem_CUserProc_ClearActionAndSendtoUser = new NativeFunction(ptr(0x08122390), 'void', ['pointer','int','int','int'], {"abi":"sysv"});
+const DB_InsertUnlimitSupportLog_makeRequest = new NativeFunction(ptr(0x080cbc9e), 'void', ['pointer','int','pointer'], {"abi":"sysv"});
+const DB_InsertArchieveEventLog_makeRequest = new NativeFunction(ptr(0x08115998), 'void', ['int','int','int'], {"abi":"sysv"});
+const RDARScriptStringManager_findString = new NativeFunction(ptr(0x08aa57fe), 'pointer', ['pointer','int','pointer','int'], {"abi":"sysv"});
+const ImportSpPerLevelReferenceTable = new NativeFunction(ptr(0x08910505), 'int', ['pointer','pointer'], {"abi":"sysv"});
+const stSpPerLevelTable = new NativeFunction(ptr(0x0837f544), 'void', ['pointer'], {"abi":"sysv"});
 //获取背包槽中的道具
-var INVENTORY_TYPE_CREATURE = 3;        //宠物装备(0-241)
+const INVENTORY_TYPE_CREATURE = 3;        //宠物装备(0-241)
 
 //通知客户端更新背包栏
-var ENUM_ITEMSPACE_INVENTORY = 0;       //物品栏
-var ENUM_ITEMSPACE_AVATAR = 1;          //时装栏
-var ENUM_ITEMSPACE_CARGO = 2;           //仓库
-var ENUM_ITEMSPACE_CREATURE = 7;        //宠物栏
-var ENUM_ITEMSPACE_ACCOUNT_CARGO = 12;  //账号仓库
+const ENUM_ITEMSPACE_INVENTORY = 0;       //物品栏
+const ENUM_ITEMSPACE_AVATAR = 1;          //时装栏
+const ENUM_ITEMSPACE_CARGO = 2;           //仓库
+const ENUM_ITEMSPACE_CREATURE = 7;        //宠物栏
+const ENUM_ITEMSPACE_ACCOUNT_CARGO = 12;  //账号仓库
 
 //服务器环境
-var G_CEnvironment = new NativeFunction(ptr(0x080CC181), 'pointer', [], { "abi": "sysv" });
+const G_CEnvironment = new NativeFunction(ptr(0x080CC181), 'pointer', [], { "abi": "sysv" });
 //获取当前服务器配置文件名
-var CEnvironment_get_file_name = new NativeFunction(ptr(0x80DA39A), 'pointer', ['pointer'], { "abi": "sysv" });
+const CEnvironment_get_file_name = new NativeFunction(ptr(0x80DA39A), 'pointer', ['pointer'], { "abi": "sysv" });
 
-var CUserCharacInfo_setDemensionInoutValue = new NativeFunction(ptr(0x0822f184), 'int', ['pointer','int','int'], {"abi":"sysv"});
+const CUserCharacInfo_setDemensionInoutValue = new NativeFunction(ptr(0x0822f184), 'int', ['pointer','int','int'], {"abi":"sysv"});
 //获取角色上次退出游戏时间
-var CUserCharacInfo_getCurCharacLastPlayTick = new NativeFunction(ptr(0x82A66AA), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharacLastPlayTick = new NativeFunction(ptr(0x82A66AA), 'int', ['pointer'], {"abi":"sysv"});
 // 价差分解机用户的状态 参数 用户  239 背包类型 位置
-var CUserCharacInfo_GetCurCharacExpertJob = new NativeFunction(ptr(0x822f8d4), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_GetCurCharacMaxEquipLevel = new NativeFunction(ptr(0x086467a0), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_SetCurCharacMaxEquipLevel = new NativeFunction(ptr(0x086467c2), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharacSkillR = new NativeFunction(ptr(0x0822f130), 'pointer', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharacSkillW = new NativeFunction(ptr(0x0822f140), 'pointer', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharacR =  new NativeFunction(ptr(0x0854f718), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_get_charac_exp = new NativeFunction(ptr(0x084ec05c), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_setCurCharacExp =  new NativeFunction(ptr(0x0819a87c), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUserCharacInfo_addCurCharacExp =  new NativeFunction(ptr(0x086967be), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUserCharacInfo_incCurCharacLevel = new NativeFunction(ptr(0x08696762), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_resetCharacFatigueGrownUpBuff = new NativeFunction(ptr(0x08696386), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharacGrowType = new NativeFunction(ptr(0x0815741c), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_set_charac_fatigue_buf_bonus_exp =  new NativeFunction(ptr(0x08469a02), 'int', ['pointer', 'int'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharacCreateTime = new NativeFunction(ptr(0x0822f202), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_ResetCurCharacDungeonPlayCount = new NativeFunction(ptr(0x086969fe), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_GetCurCharacExpertJobExp = new NativeFunction(ptr(0x08375026), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_GetCurCharacDungeonPlayCount = new NativeFunction(ptr(0x085bfc78), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_get_charac_job = new NativeFunction(ptr(0x080fdf20), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_get_pvp_grade =  new NativeFunction(ptr(0x0819ee4a), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharSecondGrowType = new NativeFunction(ptr(0x0822f23c), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharFirstGrowType = new NativeFunction(ptr(0x08110c94), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_GetCurCharacExpertJobType =  new NativeFunction(ptr(0x0822f894), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_GetCurCharacSkillTreeIndex =new NativeFunction(ptr(0x0822f33c), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_setCurCharacFatigue = new NativeFunction(ptr(0x0822f2ce), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUserCharacInfo_add_guild_exp = new NativeFunction(ptr(0x08645c76), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUserCharacInfo_setCurCharacStamina = new NativeFunction(ptr(0x082f0914), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUserCharacInfo_IncreasePowerWarPoint =  new NativeFunction(ptr(0x08687efc), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharacInvenR = new NativeFunction(ptr(0x080da27e), 'pointer', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_get_charac_guildkey = new NativeFunction(ptr(0x0822f46c), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharacFatigue = new NativeFunction(ptr(0x0822f2ae), 'int', ['pointer'], {"abi":"sysv"});
-var CUserCharacInfo_getCurCharacAddInfoRefW = new NativeFunction(ptr(0x086960d8), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_GetCurCharacExpertJob = new NativeFunction(ptr(0x822f8d4), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_GetCurCharacMaxEquipLevel = new NativeFunction(ptr(0x086467a0), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_SetCurCharacMaxEquipLevel = new NativeFunction(ptr(0x086467c2), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharacSkillR = new NativeFunction(ptr(0x0822f130), 'pointer', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharacSkillW = new NativeFunction(ptr(0x0822f140), 'pointer', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharacR = new NativeFunction(ptr(0x0854f718), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_get_charac_exp = new NativeFunction(ptr(0x084ec05c), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_setCurCharacExp = new NativeFunction(ptr(0x0819a87c), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUserCharacInfo_addCurCharacExp = new NativeFunction(ptr(0x086967be), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUserCharacInfo_incCurCharacLevel = new NativeFunction(ptr(0x08696762), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_resetCharacFatigueGrownUpBuff = new NativeFunction(ptr(0x08696386), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharacGrowType = new NativeFunction(ptr(0x0815741c), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_set_charac_fatigue_buf_bonus_exp = new NativeFunction(ptr(0x08469a02), 'int', ['pointer', 'int'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharacCreateTime = new NativeFunction(ptr(0x0822f202), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_ResetCurCharacDungeonPlayCount = new NativeFunction(ptr(0x086969fe), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_GetCurCharacExpertJobExp = new NativeFunction(ptr(0x08375026), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_GetCurCharacDungeonPlayCount = new NativeFunction(ptr(0x085bfc78), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_get_charac_job = new NativeFunction(ptr(0x080fdf20), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_get_pvp_grade = new NativeFunction(ptr(0x0819ee4a), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharSecondGrowType = new NativeFunction(ptr(0x0822f23c), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharFirstGrowType = new NativeFunction(ptr(0x08110c94), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_GetCurCharacExpertJobType = new NativeFunction(ptr(0x0822f894), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_GetCurCharacSkillTreeIndex = new NativeFunction(ptr(0x0822f33c), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_setCurCharacFatigue = new NativeFunction(ptr(0x0822f2ce), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUserCharacInfo_add_guild_exp = new NativeFunction(ptr(0x08645c76), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUserCharacInfo_setCurCharacStamina = new NativeFunction(ptr(0x082f0914), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUserCharacInfo_IncreasePowerWarPoint = new NativeFunction(ptr(0x08687efc), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharacInvenR = new NativeFunction(ptr(0x080da27e), 'pointer', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_get_charac_guildkey = new NativeFunction(ptr(0x0822f46c), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharacFatigue = new NativeFunction(ptr(0x0822f2ae), 'int', ['pointer'], {"abi":"sysv"});
+const CUserCharacInfo_getCurCharacAddInfoRefW = new NativeFunction(ptr(0x086960d8), 'int', ['pointer'], {"abi":"sysv"});
 
-var CInventory_GetInvenData = new NativeFunction(ptr(0x084fbf2c), 'int', ['pointer','int','pointer'], {"abi":"sysv"});
-var CInventory_GetInvenSlot  = new NativeFunction(ptr(0x084fb918), 'pointer', ['pointer', 'int', 'int', 'int'], {"abi":"sysv"});
-var CInventory_update_item= new NativeFunction(ptr(0x085000ae), 'int', ['pointer','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int'], {"abi":"sysv"});
-var CInventory_insertItemIntoInventory =  new NativeFunction(ptr(0x08502d86), 'int', ['pointer','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int'], {"abi":"sysv"});
-var CInventory_GetEventCoin  = new NativeFunction(ptr(0x08110c7a), 'int', ['pointer'], {"abi":"sysv"});
-var CInventory_SetEventCoin = new NativeFunction(ptr(0x08110c86), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var CInventory_GetCoin = new NativeFunction(ptr(0x0822d68a), 'int', ['pointer'], {"abi":"sysv"});
-var CInventory_SetCoin = new NativeFunction(ptr(0x0822d67c), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var CInventory_get_inven_slot_no= new NativeFunction(ptr(0x0850cd62), 'int', ['pointer', 'int'], {"abi":"sysv"});
+const CInventory_GetInvenData = new NativeFunction(ptr(0x084fbf2c), 'int', ['pointer','int','pointer'], {"abi":"sysv"});
+const CInventory_GetInvenSlot = new NativeFunction(ptr(0x084fb918), 'pointer', ['pointer', 'int', 'int', 'int'], {"abi":"sysv"});
+const CInventory_update_item = new NativeFunction(ptr(0x085000ae), 'int', ['pointer','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int'], {"abi":"sysv"});
+const CInventory_insertItemIntoInventory = new NativeFunction(ptr(0x08502d86), 'int', ['pointer','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int','int'], {"abi":"sysv"});
+const CInventory_GetEventCoin = new NativeFunction(ptr(0x08110c7a), 'int', ['pointer'], {"abi":"sysv"});
+const CInventory_SetEventCoin = new NativeFunction(ptr(0x08110c86), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const CInventory_GetCoin = new NativeFunction(ptr(0x0822d68a), 'int', ['pointer'], {"abi":"sysv"});
+const CInventory_SetCoin = new NativeFunction(ptr(0x0822d67c), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const CInventory_get_inven_slot_no = new NativeFunction(ptr(0x0850cd62), 'int', ['pointer', 'int'], {"abi":"sysv"});
 
 
 // 分解机 参数 角色 位置 背包类型  239  角色（谁的） 0xFFFF
-var DisPatcher_DisJointItem_disjoint = new NativeFunction(ptr(0x81f92ca), 'int', ['pointer', 'int', 'int', 'int','pointer','int'], {"abi":"sysv"});
+const DisPatcher_DisJointItem_disjoint = new NativeFunction(ptr(0x81f92ca), 'int', ['pointer', 'int', 'int', 'int','pointer','int'], {"abi":"sysv"});
 // 获取账号金库一个空的格子
-var CAccountCargo_GetEmptySlot= new NativeFunction(ptr(0x0828a580), 'int', ['pointer'], {"abi":"sysv"});
+const CAccountCargo_GetEmptySlot = new NativeFunction(ptr(0x0828a580), 'int', ['pointer'], {"abi":"sysv"});
 // 将已经物品移动到某个格子 第一个账号金库，第二个移入的物品，第三个格子位置
-var CAccountCargo_InsertItem = new NativeFunction(ptr(0x08289c82), 'int', ['pointer','pointer','int'], {"abi":"sysv"});
+const CAccountCargo_InsertItem = new NativeFunction(ptr(0x08289c82), 'int', ['pointer','pointer','int'], {"abi":"sysv"});
 // 向客户端发送账号金库列表
-var CAccountCargo_SendItemList = new NativeFunction(ptr(0x0828a88a), 'int', ['pointer'], {"abi":"sysv"});
+const CAccountCargo_SendItemList = new NativeFunction(ptr(0x0828a88a), 'int', ['pointer'], {"abi":"sysv"});
 
-var CAccountCargo_CheckValidSlot = new NativeFunction(ptr(0x0828A554), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var CAccountCargo_ResetSlot = new NativeFunction(ptr(0x082898C0), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var ARAD_Singleton_ServiceRestrictManager_Get = new NativeFunction(ptr(0x081625E6), 'pointer', [], { "abi": "sysv" });
-var ServiceRestrictManager_isRestricted = new NativeFunction(ptr(0x0816E6B8), 'uint8', ['int', 'pointer', 'int', 'int'], { "abi": "sysv" });
-var CUser_SendCmdErrorPacket = new NativeFunction(ptr(0x0867BF42), 'int', ['pointer', 'int', 'uint8'], { "abi": "sysv" });
-var CSecu_ProtectionField_Check = new NativeFunction(ptr(0x08288A02), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
-var CUserCharacInfo_getCurCharacMoney = new NativeFunction(ptr(0x0817A188), 'int', ['pointer'], { "abi": "sysv" });
-var CAccountCargo_CheckMoneyLimit = new NativeFunction(ptr(0x0828A4CA), 'int', ['pointer', 'uint'], { "abi": "sysv" });
+const CAccountCargo_CheckValidSlot = new NativeFunction(ptr(0x0828A554), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const CAccountCargo_ResetSlot = new NativeFunction(ptr(0x082898C0), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const ARAD_Singleton_ServiceRestrictManager_Get = new NativeFunction(ptr(0x081625E6), 'pointer', [], { "abi": "sysv" });
+const ServiceRestrictManager_isRestricted = new NativeFunction(ptr(0x0816E6B8), 'uint8', ['int', 'pointer', 'int', 'int'], { "abi": "sysv" });
+const CUser_SendCmdErrorPacket = new NativeFunction(ptr(0x0867BF42), 'int', ['pointer', 'int', 'uint8'], { "abi": "sysv" });
+const CSecu_ProtectionField_Check = new NativeFunction(ptr(0x08288A02), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
+const CUserCharacInfo_getCurCharacMoney = new NativeFunction(ptr(0x0817A188), 'int', ['pointer'], { "abi": "sysv" });
+const CAccountCargo_CheckMoneyLimit = new NativeFunction(ptr(0x0828A4CA), 'int', ['pointer', 'uint'], { "abi": "sysv" });
 
 //设置幸运点数
-var CUserCharacInfo_SetCurCharacLuckPoint = new NativeFunction(ptr(0x0864670A), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const CUserCharacInfo_SetCurCharacLuckPoint = new NativeFunction(ptr(0x0864670A), 'int', ['pointer', 'int'], { "abi": "sysv" });
 //获取角色当前幸运点
-var CUserCharacInfo_GetCurCharacLuckPoint = new NativeFunction(ptr(0x822F828), 'int', ['pointer'], { "abi": "sysv" });
+const CUserCharacInfo_GetCurCharacLuckPoint = new NativeFunction(ptr(0x822F828), 'int', ['pointer'], { "abi": "sysv" });
 //设置角色属性改变脏标记(角色上线时把所有属性从数据库缓存到内存中, 只有设置了脏标记, 角色下线时才能正确存档到数据库, 否则变动的属性下线后可能会回档)
-var CUserCharacInfo_enableSaveCharacStat = new NativeFunction(ptr(0x819A870), 'int', ['pointer'], { "abi": "sysv" });
+const CUserCharacInfo_enableSaveCharacStat = new NativeFunction(ptr(0x819A870), 'int', ['pointer'], { "abi": "sysv" });
 //获取角色状态
-var CUser_get_state = new NativeFunction(ptr(0x80DA38C), 'int', ['pointer'], { "abi": "sysv" });
+const CUser_get_state = new NativeFunction(ptr(0x80DA38C), 'int', ['pointer'], { "abi": "sysv" });
 //获取角色账号id
-var CUser_get_acc_id = new NativeFunction(ptr(0x80DA36E), 'int', ['pointer'], { "abi": "sysv" });
-var Stream_operator_p = new NativeFunction(ptr(0x0861C796), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var NumberToString = new NativeFunction(ptr(0x0810904B), 'uint', ['uint', 'int'], { "abi": "sysv" });
-var Stream_GetOutBuffer_SIG_ACCOUNT_CARGO_DATA = new NativeFunction(ptr(0x08453A26), 'int', ['pointer'], { "abi": "sysv" });
-var CAccountCargo_GetMoney = new NativeFunction(ptr(0x0822F020), 'int', ['pointer'], { "abi": "sysv" });
+const CUser_get_acc_id = new NativeFunction(ptr(0x80DA36E), 'int', ['pointer'], { "abi": "sysv" });
+const Stream_operator_p = new NativeFunction(ptr(0x0861C796), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const NumberToString = new NativeFunction(ptr(0x0810904B), 'uint', ['uint', 'int'], { "abi": "sysv" });
+const Stream_GetOutBuffer_SIG_ACCOUNT_CARGO_DATA = new NativeFunction(ptr(0x08453A26), 'int', ['pointer'], { "abi": "sysv" });
+const CAccountCargo_GetMoney = new NativeFunction(ptr(0x0822F020), 'int', ['pointer'], { "abi": "sysv" });
 //获取当前角色id
-var CUserCharacInfo_getCurCharacNo = new NativeFunction(ptr(0x80CBC4E), 'int', ['pointer'], { "abi": "sysv" });
+const CUserCharacInfo_getCurCharacNo = new NativeFunction(ptr(0x80CBC4E), 'int', ['pointer'], { "abi": "sysv" });
 //获取角色等级
-var CUserCharacInfo_get_charac_level = new NativeFunction(ptr(0x80DA2B8), 'int', ['pointer'], { "abi": "sysv" });
+const CUserCharacInfo_get_charac_level = new NativeFunction(ptr(0x80DA2B8), 'int', ['pointer'], { "abi": "sysv" });
 //获取角色名字
-var CUserCharacInfo_getCurCharacName = new NativeFunction(ptr(0x8101028), 'pointer', ['pointer'], { "abi": "sysv" });
+const CUserCharacInfo_getCurCharacName = new NativeFunction(ptr(0x8101028), 'pointer', ['pointer'], { "abi": "sysv" });
 //获取角色当前等级升级所需经验
-var CUserCharacInfo_get_level_up_exp = new NativeFunction(ptr(0x0864E3BA), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const CUserCharacInfo_get_level_up_exp = new NativeFunction(ptr(0x0864E3BA), 'int', ['pointer', 'int'], { "abi": "sysv" });
 //获取角色背包
-var CUserCharacInfo_getCurCharacInvenW = new NativeFunction(ptr(0x80DA28E), 'pointer', ['pointer'], { "abi": "sysv" });
+const CUserCharacInfo_getCurCharacInvenW = new NativeFunction(ptr(0x80DA28E), 'pointer', ['pointer'], { "abi": "sysv" });
 //获取副本id
-var CDungeon_get_index = new NativeFunction(ptr(0x080FDCF0), 'int', ['pointer'], { "abi": "sysv" });
+const CDungeon_get_index = new NativeFunction(ptr(0x080FDCF0), 'int', ['pointer'], { "abi": "sysv" });
 //获取背包槽中的道具
-var CInventory_GetInvenRef = new NativeFunction(ptr(0x84FC1DE), 'pointer', ['pointer', 'int', 'int'], { "abi": "sysv" });
+const CInventory_GetInvenRef = new NativeFunction(ptr(0x84FC1DE), 'pointer', ['pointer', 'int', 'int'], { "abi": "sysv" });
 //道具是否是装备
-var Inven_Item_isEquipableItemType = new NativeFunction(ptr(0x08150812), 'int', ['pointer'], { "abi": "sysv" });
+const Inven_Item_isEquipableItemType = new NativeFunction(ptr(0x08150812), 'int', ['pointer'], { "abi": "sysv" });
 //是否魔法封印装备
-var CEquipItem_IsRandomOption = new NativeFunction(ptr(0x8514E5E), 'int', ['pointer'], { "abi": "sysv" });
+const CEquipItem_IsRandomOption = new NativeFunction(ptr(0x8514E5E), 'int', ['pointer'], { "abi": "sysv" });
 //解封魔法封印
-var random_option_CRandomOptionItemHandle_give_option = new NativeFunction(ptr(0x85F2CC6), 'int', ['pointer', 'int', 'int', 'int', 'int', 'int', 'pointer'], { "abi": "sysv" });
+const random_option_CRandomOptionItemHandle_give_option = new NativeFunction(ptr(0x85F2CC6), 'int', ['pointer', 'int', 'int', 'int', 'int', 'int', 'pointer'], { "abi": "sysv" });
 //获取装备品级
-var CItem_get_rarity = new NativeFunction(ptr(0x080F12D6), 'int', ['pointer'], { "abi": "sysv" });
+const CItem_get_rarity = new NativeFunction(ptr(0x080F12D6), 'int', ['pointer'], { "abi": "sysv" });
 //获取装备可穿戴等级
-var CItem_getUsableLevel = new NativeFunction(ptr(0x80F12EE), 'int', ['pointer'], { "abi": "sysv" });
+const CItem_getUsableLevel = new NativeFunction(ptr(0x80F12EE), 'int', ['pointer'], { "abi": "sysv" });
 //获取装备[item group name]
-var CItem_getItemGroupName = new NativeFunction(ptr(0x80F1312), 'int', ['pointer'], { "abi": "sysv" });
+const CItem_getItemGroupName = new NativeFunction(ptr(0x80F1312), 'int', ['pointer'], { "abi": "sysv" });
 //获取装备魔法封印等级
-var CEquipItem_GetRandomOptionGrade = new NativeFunction(ptr(0x8514E6E), 'int', ['pointer'], { "abi": "sysv" });
-var CEquipItem_GetUsableEquipmentType = new NativeFunction(ptr(0x0832e036), 'int', ['pointer'], {"abi":"sysv"});
-var CEquipItem_GetSubType = new NativeFunction(ptr(0x833eecc), 'int', ['pointer'], {"abi":"sysv"});
+const CEquipItem_GetRandomOptionGrade = new NativeFunction(ptr(0x8514E6E), 'int', ['pointer'], { "abi": "sysv" });
+const CEquipItem_GetUsableEquipmentType = new NativeFunction(ptr(0x0832e036), 'int', ['pointer'], {"abi":"sysv"});
+const CEquipItem_GetSubType = new NativeFunction(ptr(0x833eecc), 'int', ['pointer'], {"abi":"sysv"});
 //检查背包中道具是否为空
-var Inven_Item_isEmpty = new NativeFunction(ptr(0x811ED66), 'int', ['pointer'], { "abi": "sysv" });
+const Inven_Item_isEmpty = new NativeFunction(ptr(0x811ED66), 'int', ['pointer'], { "abi": "sysv" });
 //获取背包中道具item_id
-var Inven_Item_getKey = new NativeFunction(ptr(0x850D14E), 'int', ['pointer'], { "abi": "sysv" });
+const Inven_Item_getKey = new NativeFunction(ptr(0x850D14E), 'int', ['pointer'], { "abi": "sysv" });
 //获取道具附加信息
-var Inven_Item_get_add_info = new NativeFunction(ptr(0x80F783A), 'int', ['pointer'], { "abi": "sysv" });
+const Inven_Item_get_add_info = new NativeFunction(ptr(0x80F783A), 'int', ['pointer'], { "abi": "sysv" });
 
-var CItem_GetIndex = new NativeFunction(ptr(0x8110c48), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetGrade = new NativeFunction(ptr(0x8110c54), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetPrice = new NativeFunction(ptr(0x822c84a), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetGenRate = new NativeFunction(ptr(0x822c84a), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetNeedLevel = new NativeFunction(ptr(0x8545fda), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetUsableLevel = new NativeFunction(ptr(0x80f12ee), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetRarity = new NativeFunction(ptr(0x80f12d6), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetItemGroupName = new NativeFunction(ptr(0x80f1312), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetUpSkillType = new NativeFunction(ptr(0x8545fcc), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetGetExpertJobCompoundMaterialVariation = new NativeFunction(ptr(0x850d292), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetExpertJobCompoundRateVariation = new NativeFunction(ptr(0x850d2aa), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetExpertJobCompoundResultVariation = new NativeFunction(ptr(0x850d2c2), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetExpertJobSelfDisjointBigWinRate = new NativeFunction(ptr(0x850d2de), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetExpertJobSelfDisjointResultVariation = new NativeFunction(ptr(0x850d2f6), 'int', ['pointer'], {"abi":"sysv"});
-var CItem_GetExpertJobAdditionalExp = new NativeFunction(ptr(0x850d30e), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetIndex = new NativeFunction(ptr(0x8110c48), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetGrade = new NativeFunction(ptr(0x8110c54), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetPrice = new NativeFunction(ptr(0x822c84a), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetGenRate = new NativeFunction(ptr(0x822c84a), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetNeedLevel = new NativeFunction(ptr(0x8545fda), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetUsableLevel = new NativeFunction(ptr(0x80f12ee), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetRarity = new NativeFunction(ptr(0x80f12d6), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetItemGroupName = new NativeFunction(ptr(0x80f1312), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetUpSkillType = new NativeFunction(ptr(0x8545fcc), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetGetExpertJobCompoundMaterialVariation = new NativeFunction(ptr(0x850d292), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetExpertJobCompoundRateVariation = new NativeFunction(ptr(0x850d2aa), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetExpertJobCompoundResultVariation = new NativeFunction(ptr(0x850d2c2), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetExpertJobSelfDisjointBigWinRate = new NativeFunction(ptr(0x850d2de), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetExpertJobSelfDisjointResultVariation = new NativeFunction(ptr(0x850d2f6), 'int', ['pointer'], {"abi":"sysv"});
+const CItem_GetExpertJobAdditionalExp = new NativeFunction(ptr(0x850d30e), 'int', ['pointer'], {"abi":"sysv"});
 
 //获取时装插槽数据
-var WongWork_CAvatarItemMgr_getJewelSocketData = new NativeFunction(ptr(0x82F98F8), 'pointer', ['pointer', 'int'], { "abi": "sysv" });
+const WongWork_CAvatarItemMgr_getJewelSocketData = new NativeFunction(ptr(0x82F98F8), 'pointer', ['pointer', 'int'], { "abi": "sysv" });
 //获取DataManager实例
-var G_CDataManager = new NativeFunction(ptr(0x80CC19B), 'pointer', [], { "abi": "sysv" });
+const G_CDataManager = new NativeFunction(ptr(0x80CC19B), 'pointer', [], { "abi": "sysv" });
 //获取时装管理器
-var CInventory_GetAvatarItemMgrR = new NativeFunction(ptr(0x80DD576), 'pointer', ['pointer'], { "abi": "sysv" });
+const CInventory_GetAvatarItemMgrR = new NativeFunction(ptr(0x80DD576), 'pointer', ['pointer'], { "abi": "sysv" });
 //获取装备pvf数据
-var CDataManager_find_item = new NativeFunction(ptr(0x835FA32), 'pointer', ['pointer', 'int'], { "abi": "sysv" });
+const CDataManager_find_item = new NativeFunction(ptr(0x835FA32), 'pointer', ['pointer', 'int'], { "abi": "sysv" });
 //从pvf中获取任务数据
-var CDataManager_find_quest = new NativeFunction(ptr(0x835FDC6), 'pointer', ['pointer', 'int'], { "abi": "sysv" });
+const CDataManager_find_quest = new NativeFunction(ptr(0x835FDC6), 'pointer', ['pointer', 'int'], { "abi": "sysv" });
 
 //获取DataManager实例 用于处理pvf的
-var CDataManager_get_level_exp =  new NativeFunction(ptr(0x08360442), 'int', ['pointer','int'], {"abi":"sysv"});
-var CDataManager_getDailyTrainingQuest = new NativeFunction(ptr(0x083640fe), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var CDataManager_GetSpAtLevelUp = new NativeFunction(ptr(0x08360cb8), 'int', ['pointer','int'], {"abi":"sysv"});
-var CDataManager_get_event_script_mng = new NativeFunction(ptr(0x08110b62), 'pointer', ['pointer'], {"abi":"sysv"});
-var CDataManager_GetExpertJobScript = new NativeFunction(ptr(0x0822b5f2), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var CDataManager_get_dimensionInout = new NativeFunction(ptr(0x0822b612), 'int', ['pointer','int'], {"abi":"sysv"});
+const CDataManager_get_level_exp = new NativeFunction(ptr(0x08360442), 'int', ['pointer','int'], {"abi":"sysv"});
+const CDataManager_getDailyTrainingQuest = new NativeFunction(ptr(0x083640fe), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const CDataManager_GetSpAtLevelUp = new NativeFunction(ptr(0x08360cb8), 'int', ['pointer','int'], {"abi":"sysv"});
+const CDataManager_get_event_script_mng = new NativeFunction(ptr(0x08110b62), 'pointer', ['pointer'], {"abi":"sysv"});
+const CDataManager_GetExpertJobScript = new NativeFunction(ptr(0x0822b5f2), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const CDataManager_get_dimensionInout = new NativeFunction(ptr(0x0822b612), 'int', ['pointer','int'], {"abi":"sysv"});
 
 //获取消耗品类型
-var CStackableItem_GetItemType = new NativeFunction(ptr(0x8514A84), 'int', ['pointer'], { "abi": "sysv" });
+const CStackableItem_GetItemType = new NativeFunction(ptr(0x8514A84), 'int', ['pointer'], { "abi": "sysv" });
 //获取徽章支持的镶嵌槽类型
-var CStackableItem_getJewelTargetSocket = new NativeFunction(ptr(0x0822CA28), 'int', ['pointer'], { "abi": "sysv" });
+const CStackableItem_getJewelTargetSocket = new NativeFunction(ptr(0x0822CA28), 'int', ['pointer'], { "abi": "sysv" });
 //背包道具
-var Inven_Item_Inven_Item = new NativeFunction(ptr(0x80CB854), 'pointer', ['pointer'], { "abi": "sysv" });
+const Inven_Item_Inven_Item = new NativeFunction(ptr(0x80CB854), 'pointer', ['pointer'], { "abi": "sysv" });
 //获取角色点券余额
-var CUser_GetCera = new NativeFunction(ptr(0x080FDF7A), 'int', ['pointer'], { "abi": "sysv" });
+const CUser_GetCera = new NativeFunction(ptr(0x080FDF7A), 'int', ['pointer'], { "abi": "sysv" });
 //获取玩家任务信息
-var CUser_getCurCharacQuestW = new NativeFunction(ptr(0x814AA5E), 'pointer', ['pointer'], { "abi": "sysv" });
+const CUser_getCurCharacQuestW = new NativeFunction(ptr(0x814AA5E), 'pointer', ['pointer'], { "abi": "sysv" });
 //获取系统时间
-var CSystemTime_getCurSec = new NativeFunction(ptr(0x80CBC9E), 'int', ['pointer'], { "abi": "sysv" });
-var GlobalData_s_systemTime_ = ptr(0x941F714);
+const CSystemTime_getCurSec = new NativeFunction(ptr(0x80CBC9E), 'int', ['pointer'], { "abi": "sysv" });
+const GlobalData_s_systemTime_ = ptr(0x941F714);
 //本次登录时间
-var CUserCharacInfo_GetLoginTick = new NativeFunction(ptr(0x822F692), 'int', ['pointer'], { "abi": "sysv" });
+const CUserCharacInfo_GetLoginTick = new NativeFunction(ptr(0x822F692), 'int', ['pointer'], { "abi": "sysv" });
 //道具是否被锁
-var CUser_CheckItemLock = new NativeFunction(ptr(0x8646942), 'int', ['pointer', 'int', 'int'], { "abi": "sysv" });
+const CUser_CheckItemLock = new NativeFunction(ptr(0x8646942), 'int', ['pointer', 'int', 'int'], { "abi": "sysv" });
 //道具是否为消耗品
-var CItem_is_stackable = new NativeFunction(ptr(0x80F12FA), 'int', ['pointer'], { "abi": "sysv" });
+const CItem_is_stackable = new NativeFunction(ptr(0x80F12FA), 'int', ['pointer'], { "abi": "sysv" });
 //任务是否已完成
-var WongWork_CQuestClear_isClearedQuest = new NativeFunction(ptr(0x808BAE0), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var UserQuest_finish_quest = new NativeFunction(ptr(0x86AC854), 'int', ['pointer', 'int'], {"abi":"sysv"});
+const WongWork_CQuestClear_isClearedQuest = new NativeFunction(ptr(0x808BAE0), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const UserQuest_finish_quest = new NativeFunction(ptr(0x86AC854), 'int', ['pointer', 'int'], {"abi":"sysv"});
 //重置所有任务为未完成状态
-var UserQuest_reset = new NativeFunction(ptr(0x86AB894), 'int', ['pointer'], {"abi":"sysv"});
-var UserQuest_get_mail_quest_info = new NativeFunction(ptr(0x086abd7a), 'int', ['int','int','pointer'], {"abi":"sysv"});
-var UserQuest_ResetUrgentQuestWaitingList = new NativeFunction(ptr(0x086ad178),  'pointer', ['pointer'], {"abi":"sysv"});
+const UserQuest_reset = new NativeFunction(ptr(0x86AB894), 'int', ['pointer'], {"abi":"sysv"});
+const UserQuest_get_mail_quest_info = new NativeFunction(ptr(0x086abd7a), 'int', ['int','int','pointer'], {"abi":"sysv"});
+const UserQuest_ResetUrgentQuestWaitingList = new NativeFunction(ptr(0x086ad178),  'pointer', ['pointer'], {"abi":"sysv"});
 //设置任务为已完成状态
-var WongWork_CQuestClear_setClearedQuest = new NativeFunction(ptr(0x808BA78), 'int', ['pointer', 'int'], {"abi":"sysv"});
+const WongWork_CQuestClear_setClearedQuest = new NativeFunction(ptr(0x808BA78), 'int', ['pointer', 'int'], {"abi":"sysv"});
 //重置任务为未完成状态
-var WongWork_CQuestClear_resetClearedQuests = new NativeFunction(ptr(0x808BAAC), 'int', ['pointer', 'int'], {"abi":"sysv"});
+const WongWork_CQuestClear_resetClearedQuests = new NativeFunction(ptr(0x808BAAC), 'int', ['pointer', 'int'], {"abi":"sysv"});
 //根据账号查找已登录角色
-var GameWorld_find_user_from_world_byaccid = new NativeFunction(ptr(0x86C4D40), 'pointer', ['pointer', 'int'], { "abi": "sysv" });
+const GameWorld_find_user_from_world_byaccid = new NativeFunction(ptr(0x86C4D40), 'pointer', ['pointer', 'int'], { "abi": "sysv" });
 //任务相关操作(第二个参数为协议编号: 33=接受任务, 34=放弃任务, 35=任务完成条件已满足, 36=提交任务领取奖励)
-var CUser_quest_action = new NativeFunction(ptr(0x0866DA8A), 'int', ['pointer', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
+const CUser_quest_action = new NativeFunction(ptr(0x0866DA8A), 'int', ['pointer', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
 //设置GM完成任务模式(无条件完成任务)
-var CUser_setGmQuestFlag = new NativeFunction(ptr(0x822FC8E), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const CUser_setGmQuestFlag = new NativeFunction(ptr(0x822FC8E), 'int', ['pointer', 'int'], { "abi": "sysv" });
 //删除背包槽中的道具
-var Inven_Item_reset = new NativeFunction(ptr(0x080CB7D8), 'int', ['pointer'], { "abi": "sysv" });
+const Inven_Item_reset = new NativeFunction(ptr(0x080CB7D8), 'int', ['pointer'], { "abi": "sysv" });
 //减少金币
-var CInventory_use_money = new NativeFunction(ptr(0x84FF54C), 'int', ['pointer', 'int', 'int', 'int'], { "abi": "sysv" });
-var CInventory_gain_money = new NativeFunction(ptr(0x084ff29C), 'pointer', ['pointer', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
-var CAccountCargo_AddMoney = new NativeFunction(ptr(0x0828A742), 'pointer', ['pointer', 'uint'], { "abi": "sysv" });
-var CAccountCargo_SendNotifyMoney = new NativeFunction(ptr(0x0828A7DC), 'pointer', ['int', 'int'], { "abi": "sysv" });
-var CUser_CheckMoney = new NativeFunction(ptr(0x0866AF1C), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var CAccountCargo_SubMoney = new NativeFunction(ptr(0x0828A764), 'pointer', ['pointer', 'uint'], { "abi": "sysv" });
+const CInventory_use_money = new NativeFunction(ptr(0x84FF54C), 'int', ['pointer', 'int', 'int', 'int'], { "abi": "sysv" });
+const CInventory_gain_money = new NativeFunction(ptr(0x084ff29C), 'pointer', ['pointer', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
+const CAccountCargo_AddMoney = new NativeFunction(ptr(0x0828A742), 'pointer', ['pointer', 'uint'], { "abi": "sysv" });
+const CAccountCargo_SendNotifyMoney = new NativeFunction(ptr(0x0828A7DC), 'pointer', ['int', 'int'], { "abi": "sysv" });
+const CUser_CheckMoney = new NativeFunction(ptr(0x0866AF1C), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const CAccountCargo_SubMoney = new NativeFunction(ptr(0x0828A764), 'pointer', ['pointer', 'uint'], { "abi": "sysv" });
 //背包中删除道具(背包指针, 背包类型, 槽, 数量, 删除原因, 记录删除日志)
-var CInventory_delete_item = new NativeFunction(ptr(0x850400C), 'int', ['pointer', 'int', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
+const CInventory_delete_item = new NativeFunction(ptr(0x850400C), 'int', ['pointer', 'int', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
 //角色增加经验
-var CUser_gain_exp_sp = new NativeFunction(ptr(0x866A3FE), 'int', ['pointer', 'int', 'pointer', 'pointer', 'int', 'int', 'int'], { "abi": "sysv" });
+const CUser_gain_exp_sp = new NativeFunction(ptr(0x866A3FE), 'int', ['pointer', 'int', 'pointer', 'pointer', 'int', 'int', 'int'], { "abi": "sysv" });
 //时装镶嵌数据存盘
-var DB_UpdateAvatarJewelSlot_makeRequest = new NativeFunction(ptr(0x843081C), 'pointer', ['int', 'int', 'pointer'], { "abi": "sysv" });
+const DB_UpdateAvatarJewelSlot_makeRequest = new NativeFunction(ptr(0x843081C), 'pointer', ['int', 'int', 'pointer'], { "abi": "sysv" });
 //发包给客户端
-var CUser_Send = new NativeFunction(ptr(0x86485BA), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const CUser_Send = new NativeFunction(ptr(0x86485BA), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
 //给角色发消息
-var CUser_SendNotiPacketMessage = new NativeFunction(ptr(0x86886CE), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
+const CUser_SendNotiPacketMessage = new NativeFunction(ptr(0x86886CE), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
 //将协议发给所有在线玩家(慎用! 广播类接口必须限制调用频率, 防止CC攻击)
 //除非必须使用, 否则改用对象更加明确的CParty::send_to_party/GameWorld::send_to_area
-var GameWorld_send_all = new NativeFunction(ptr(0x86C8C14), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var GameWorld_send_all_with_state = new NativeFunction(ptr(0x86C9184), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
+const GameWorld_send_all = new NativeFunction(ptr(0x86C8C14), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const GameWorld_send_all_with_state = new NativeFunction(ptr(0x86C9184), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
 //通知客户端道具更新(客户端指针, 通知方式[仅客户端=1, 世界广播=0, 小队=2, war room=3], itemSpace[装备=0, 时装=1], 道具所在的背包槽)
-var CUser_SendUpdateItemList = new NativeFunction(ptr(0x867C65A), 'int', ['pointer', 'int', 'int', 'int'], { "abi": "sysv" });
+const CUser_SendUpdateItemList = new NativeFunction(ptr(0x867C65A), 'int', ['pointer', 'int', 'int', 'int'], { "abi": "sysv" });
 //通知客户端更新已完成任务列表
-var CUser_send_clear_quest_list = new NativeFunction(ptr(0x868B044), 'int', ['pointer'], { "abi": "sysv" });
+const CUser_send_clear_quest_list = new NativeFunction(ptr(0x868B044), 'int', ['pointer'], { "abi": "sysv" });
 //通知客户端更新角色任务列表
-var UserQuest_get_quest_info = new NativeFunction(ptr(0x86ABBA8), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const UserQuest_get_quest_info = new NativeFunction(ptr(0x86ABBA8), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
 //获取在线玩家数量
-var GameWorld_get_UserCount_InWorld = new NativeFunction(ptr(0x86C4550), 'int', ['pointer'], { "abi": "sysv" });
+const GameWorld_get_UserCount_InWorld = new NativeFunction(ptr(0x86C4550), 'int', ['pointer'], { "abi": "sysv" });
 //在线玩家列表(用于std::map遍历)
-var gameworld_user_map_begin = new NativeFunction(ptr(0x80F78A6), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var gameworld_user_map_end = new NativeFunction(ptr(0x80F78CC), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var gameworld_user_map_not_equal = new NativeFunction(ptr(0x80F78F2), 'bool', ['pointer', 'pointer'], { "abi": "sysv" });
-var gameworld_user_map_get = new NativeFunction(ptr(0x80F7944), 'pointer', ['pointer'], { "abi": "sysv" });
-var gameworld_user_map_next = new NativeFunction(ptr(0x80F7906), 'pointer', ['pointer', 'pointer'], { "abi": "sysv" });
-var GameWorld_getDungeonMinimumRequiredLevel = new NativeFunction(ptr(0x086c9076), 'int', ['pointer','int'], {"abi":"sysv"});
-var GameWorld_send_user_dungeon_inout_message = new NativeFunction(ptr(0x086c8fc8), 'void', ['pointer','pointer','int','int'], {"abi":"sysv"});
-var GameWorld_IsPvPSkilTreeChannel = new NativeFunction(ptr(0x0823441e), 'int', ['pointer'], {"abi":"sysv"});
+const gameworld_user_map_begin = new NativeFunction(ptr(0x80F78A6), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const gameworld_user_map_end = new NativeFunction(ptr(0x80F78CC), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const gameworld_user_map_not_equal = new NativeFunction(ptr(0x80F78F2), 'bool', ['pointer', 'pointer'], { "abi": "sysv" });
+const gameworld_user_map_get = new NativeFunction(ptr(0x80F7944), 'pointer', ['pointer'], { "abi": "sysv" });
+const gameworld_user_map_next = new NativeFunction(ptr(0x80F7906), 'pointer', ['pointer', 'pointer'], { "abi": "sysv" });
+const GameWorld_getDungeonMinimumRequiredLevel = new NativeFunction(ptr(0x086c9076), 'int', ['pointer','int'], {"abi":"sysv"});
+const GameWorld_send_user_dungeon_inout_message = new NativeFunction(ptr(0x086c8fc8), 'void', ['pointer','pointer','int','int'], {"abi":"sysv"});
+const GameWorld_IsPvPSkilTreeChannel = new NativeFunction(ptr(0x0823441e), 'int', ['pointer'], {"abi":"sysv"});
 
 //发系统邮件(多道具)
-var WongWork_CMailBoxHelper_ReqDBSendNewSystemMultiMail = new NativeFunction(ptr(0x8556B68), 'int', ['pointer', 'pointer', 'int', 'int', 'int', 'pointer', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
-var WongWork_CMailBoxHelper_MakeSystemMultiMailPostal = new NativeFunction(ptr(0x8556A14), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
+const WongWork_CMailBoxHelper_ReqDBSendNewSystemMultiMail = new NativeFunction(ptr(0x8556B68), 'int', ['pointer', 'pointer', 'int', 'int', 'int', 'pointer', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
+const WongWork_CMailBoxHelper_MakeSystemMultiMailPostal = new NativeFunction(ptr(0x8556A14), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
 //发系统邮件(时装)(仅支持在线角色发信)
-var WongWork_CMailBoxHelper_ReqDBSendNewAvatarMail = new NativeFunction(ptr(0x85561B0), 'pointer', ['pointer', 'int', 'int', 'int', 'int', 'int', 'int', 'pointer', 'int'], { "abi": "sysv" });
+const WongWork_CMailBoxHelper_ReqDBSendNewAvatarMail = new NativeFunction(ptr(0x85561B0), 'pointer', ['pointer', 'int', 'int', 'int', 'int', 'int', 'int', 'pointer', 'int'], { "abi": "sysv" });
 
-var WongWork_CUserPremium_GetGoldBonus = new NativeFunction(ptr(0x08694a64), 'int', ['pointer','int'], {"abi":"sysv"});
-var WongWork_CUserPremium_RecalcAdditionalInfo = new NativeFunction(ptr(0x086ae8c6), 'pointer', ['pointer','pointer'], {"abi":"sysv"});
-var WongWork_CGMAccounts_isGM = new NativeFunction(ptr(0x08109346), 'int', ['pointer','int'], {"abi":"sysv"});
-var WongWork_CSkillChanger_CheckCondition = new NativeFunction(ptr(0x08609d10), 'int', ['pointer'], {"abi":"sysv"});
-var WongWork_CSkillChanger_d_CSkillChanger = new NativeFunction(ptr(0x08234fc4), 'void', ['pointer'], {"abi":"sysv"});
-var WongWork_CSkillChanger_CSkillChanger = new NativeFunction(ptr(0x08234fbe), 'void', ['pointer'], {"abi":"sysv"});
-var WongWork_CSkillChanger_SkillInitialize =new NativeFunction(ptr(0x08609e90), 'pointer', ['pointer','pointer','int','int'], {"abi":"sysv"});
-var WongWork_CMailBoxHelper_ReqDBSendNewSystemMail = new NativeFunction(ptr(0x085555e8), 'int', ['pointer'], {"abi":"sysv"});
+const WongWork_CUserPremium_GetGoldBonus = new NativeFunction(ptr(0x08694a64), 'int', ['pointer','int'], {"abi":"sysv"});
+const WongWork_CUserPremium_RecalcAdditionalInfo = new NativeFunction(ptr(0x086ae8c6), 'pointer', ['pointer','pointer'], {"abi":"sysv"});
+const WongWork_CGMAccounts_isGM = new NativeFunction(ptr(0x08109346), 'int', ['pointer','int'], {"abi":"sysv"});
+const WongWork_CSkillChanger_CheckCondition = new NativeFunction(ptr(0x08609d10), 'int', ['pointer'], {"abi":"sysv"});
+const WongWork_CSkillChanger_d_CSkillChanger = new NativeFunction(ptr(0x08234fc4), 'void', ['pointer'], {"abi":"sysv"});
+const WongWork_CSkillChanger_CSkillChanger = new NativeFunction(ptr(0x08234fbe), 'void', ['pointer'], {"abi":"sysv"});
+const WongWork_CSkillChanger_SkillInitialize = new NativeFunction(ptr(0x08609e90), 'pointer', ['pointer','pointer','int','int'], {"abi":"sysv"});
+const WongWork_CMailBoxHelper_ReqDBSendNewSystemMail = new NativeFunction(ptr(0x085555e8), 'int', ['pointer'], {"abi":"sysv"});
 
 //检测当前角色是否可接该任务
-var stSelectQuestParam_stSelectQuestParam = new NativeFunction(ptr(0x83480B4), 'pointer', ['pointer', 'pointer'], {"abi":"sysv"});
-var Quest_check_possible = new NativeFunction(ptr(0x8352D86), 'int', ['pointer', 'pointer'], {"abi":"sysv"});
+const stSelectQuestParam_stSelectQuestParam = new NativeFunction(ptr(0x83480B4), 'pointer', ['pointer', 'pointer'], {"abi":"sysv"});
+const Quest_check_possible = new NativeFunction(ptr(0x8352D86), 'int', ['pointer', 'pointer'], {"abi":"sysv"});
 
-var AvatarCoin_Add = new NativeFunction(ptr(0x0817fefa), 'int', ['pointer','int'], {"abi":"sysv"});
-var AvatarCoin_SaveToDB = new NativeFunction(ptr(0x081800d6), 'int', ['pointer'], {"abi":"sysv"});
-var AvatarCoin_SendSyncPacket = new NativeFunction(ptr(0x0817ffe4), 'int', ['pointer'], {"abi":"sysv"});
-var AvatarCoin_HistoryLog_AddLog = new NativeFunction(ptr(0x0817ff9c), 'void', ['pointer','pointer'], {"abi":"sysv"});
+const AvatarCoin_Add = new NativeFunction(ptr(0x0817fefa), 'int', ['pointer','int'], {"abi":"sysv"});
+const AvatarCoin_SaveToDB = new NativeFunction(ptr(0x081800d6), 'int', ['pointer'], {"abi":"sysv"});
+const AvatarCoin_SendSyncPacket = new NativeFunction(ptr(0x0817ffe4), 'int', ['pointer'], {"abi":"sysv"});
+const AvatarCoin_HistoryLog_AddLog = new NativeFunction(ptr(0x0817ff9c), 'void', ['pointer','pointer'], {"abi":"sysv"});
 
 
-var CPremiumLetheManager_InitLetheSkill = new NativeFunction(ptr(0x085c4008), 'int', ['int','pointer','int'], {"abi":"sysv"});
-var CPremiumLetheManager_UpdateBackupSkillFlag = new NativeFunction(ptr(0x085c3f30), 'int', ['int','pointer','int'], {"abi":"sysv"});
-var CPremiumLetheManager_ConfirmSkillReq =new NativeFunction(ptr(0x085c3d70), 'int', ['pointer','pointer'], {"abi":"sysv"});
+const CPremiumLetheManager_InitLetheSkill = new NativeFunction(ptr(0x085c4008), 'int', ['int','pointer','int'], {"abi":"sysv"});
+const CPremiumLetheManager_UpdateBackupSkillFlag = new NativeFunction(ptr(0x085c3f30), 'int', ['int','pointer','int'], {"abi":"sysv"});
+const CPremiumLetheManager_ConfirmSkillReq = new NativeFunction(ptr(0x085c3d70), 'int', ['pointer','pointer'], {"abi":"sysv"});
 
-var SkillSlot_get_remain_sp_at_index = new NativeFunction(ptr(0x08603528), 'int', ['pointer','pointer'], {"abi":"sysv"});
-var SkillSlot_get_remain_sfp_at_index = new NativeFunction(ptr(0x086035f2), 'int', ['pointer','pointer'], {"abi":"sysv"});
-var SkillSlot_growtype_skill = new NativeFunction(ptr(0x086040bc), 'int', ['pointer','pointer','int','int','int'], {"abi":"sysv"});
-var SkillSlot_set_remain_sp_at_index = new NativeFunction(ptr(0x086034f8), 'int', ['int','int','int'], {"abi":"sysv"});
-var SkillSlot_clear_sfp_skills = new NativeFunction(ptr(0x08604e78), 'int', ['int','int','pointer'], {"abi":"sysv"});
-var SkillSlot_clear_all_skills = new NativeFunction(ptr(0x08604d90), 'int', ['pointer','int'], {"abi":"sysv"});
-var SkillSlot_clear_all_skills_both =  new NativeFunction(ptr(0x08604e08), 'int', ['pointer'], {"abi":"sysv"});
-var SkillSlot_set_parent = new NativeFunction(ptr(0x0822ee2e), 'pointer', ['pointer','pointer'], {"abi":"sysv"});
-var addSkillOnCreateCharacter = new NativeFunction(ptr(0x08604fe2), 'void', ['int','int'], {"abi":"sysv"});
-var CCharacter_get_give_skill = new NativeFunction(ptr(0x08348798), 'int', ['int','int','int','int','int'], {"abi":"sysv"});
+const SkillSlot_get_remain_sp_at_index = new NativeFunction(ptr(0x08603528), 'int', ['pointer','pointer'], {"abi":"sysv"});
+const SkillSlot_get_remain_sfp_at_index = new NativeFunction(ptr(0x086035f2), 'int', ['pointer','pointer'], {"abi":"sysv"});
+const SkillSlot_growtype_skill = new NativeFunction(ptr(0x086040bc), 'int', ['pointer','pointer','int','int','int'], {"abi":"sysv"});
+const SkillSlot_set_remain_sp_at_index = new NativeFunction(ptr(0x086034f8), 'int', ['int','int','int'], {"abi":"sysv"});
+const SkillSlot_clear_sfp_skills = new NativeFunction(ptr(0x08604e78), 'int', ['int','int','pointer'], {"abi":"sysv"});
+const SkillSlot_clear_all_skills = new NativeFunction(ptr(0x08604d90), 'int', ['pointer','int'], {"abi":"sysv"});
+const SkillSlot_clear_all_skills_both = new NativeFunction(ptr(0x08604e08), 'int', ['pointer'], {"abi":"sysv"});
+const SkillSlot_set_parent = new NativeFunction(ptr(0x0822ee2e), 'pointer', ['pointer','pointer'], {"abi":"sysv"});
+const addSkillOnCreateCharacter = new NativeFunction(ptr(0x08604fe2), 'void', ['int','int'], {"abi":"sysv"});
+const CCharacter_get_give_skill = new NativeFunction(ptr(0x08348798), 'int', ['int','int','int','int','int'], {"abi":"sysv"});
 
-var CQuestShop_clearQP = new NativeFunction(ptr(0x085ef54c), 'int', ['pointer', 'pointer'], {"abi":"sysv"});
-var CQuestShop_sendCharacQp = new NativeFunction(ptr(0x085ef6fc), 'void', ['pointer', 'pointer','int'], {"abi":"sysv"});
+const CQuestShop_clearQP = new NativeFunction(ptr(0x085ef54c), 'int', ['pointer', 'pointer'], {"abi":"sysv"});
+const CQuestShop_sendCharacQp = new NativeFunction(ptr(0x085ef6fc), 'void', ['pointer', 'pointer','int'], {"abi":"sysv"});
 
 //通知客户端QuestPiece更新
-var GET_USER = new NativeFunction(ptr(0x084bb9cf),  'int', ['pointer'], {"abi":"sysv"});
+const GET_USER = new NativeFunction(ptr(0x084bb9cf),  'int', ['pointer'], {"abi":"sysv"});
 // 通知客户端更新背包栏
-var CUser_send_itemspace = new NativeFunction(ptr(0x865DB6C),  'int', ['pointer', 'int'], {"abi":"sysv"});
+const CUser_send_itemspace = new NativeFunction(ptr(0x865DB6C),  'int', ['pointer', 'int'], {"abi":"sysv"});
 //是否GM任务模式
-var CUser_getGmQuestFlag = new NativeFunction(ptr(0x822FC8E),  'int', ['pointer'], {"abi":"sysv"});
+const CUser_getGmQuestFlag = new NativeFunction(ptr(0x822FC8E),  'int', ['pointer'], {"abi":"sysv"});
 //计算任务基础奖励(不包含道具奖励)
-var CUser_quest_basic_reward = new NativeFunction(ptr(0x866E7A8),  'int', ['pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'int'], {"abi":"sysv"});
+const CUser_quest_basic_reward = new NativeFunction(ptr(0x866E7A8),  'int', ['pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'int'], {"abi":"sysv"});
 //通知客户端QP更新
-var CUser_sendCharacQp = new NativeFunction(ptr(0x868AC24),  'int', ['pointer'], {"abi":"sysv"});
+const CUser_sendCharacQp = new NativeFunction(ptr(0x868AC24),  'int', ['pointer'], {"abi":"sysv"});
 //通知客户端QuestPiece更新
-var CUser_sendCharacQuestPiece = new NativeFunction(ptr(0x868AF2C),  'int', ['pointer'], {"abi":"sysv"});
+const CUser_sendCharacQuestPiece = new NativeFunction(ptr(0x868AF2C),  'int', ['pointer'], {"abi":"sysv"});
 // 获取账号金库
-var CUser_GetAccountCargo = new NativeFunction(ptr(0x0822fc22), 'pointer', ['pointer'], {"abi":"sysv"});
+const CUser_GetAccountCargo = new NativeFunction(ptr(0x0822fc22), 'pointer', ['pointer'], {"abi":"sysv"});
 //重置异界/极限祭坛次数
-var CUser_DimensionInoutUpdate = new NativeFunction(ptr(0x8656C12),  'int', ['pointer', 'int', 'int'], {"abi":"sysv"});
+const CUser_DimensionInoutUpdate = new NativeFunction(ptr(0x8656C12),  'int', ['pointer', 'int', 'int'], {"abi":"sysv"});
 // 设置用户最大等级 int为等级
-var CUser_SetUserMaxLevel  = new NativeFunction(ptr(0x0868fec8), 'pointer', ['pointer', 'int'], {"abi":"sysv"});
-var CUser_CalcurateUserMaxLevel  = new NativeFunction(ptr(0x0868ff04), 'pointer', ['pointer'], {"abi":"sysv"});
+const CUser_SetUserMaxLevel = new NativeFunction(ptr(0x0868fec8), 'pointer', ['pointer', 'int'], {"abi":"sysv"});
+const CUser_CalcurateUserMaxLevel = new NativeFunction(ptr(0x0868ff04), 'pointer', ['pointer'], {"abi":"sysv"});
 //返回选择角色界面
-var CUser_ReturnToSelectCharacList = new NativeFunction(ptr(0x8686FEE), 'int', ['pointer', 'int'], {"abi":"sysv"});
-var CUser_onLevelUp =  new NativeFunction(ptr(0x0866311a), 'void', ['pointer'], {"abi":"sysv"});
-var CUser_getHades  = new NativeFunction(ptr(0x08230800), 'pointer', ['pointer'], {"abi":"sysv"});
-var CUser_check_level_up  = new NativeFunction(ptr(0x08662aea), 'int', ['pointer','int','int','int','int'], {"abi":"sysv"});
-var CUser_gain_sp = new NativeFunction(ptr(0x0866a9a0), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUser_gain_sfp = new NativeFunction(ptr(0x0866aad2), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUser_history_log_sp = new NativeFunction(ptr(0x0866ac0e), 'pointer', ['pointer','int','int','int'], {"abi":"sysv"});
-var CUser_history_log_sfp = new NativeFunction(ptr(0x0866acd0), 'pointer', ['pointer','int','int','int'], {"abi":"sysv"});
-var CUser_GetTutorialSkipable  = new NativeFunction(ptr(0x084ecad4), 'int', ['pointer'], {"abi":"sysv"});
-var CUser_UpdateTutorialSkipable  = new NativeFunction(ptr(0x08697318), 'int', ['pointer'], {"abi":"sysv"});
-var CUser_update_charac_stat = new NativeFunction(ptr(0x086646c8), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUser_GetServerGroup = new NativeFunction(ptr(0x080cbc90), 'int', ['pointer'], {"abi":"sysv"});
-var CUser_makeGuildLevelUpMessage =  new NativeFunction(ptr(0x08679754), 'void', ['pointer','int'], {"abi":"sysv"});
-var CUser_getCurCharacQuestR= new NativeFunction(ptr(0x0819a8a6),  'pointer', ['pointer'], {"abi":"sysv"});
-var CUser_UpdateUserInfo4Guild = new NativeFunction(ptr(0x0867cd20), 'void', ['pointer'], {"abi":"sysv"});
-var CUser_get_charac_no =  new NativeFunction(ptr(0x0815741c), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUser_VerifyPresentAvengerTitle = new NativeFunction(ptr(0x0868b552), 'int', ['pointer'], {"abi":"sysv"});
-var CUser_AddCurCharacMercenaryInfo = new NativeFunction(ptr(0x0868e596), 'pointer', ['pointer'], {"abi":"sysv"});
-var CUser_decide_growth_power_reward_system = new NativeFunction(ptr(0x0868d780), 'int', ['pointer'], {"abi":"sysv"});
-var CUser_ReCalcChattingEmoticon = new NativeFunction(ptr(0x08689a22), 'void', ['pointer'], {"abi":"sysv"});
-var CUser_SendChattingEmoticon = new NativeFunction(ptr(0x08689b90), 'void', ['pointer'], {"abi":"sysv"});
-var CUser_isAffectedPremium = new NativeFunction(ptr(0x080e600e), 'int', ['int', 'int'], {"abi":"sysv"});
-var CUser_processNPCGiftOnLevelUp = new NativeFunction(ptr(0x0866407a), 'void', ['pointer'], {"abi":"sysv"});
-var CUser_processLevelUpEventReward = new NativeFunction(ptr(0x08663cc0), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUser_processLevelUpEvent  = new NativeFunction(ptr(0x0869115a), 'int', ['pointer'], {"abi":"sysv"});
-var CUser_incPlayExpAdd = new NativeFunction(ptr(0x0869729a), 'pointer', ['pointer', 'int'], {"abi":"sysv"});
-var CUser_CheckInTrade = new NativeFunction(ptr(0x080da2fe), 'uint16', ['pointer'], {"abi":"sysv"});
-var CUser_getCurCharacTotalFatigue = new NativeFunction(ptr(0x08657766), 'int', ['pointer'], {"abi":"sysv"});
-var CUser_IsGuildMaster =  new NativeFunction(ptr(0x08230172), 'int', ['pointer'], {"abi":"sysv"});
-var CUser_GetGuildDBInfo =  new NativeFunction(ptr(0x08230164), 'pointer', ['pointer'], {"abi":"sysv"});
-var CUser_CalLevelUpItemCheck = new NativeFunction(ptr(0x08689d06), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUser_CalLevelUpItemState =  new NativeFunction(ptr(0x08689d74), 'int', ['pointer', 'pointer', 'pointer','int','int'], {"abi":"sysv"});
-var CUser_GetCurExpertJobLevel = new NativeFunction(ptr(0x0868bc7c), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUser_send_skill_info = new NativeFunction(ptr(0x0866c46a), 'void', ['pointer'], {"abi":"sysv"});
-var CUser_make_basic_info = new NativeFunction(ptr(0x0865a44e), 'int', ['pointer','pointer','int'], {"abi":"sysv"});
-var CUser_GetWarRoom = new NativeFunction(ptr(0x086551de), 'pointer', ['pointer'], {"abi":"sysv"});
-var CUser_adjust_charac_stat = new NativeFunction(ptr(0x08664766), 'int', ['pointer'], {"abi":"sysv"});
-var CUser_increase_status = new NativeFunction(ptr(0x086657fc), 'void', ['pointer', 'int'], {"abi":"sysv"});
-var CUser_SendTagCharacInfo = new NativeFunction(ptr(0x086903f8), 'void', ['pointer'], {"abi":"sysv"});
-var CUser_giveCharacLinkBonusExp= new NativeFunction(ptr(0x08652564), 'void', ['pointer', 'int'], {"abi":"sysv"});
-var CUser_RecoverFatigue =new NativeFunction(ptr(0x08657ada), 'int', ['pointer','int'], {"abi":"sysv"});
-var CUser_SendFatigue =new NativeFunction(ptr(0x08656540), 'void', ['pointer'], {"abi":"sysv"});
-var CUser_processLevelReward  = new NativeFunction(ptr(0x0868745e), 'pointer', ['pointer','int','int','int'], {"abi":"sysv"});
-var CUser_givePvPSkillTree = new NativeFunction(ptr(0x08665400), 'int', ['pointer','int','int','int'], {"abi":"sysv"});
-var CUser_rewardExp = new NativeFunction(ptr(0x0868b20c), 'void', ['pointer', 'int', 'int', 'int', 'pointer', 'pointer','int','int'], {"abi":"sysv"});
+const CUser_ReturnToSelectCharacList = new NativeFunction(ptr(0x8686FEE), 'int', ['pointer', 'int'], {"abi":"sysv"});
+const CUser_onLevelUp = new NativeFunction(ptr(0x0866311a), 'void', ['pointer'], {"abi":"sysv"});
+const CUser_getHades = new NativeFunction(ptr(0x08230800), 'pointer', ['pointer'], {"abi":"sysv"});
+const CUser_check_level_up = new NativeFunction(ptr(0x08662aea), 'int', ['pointer','int','int','int','int'], {"abi":"sysv"});
+const CUser_gain_sp = new NativeFunction(ptr(0x0866a9a0), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUser_gain_sfp = new NativeFunction(ptr(0x0866aad2), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUser_history_log_sp = new NativeFunction(ptr(0x0866ac0e), 'pointer', ['pointer','int','int','int'], {"abi":"sysv"});
+const CUser_history_log_sfp = new NativeFunction(ptr(0x0866acd0), 'pointer', ['pointer','int','int','int'], {"abi":"sysv"});
+const CUser_GetTutorialSkipable = new NativeFunction(ptr(0x084ecad4), 'int', ['pointer'], {"abi":"sysv"});
+const CUser_UpdateTutorialSkipable = new NativeFunction(ptr(0x08697318), 'int', ['pointer'], {"abi":"sysv"});
+const CUser_update_charac_stat = new NativeFunction(ptr(0x086646c8), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUser_GetServerGroup = new NativeFunction(ptr(0x080cbc90), 'int', ['pointer'], {"abi":"sysv"});
+const CUser_makeGuildLevelUpMessage = new NativeFunction(ptr(0x08679754), 'void', ['pointer','int'], {"abi":"sysv"});
+const CUser_getCurCharacQuestR = new NativeFunction(ptr(0x0819a8a6),  'pointer', ['pointer'], {"abi":"sysv"});
+const CUser_UpdateUserInfo4Guild = new NativeFunction(ptr(0x0867cd20), 'void', ['pointer'], {"abi":"sysv"});
+const CUser_get_charac_no = new NativeFunction(ptr(0x0815741c), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUser_VerifyPresentAvengerTitle = new NativeFunction(ptr(0x0868b552), 'int', ['pointer'], {"abi":"sysv"});
+const CUser_AddCurCharacMercenaryInfo = new NativeFunction(ptr(0x0868e596), 'pointer', ['pointer'], {"abi":"sysv"});
+const CUser_decide_growth_power_reward_system = new NativeFunction(ptr(0x0868d780), 'int', ['pointer'], {"abi":"sysv"});
+const CUser_ReCalcChattingEmoticon = new NativeFunction(ptr(0x08689a22), 'void', ['pointer'], {"abi":"sysv"});
+const CUser_SendChattingEmoticon = new NativeFunction(ptr(0x08689b90), 'void', ['pointer'], {"abi":"sysv"});
+const CUser_isAffectedPremium = new NativeFunction(ptr(0x080e600e), 'int', ['int', 'int'], {"abi":"sysv"});
+const CUser_processNPCGiftOnLevelUp = new NativeFunction(ptr(0x0866407a), 'void', ['pointer'], {"abi":"sysv"});
+const CUser_processLevelUpEventReward = new NativeFunction(ptr(0x08663cc0), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUser_processLevelUpEvent = new NativeFunction(ptr(0x0869115a), 'int', ['pointer'], {"abi":"sysv"});
+const CUser_incPlayExpAdd = new NativeFunction(ptr(0x0869729a), 'pointer', ['pointer', 'int'], {"abi":"sysv"});
+const CUser_CheckInTrade = new NativeFunction(ptr(0x080da2fe), 'uint16', ['pointer'], {"abi":"sysv"});
+const CUser_getCurCharacTotalFatigue = new NativeFunction(ptr(0x08657766), 'int', ['pointer'], {"abi":"sysv"});
+const CUser_IsGuildMaster = new NativeFunction(ptr(0x08230172), 'int', ['pointer'], {"abi":"sysv"});
+const CUser_GetGuildDBInfo = new NativeFunction(ptr(0x08230164), 'pointer', ['pointer'], {"abi":"sysv"});
+const CUser_CalLevelUpItemCheck = new NativeFunction(ptr(0x08689d06), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUser_CalLevelUpItemState = new NativeFunction(ptr(0x08689d74), 'int', ['pointer', 'pointer', 'pointer','int','int'], {"abi":"sysv"});
+const CUser_GetCurExpertJobLevel = new NativeFunction(ptr(0x0868bc7c), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUser_send_skill_info = new NativeFunction(ptr(0x0866c46a), 'void', ['pointer'], {"abi":"sysv"});
+const CUser_make_basic_info = new NativeFunction(ptr(0x0865a44e), 'int', ['pointer','pointer','int'], {"abi":"sysv"});
+const CUser_GetWarRoom = new NativeFunction(ptr(0x086551de), 'pointer', ['pointer'], {"abi":"sysv"});
+const CUser_adjust_charac_stat = new NativeFunction(ptr(0x08664766), 'int', ['pointer'], {"abi":"sysv"});
+const CUser_increase_status = new NativeFunction(ptr(0x086657fc), 'void', ['pointer', 'int'], {"abi":"sysv"});
+const CUser_SendTagCharacInfo = new NativeFunction(ptr(0x086903f8), 'void', ['pointer'], {"abi":"sysv"});
+const CUser_giveCharacLinkBonusExp = new NativeFunction(ptr(0x08652564), 'void', ['pointer', 'int'], {"abi":"sysv"});
+const CUser_RecoverFatigue = new NativeFunction(ptr(0x08657ada), 'int', ['pointer','int'], {"abi":"sysv"});
+const CUser_SendFatigue = new NativeFunction(ptr(0x08656540), 'void', ['pointer'], {"abi":"sysv"});
+const CUser_processLevelReward = new NativeFunction(ptr(0x0868745e), 'pointer', ['pointer','int','int','int'], {"abi":"sysv"});
+const CUser_givePvPSkillTree = new NativeFunction(ptr(0x08665400), 'int', ['pointer','int','int','int'], {"abi":"sysv"});
+const CUser_rewardExp = new NativeFunction(ptr(0x0868b20c), 'void', ['pointer', 'int', 'int', 'int', 'pointer', 'pointer','int','int'], {"abi":"sysv"});
 
 //vector相关操作
-var std_vector_std_pair_int_int_vector = new NativeFunction(ptr(0x81349D6), 'pointer', ['pointer'], { "abi": "sysv" });
-var std_vector_std_pair_int_int_clear = new NativeFunction(ptr(0x817A342), 'pointer', ['pointer'], { "abi": "sysv" });
-var std_make_pair_int_int = new NativeFunction(ptr(0x81B8D41), 'pointer', ['pointer', 'pointer', 'pointer'], { "abi": "sysv" });
-var std_vector_std_pair_int_int_push_back = new NativeFunction(ptr(0x80DD606), 'pointer', ['pointer', 'pointer'], { "abi": "sysv" });
-var vector_unsigned_int_operator=  new NativeFunction(ptr(0x0808e1dc), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var std_vector_std_pair_int_int_size = new NativeFunction(ptr(0x080dd814), 'int', ['pointer'], {"abi":"sysv"});
-var std_vector_std_pair_int_int_operator = new NativeFunction(ptr(0x080ea8a4), 'pointer', ['pointer','int'], {"abi":"sysv"});
-var std_vector_std_pair_int_int_d_vector = new NativeFunction(ptr(0x081349ea), 'void', ['pointer'], {"abi":"sysv"});
-var std_vector_charac_info_size = new NativeFunction(ptr(0x081a0b9a), 'int', ['pointer'], {"abi":"sysv"});
-var std_vector_Charac_info_operatorArr = new NativeFunction(ptr(0x081a0bb8), 'int', ['pointer','int'], {"abi":"sysv"});
+const std_vector_std_pair_int_int_vector = new NativeFunction(ptr(0x81349D6), 'pointer', ['pointer'], { "abi": "sysv" });
+const std_vector_std_pair_int_int_clear = new NativeFunction(ptr(0x817A342), 'pointer', ['pointer'], { "abi": "sysv" });
+const std_make_pair_int_int = new NativeFunction(ptr(0x81B8D41), 'pointer', ['pointer', 'pointer', 'pointer'], { "abi": "sysv" });
+const std_vector_std_pair_int_int_push_back = new NativeFunction(ptr(0x80DD606), 'pointer', ['pointer', 'pointer'], { "abi": "sysv" });
+const vector_unsigned_int_operator = new NativeFunction(ptr(0x0808e1dc), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const std_vector_std_pair_int_int_size = new NativeFunction(ptr(0x080dd814), 'int', ['pointer'], {"abi":"sysv"});
+const std_vector_std_pair_int_int_operator = new NativeFunction(ptr(0x080ea8a4), 'pointer', ['pointer','int'], {"abi":"sysv"});
+const std_vector_std_pair_int_int_d_vector = new NativeFunction(ptr(0x081349ea), 'void', ['pointer'], {"abi":"sysv"});
+const std_vector_charac_info_size = new NativeFunction(ptr(0x081a0b9a), 'int', ['pointer'], {"abi":"sysv"});
+const std_vector_Charac_info_operatorArr = new NativeFunction(ptr(0x081a0bb8), 'int', ['pointer','int'], {"abi":"sysv"});
 
-var LogManager_logFormat = new NativeFunction(ptr(0x08ad3c0a), 'int', ['pointer','int','pointer','pointer','pointer','pointer','...','pointer'], {"abi":"sysv"});
-var cUserHistoryLog_EventCoinAdd = new NativeFunction(ptr(0x08683c58), 'pointer', ['pointer','int','int','int'], {"abi":"sysv"});
-var cUserHistoryLog_CoinAdd = new NativeFunction(ptr(0x08683b90), 'int', ['pointer','int','int','int'], {"abi":"sysv"});
-var HistoryLog_WriteLevelUp = new NativeFunction(ptr(0x084b9e5e), 'int', ['pointer','pointer'], {"abi":"sysv"});
-var cUserHistoryLog_LevelUp  = new NativeFunction(ptr(0x086845b2), 'int', ['pointer', 'int', 'int'], {"abi":"sysv"});
-var cUserHistoryLog_ItemAdd = new NativeFunction(ptr(0x08682e84), 'int', ['int','int','int','int','pointer','int'], {"abi":"sysv"});
+const LogManager_logFormat = new NativeFunction(ptr(0x08ad3c0a), 'int', ['pointer','int','pointer','pointer','pointer','pointer','...','pointer'], {"abi":"sysv"});
+const cUserHistoryLog_EventCoinAdd = new NativeFunction(ptr(0x08683c58), 'pointer', ['pointer','int','int','int'], {"abi":"sysv"});
+const cUserHistoryLog_CoinAdd = new NativeFunction(ptr(0x08683b90), 'int', ['pointer','int','int','int'], {"abi":"sysv"});
+const HistoryLog_WriteLevelUp = new NativeFunction(ptr(0x084b9e5e), 'int', ['pointer','pointer'], {"abi":"sysv"});
+const cUserHistoryLog_LevelUp = new NativeFunction(ptr(0x086845b2), 'int', ['pointer', 'int', 'int'], {"abi":"sysv"});
+const cUserHistoryLog_ItemAdd = new NativeFunction(ptr(0x08682e84), 'int', ['int','int','int','int','pointer','int'], {"abi":"sysv"});
 
 //点券充值
-var WongWork_IPG_CIPGHelper_IPGInput = new NativeFunction(ptr(0x80FFCA4), 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer'], { "abi": "sysv" });
+const WongWork_IPG_CIPGHelper_IPGInput = new NativeFunction(ptr(0x80FFCA4), 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer'], { "abi": "sysv" });
 //同步点券数据库
-var WongWork_IPG_CIPGHelper_IPGQuery = new NativeFunction(ptr(0x8100790), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const WongWork_IPG_CIPGHelper_IPGQuery = new NativeFunction(ptr(0x8100790), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
 //代币充值
-var WongWork_IPG_CIPGHelper_IPGInputPoint = new NativeFunction(ptr(0x80FFFC0), 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer'], { "abi": "sysv" });
+const WongWork_IPG_CIPGHelper_IPGInputPoint = new NativeFunction(ptr(0x80FFFC0), 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer'], { "abi": "sysv" });
 //从客户端封包中读取数据
-var PacketBuf_get_byte = new NativeFunction(ptr(0x858CF22), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var PacketBuf_get_short = new NativeFunction(ptr(0x858CFC0), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var PacketBuf_get_int = new NativeFunction(ptr(0x858D27E), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var PacketBuf_get_binary = new NativeFunction(ptr(0x858D3B2), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
+const PacketBuf_get_byte = new NativeFunction(ptr(0x858CF22), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const PacketBuf_get_short = new NativeFunction(ptr(0x858CFC0), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const PacketBuf_get_int = new NativeFunction(ptr(0x858D27E), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const PacketBuf_get_binary = new NativeFunction(ptr(0x858D3B2), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
 //服务器组包
-var PacketGuard_PacketGuard = new NativeFunction(ptr(0x858DD4C), 'int', ['pointer'], { "abi": "sysv" });
-var InterfacePacketBuf_put_header = new NativeFunction(ptr(0x80CB8FC), 'int', ['pointer', 'int', 'int'], { "abi": "sysv" });
-var InterfacePacketBuf_put_byte = new NativeFunction(ptr(0x80CB920), 'int', ['pointer', 'uint8'], { "abi": "sysv" });
-var InterfacePacketBuf_put_short = new NativeFunction(ptr(0x80D9EA4), 'int', ['pointer', 'uint16'], { "abi": "sysv" });
-var InterfacePacketBuf_put_int = new NativeFunction(ptr(0x80CB93C), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var InterfacePacketBuf_put_binary = new NativeFunction(ptr(0x811DF08), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
-var InterfacePacketBuf_finalize = new NativeFunction(ptr(0x80CB958), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var Destroy_PacketGuard_PacketGuard = new NativeFunction(ptr(0x858DE80), 'int', ['pointer'], { "abi": "sysv" });
-var InterfacePacketBuf_clear = new NativeFunction(ptr(0x080CB8E6), 'int', ['pointer'], { "abi": "sysv" });
-var InterfacePacketBuf_put_packet = new NativeFunction(ptr(0x0815098E), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var CAccountCargo_GetItemCount = new NativeFunction(ptr(0x0828A794), 'int', ['pointer'], { "abi": "sysv" });
-var GetIntegratedPvPItemAttr = new NativeFunction(ptr(0x084FC5FF), 'int', ['pointer'], { "abi": "sysv" });
-var PacketGuard_free_PacketGuard = new NativeFunction(ptr(0x0858de80), 'void', ['pointer'], {"abi":"sysv"});
-var Packet_Monitor_Max_Level_BroadCast_Packet_Monitor_Max_Level_BroadCast = new NativeFunction(ptr(0x08694560), 'void', ['pointer'], {"abi":"sysv"});
+const PacketGuard_PacketGuard = new NativeFunction(ptr(0x858DD4C), 'int', ['pointer'], { "abi": "sysv" });
+const InterfacePacketBuf_put_header = new NativeFunction(ptr(0x80CB8FC), 'int', ['pointer', 'int', 'int'], { "abi": "sysv" });
+const InterfacePacketBuf_put_byte = new NativeFunction(ptr(0x80CB920), 'int', ['pointer', 'uint8'], { "abi": "sysv" });
+const InterfacePacketBuf_put_short = new NativeFunction(ptr(0x80D9EA4), 'int', ['pointer', 'uint16'], { "abi": "sysv" });
+const InterfacePacketBuf_put_int = new NativeFunction(ptr(0x80CB93C), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const InterfacePacketBuf_put_binary = new NativeFunction(ptr(0x811DF08), 'int', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
+const InterfacePacketBuf_finalize = new NativeFunction(ptr(0x80CB958), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const Destroy_PacketGuard_PacketGuard = new NativeFunction(ptr(0x858DE80), 'int', ['pointer'], { "abi": "sysv" });
+const InterfacePacketBuf_clear = new NativeFunction(ptr(0x080CB8E6), 'int', ['pointer'], { "abi": "sysv" });
+const InterfacePacketBuf_put_packet = new NativeFunction(ptr(0x0815098E), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const CAccountCargo_GetItemCount = new NativeFunction(ptr(0x0828A794), 'int', ['pointer'], { "abi": "sysv" });
+const GetIntegratedPvPItemAttr = new NativeFunction(ptr(0x084FC5FF), 'int', ['pointer'], { "abi": "sysv" });
+const PacketGuard_free_PacketGuard = new NativeFunction(ptr(0x0858de80), 'void', ['pointer'], {"abi":"sysv"});
+const Packet_Monitor_Max_Level_BroadCast_Packet_Monitor_Max_Level_BroadCast = new NativeFunction(ptr(0x08694560), 'void', ['pointer'], {"abi":"sysv"});
 
-var G_GameWorld = new NativeFunction(ptr(0x080DA3A7), 'pointer', [], { "abi": "sysv" });
-var GameWorld_IsEnchantRevisionChannel = new NativeFunction(ptr(0x082343FC), 'int', ['pointer'], { "abi": "sysv" });
-var stAmplifyOption_t_getAbilityType = new NativeFunction(ptr(0x08150732), 'uint8', ['pointer'], { "abi": "sysv" });
-var stAmplifyOption_t_getAbilityValue = new NativeFunction(ptr(0x08150772), 'uint16', ['pointer'], { "abi": "sysv" });
+const G_GameWorld = new NativeFunction(ptr(0x080DA3A7), 'pointer', [], { "abi": "sysv" });
+const GameWorld_IsEnchantRevisionChannel = new NativeFunction(ptr(0x082343FC), 'int', ['pointer'], { "abi": "sysv" });
+const stAmplifyOption_t_getAbilityType = new NativeFunction(ptr(0x08150732), 'uint8', ['pointer'], { "abi": "sysv" });
+const stAmplifyOption_t_getAbilityValue = new NativeFunction(ptr(0x08150772), 'uint16', ['pointer'], { "abi": "sysv" });
 //linux读本地文件
-var fopen = new NativeFunction(Module.getExportByName(null, 'fopen'), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var fread = new NativeFunction(Module.getExportByName(null, 'fread'), 'int', ['pointer', 'int', 'int', 'int'], { "abi": "sysv" });
-var fclose = new NativeFunction(Module.getExportByName(null, 'fclose'), 'int', ['int'], { "abi": "sysv" });
+const fopen = new NativeFunction(Module.getExportByName(null, 'fopen'), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const fread = new NativeFunction(Module.getExportByName(null, 'fread'), 'int', ['pointer', 'int', 'int', 'int'], { "abi": "sysv" });
+const fclose = new NativeFunction(Module.getExportByName(null, 'fclose'), 'int', ['int'], { "abi": "sysv" });
 //MYSQL操作
 //游戏中已打开的数据库索引(游戏数据库非线程安全 谨慎操作)
-var TAIWAN_CAIN = 2;
-var DBMgr_GetDBHandle = new NativeFunction(ptr(0x83F523E), 'pointer', ['pointer', 'int', 'int'], { "abi": "sysv" });
-var MySQL_MySQL = new NativeFunction(ptr(0x83F3AC8), 'pointer', ['pointer'], { "abi": "sysv" });
-var MySQL_init = new NativeFunction(ptr(0x83F3CE4), 'int', ['pointer'], { "abi": "sysv" });
-var MySQL_open = new NativeFunction(ptr(0x83F4024), 'int', ['pointer', 'pointer', 'int', 'pointer', 'pointer', 'pointer'], { "abi": "sysv" });
-var MySQL_close = new NativeFunction(ptr(0x83F3E74), 'int', ['pointer'], { "abi": "sysv" });
-var MySQL_set_query_2 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var MySQL_set_query_3 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer', 'pointer'], { "abi": "sysv" });
-var MySQL_set_query_4 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer', 'int', 'int'], { "abi": "sysv" });
-var MySQL_set_query_5 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer', 'int', 'int', 'int'], { "abi": "sysv" });
-var MySQL_set_query_6 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
-var MySQL_exec = new NativeFunction(ptr(0x83F4326), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var MySQL_exec_query = new NativeFunction(ptr(0x083F5348), 'int', ['pointer'], { "abi": "sysv" });
-var MySQL_get_n_rows = new NativeFunction(ptr(0x80E236C), 'int', ['pointer'], { "abi": "sysv" });
-var MySQL_fetch = new NativeFunction(ptr(0x83F44BC), 'int', ['pointer'], { "abi": "sysv" });
-var MySQL_get_int = new NativeFunction(ptr(0x811692C), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
-var MySQL_get_short = new NativeFunction(ptr(0x0814201C), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
-var MySQL_get_uint = new NativeFunction(ptr(0x80E22F2), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
-var MySQL_get_ulonglong = new NativeFunction(ptr(0x81754C8), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
-var MySQL_get_ushort = new NativeFunction(ptr(0x8116990), 'int', ['pointer'], { "abi": "sysv" });
-var MySQL_get_float = new NativeFunction(ptr(0x844D6D0), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
-var MySQL_get_binary = new NativeFunction(ptr(0x812531A), 'int', ['pointer', 'int', 'pointer', 'int'], { "abi": "sysv" });
-var MySQL_get_binary_length = new NativeFunction(ptr(0x81253DE), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var MySQL_get_str = new NativeFunction(ptr(0x80ECDEA), 'int', ['pointer', 'int', 'pointer', 'int'], { "abi": "sysv" });
-var MySQL_blob_to_str = new NativeFunction(ptr(0x83F452A), 'pointer', ['pointer', 'int', 'pointer', 'int'], { "abi": "sysv" });
-var compress_zip = new NativeFunction(ptr(0x86B201F), 'int', ['pointer', 'pointer', 'pointer', 'int'], { "abi": "sysv" });
-var uncompress_zip = new NativeFunction(ptr(0x86B2102), 'int', ['pointer', 'pointer', 'pointer', 'int'], { "abi": "sysv" });
-var StreamPool_Acquire = new NativeFunction(ptr(0x0828FA86), 'pointer', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
-var CStreamGuard_CStreamGuard = new NativeFunction(ptr(0x080C8C26), 'void', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
-var CStreamGuard_operator = new NativeFunction(ptr(0x080C8C46), 'int', ['int'], { "abi": "sysv" });
-var CStreamGuard_operator_int = new NativeFunction(ptr(0x080C8C56), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var CStreamGuard_operator_p = new NativeFunction(ptr(0x080C8C4E), 'int', ['int'], { "abi": "sysv" });
-var CStreamGuard_GetInBuffer_SIG_ACCOUNT_CARGO_DATA = new NativeFunction(ptr(0x08453A10), 'pointer', ['pointer'], { "abi": "sysv" });
-var MsgQueueMgr_put = new NativeFunction(ptr(0x08570FDE), 'int', ['int', 'int', 'pointer'], { "abi": "sysv" });
-var CAccountCargo_SetStable = new NativeFunction(ptr(0x0844DC16), 'pointer', ['pointer'], { "abi": "sysv" });
-var Destroy_CStreamGuard_CStreamGuard = new NativeFunction(ptr(0x0861C8D2), 'void', ['pointer'], { "abi": "sysv" });
-var AccountCargoScript_GetCurrUpgradeInfo = new NativeFunction(ptr(0x088C80BA), 'int', ['pointer', 'int'], { "abi": "sysv" });
-var CStackableItem_getStackableLimit = new NativeFunction(ptr(0x0822C9FC), 'int', ['pointer'], { "abi": "sysv" });
-var CItem_isPackagable = new NativeFunction(ptr(0x0828B5B4), 'int', ['pointer'], { "abi": "sysv" });
-var stAmplifyOption_t_GetLock = new NativeFunction(ptr(0x0828B5A8), 'int', ['pointer'], { "abi": "sysv" });
-var CUser_GetCharacExpandDataR = new NativeFunction(ptr(0x0828B5DE), 'int', ['int', 'int'], { "abi": "sysv" });
-var item_lock_CItemLock_CheckItemLock = new NativeFunction(ptr(0x08541A96), 'int', ['int', 'int'], { "abi": "sysv" });
-var CItem_GetAttachType = new NativeFunction(ptr(0x80F12E2), 'int', ['pointer'], { "abi": "sysv" });
-var UpgradeSeparateInfo_IsTradeRestriction = new NativeFunction(ptr(0x08110B0A), 'int', ['pointer'], { "abi": "sysv" });
-var CUser_isGMUser = new NativeFunction(ptr(0x0814589C), 'int', ['pointer'], { "abi": "sysv" });
-var CItem_getUsablePeriod = new NativeFunction(ptr(0x08110C60), 'int', ['pointer'], { "abi": "sysv" });
-var CItem_getExpirationDate = new NativeFunction(ptr(0x080F1306), 'int', ['pointer'], { "abi": "sysv" });
+const TAIWAN_CAIN = 2;
+const DBMgr_GetDBHandle = new NativeFunction(ptr(0x83F523E), 'pointer', ['pointer', 'int', 'int'], { "abi": "sysv" });
+const MySQL_MySQL = new NativeFunction(ptr(0x83F3AC8), 'pointer', ['pointer'], { "abi": "sysv" });
+const MySQL_init = new NativeFunction(ptr(0x83F3CE4), 'int', ['pointer'], { "abi": "sysv" });
+const MySQL_open = new NativeFunction(ptr(0x83F4024), 'int', ['pointer', 'pointer', 'int', 'pointer', 'pointer', 'pointer'], { "abi": "sysv" });
+const MySQL_close = new NativeFunction(ptr(0x83F3E74), 'int', ['pointer'], { "abi": "sysv" });
+const MySQL_set_query_2 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const MySQL_set_query_3 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer', 'pointer'], { "abi": "sysv" });
+const MySQL_set_query_4 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer', 'int', 'int'], { "abi": "sysv" });
+const MySQL_set_query_5 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer', 'int', 'int', 'int'], { "abi": "sysv" });
+const MySQL_set_query_6 = new NativeFunction(ptr(0x83F41C0), 'int', ['pointer', 'pointer', 'int', 'int', 'int', 'int'], { "abi": "sysv" });
+const MySQL_exec = new NativeFunction(ptr(0x83F4326), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const MySQL_exec_query = new NativeFunction(ptr(0x083F5348), 'int', ['pointer'], { "abi": "sysv" });
+const MySQL_get_n_rows = new NativeFunction(ptr(0x80E236C), 'int', ['pointer'], { "abi": "sysv" });
+const MySQL_fetch = new NativeFunction(ptr(0x83F44BC), 'int', ['pointer'], { "abi": "sysv" });
+const MySQL_get_int = new NativeFunction(ptr(0x811692C), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
+const MySQL_get_short = new NativeFunction(ptr(0x0814201C), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
+const MySQL_get_uint = new NativeFunction(ptr(0x80E22F2), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
+const MySQL_get_ulonglong = new NativeFunction(ptr(0x81754C8), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
+const MySQL_get_ushort = new NativeFunction(ptr(0x8116990), 'int', ['pointer'], { "abi": "sysv" });
+const MySQL_get_float = new NativeFunction(ptr(0x844D6D0), 'int', ['pointer', 'int', 'pointer'], { "abi": "sysv" });
+const MySQL_get_binary = new NativeFunction(ptr(0x812531A), 'int', ['pointer', 'int', 'pointer', 'int'], { "abi": "sysv" });
+const MySQL_get_binary_length = new NativeFunction(ptr(0x81253DE), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const MySQL_get_str = new NativeFunction(ptr(0x80ECDEA), 'int', ['pointer', 'int', 'pointer', 'int'], { "abi": "sysv" });
+const MySQL_blob_to_str = new NativeFunction(ptr(0x83F452A), 'pointer', ['pointer', 'int', 'pointer', 'int'], { "abi": "sysv" });
+const compress_zip = new NativeFunction(ptr(0x86B201F), 'int', ['pointer', 'pointer', 'pointer', 'int'], { "abi": "sysv" });
+const uncompress_zip = new NativeFunction(ptr(0x86B2102), 'int', ['pointer', 'pointer', 'pointer', 'int'], { "abi": "sysv" });
+const StreamPool_Acquire = new NativeFunction(ptr(0x0828FA86), 'pointer', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
+const CStreamGuard_CStreamGuard = new NativeFunction(ptr(0x080C8C26), 'void', ['pointer', 'pointer', 'int'], { "abi": "sysv" });
+const CStreamGuard_operator = new NativeFunction(ptr(0x080C8C46), 'int', ['int'], { "abi": "sysv" });
+const CStreamGuard_operator_int = new NativeFunction(ptr(0x080C8C56), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const CStreamGuard_operator_p = new NativeFunction(ptr(0x080C8C4E), 'int', ['int'], { "abi": "sysv" });
+const CStreamGuard_GetInBuffer_SIG_ACCOUNT_CARGO_DATA = new NativeFunction(ptr(0x08453A10), 'pointer', ['pointer'], { "abi": "sysv" });
+const MsgQueueMgr_put = new NativeFunction(ptr(0x08570FDE), 'int', ['int', 'int', 'pointer'], { "abi": "sysv" });
+const CAccountCargo_SetStable = new NativeFunction(ptr(0x0844DC16), 'pointer', ['pointer'], { "abi": "sysv" });
+const Destroy_CStreamGuard_CStreamGuard = new NativeFunction(ptr(0x0861C8D2), 'void', ['pointer'], { "abi": "sysv" });
+const AccountCargoScript_GetCurrUpgradeInfo = new NativeFunction(ptr(0x088C80BA), 'int', ['pointer', 'int'], { "abi": "sysv" });
+const CStackableItem_getStackableLimit = new NativeFunction(ptr(0x0822C9FC), 'int', ['pointer'], { "abi": "sysv" });
+const CItem_isPackagable = new NativeFunction(ptr(0x0828B5B4), 'int', ['pointer'], { "abi": "sysv" });
+const stAmplifyOption_t_GetLock = new NativeFunction(ptr(0x0828B5A8), 'int', ['pointer'], { "abi": "sysv" });
+const CUser_GetCharacExpandDataR = new NativeFunction(ptr(0x0828B5DE), 'int', ['int', 'int'], { "abi": "sysv" });
+const item_lock_CItemLock_CheckItemLock = new NativeFunction(ptr(0x08541A96), 'int', ['int', 'int'], { "abi": "sysv" });
+const CItem_GetAttachType = new NativeFunction(ptr(0x80F12E2), 'int', ['pointer'], { "abi": "sysv" });
+const UpgradeSeparateInfo_IsTradeRestriction = new NativeFunction(ptr(0x08110B0A), 'int', ['pointer'], { "abi": "sysv" });
+const CUser_isGMUser = new NativeFunction(ptr(0x0814589C), 'int', ['pointer'], { "abi": "sysv" });
+const CItem_getUsablePeriod = new NativeFunction(ptr(0x08110C60), 'int', ['pointer'], { "abi": "sysv" });
+const CItem_getExpirationDate = new NativeFunction(ptr(0x080F1306), 'int', ['pointer'], { "abi": "sysv" });
 //线程安全锁
-var Guard_Mutex_Guard = new NativeFunction(ptr(0x810544C), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
-var Destroy_Guard_Mutex_Guard = new NativeFunction(ptr(0x8105468), 'int', ['pointer'], { "abi": "sysv" });
+const Guard_Mutex_Guard = new NativeFunction(ptr(0x810544C), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+const Destroy_Guard_Mutex_Guard = new NativeFunction(ptr(0x8105468), 'int', ['pointer'], { "abi": "sysv" });
 //服务器内置定时器队列
-var G_TimerQueue = new NativeFunction(ptr(0x80F647C), 'pointer', [], { "abi": "sysv" });
+const G_TimerQueue = new NativeFunction(ptr(0x80F647C), 'pointer', [], { "abi": "sysv" });
 //需要在dispatcher线程执行的任务队列(热加载后会被清空)
 var timer_dispatcher_list = [];
-var INVENTORY_TYPE_BODY = 0; //身上穿的装备
-var INVENTORY_TYPE_ITEM = 1; //物品栏
-var INVENTORY_TYPE_AVATAR = 2; //时装栏
+const INVENTORY_TYPE_BODY = 0; //身上穿的装备
+const INVENTORY_TYPE_ITEM = 1; //物品栏
+const INVENTORY_TYPE_AVATAR = 2; //时装栏
 //已打开的数据库句柄
 var mysql_taiwan_cain = null;
 var mysql_taiwan_cain_2nd = null;
@@ -547,7 +547,7 @@ const EVENT_VILLAGEATTACK_START_HOUR = 12; //每日北京时间20点开启活动
 const EVENT_VILLAGEATTACK_TARGET_SCORE = [100, 200, 300]; //各阶段目标PT
 const EVENT_VILLAGEATTACK_TOTAL_TIME = 3600; //活动总时长(秒)
 
-var CUser_AddItem = new NativeFunction(ptr(0x867B6D4), 'int', ['pointer', 'int', 'int', 'int', 'pointer', 'int'], {"abi":"sysv"});
+const CUser_AddItem = new NativeFunction(ptr(0x867B6D4), 'int', ['pointer', 'int', 'int', 'int', 'pointer', 'int'], {"abi":"sysv"});
 //获取角色所在队伍
 const CUser_GetParty = new NativeFunction(ptr(0x0865514C), 'pointer', ['pointer'], { "abi": "sysv" });
 //获取队伍中玩家
@@ -559,7 +559,7 @@ const TOD_Layer_TOD_Layer = new NativeFunction(ptr(0x085FE7B4), 'pointer', ['poi
 //设置绝望之塔层数
 const TOD_UserState_setEnterLayer = new NativeFunction(ptr(0x086438FC), 'pointer', ['pointer', 'pointer'], { "abi": "sysv" });
 //获取角色当前持有金币数量
-var CInventory_get_money = new NativeFunction(ptr(0x81347D6), 'int', ['pointer'], { "abi": "sysv" });
+const CInventory_get_money = new NativeFunction(ptr(0x81347D6), 'int', ['pointer'], { "abi": "sysv" });
 //通知客户端更新角色身上装备
 const CUser_SendNotiPacket = new NativeFunction(ptr(0x0867BA5C), 'int', ['pointer', 'int', 'int', 'int'], { "abi": "sysv" });
 //开启怪物攻城
@@ -568,21 +568,21 @@ const Inter_VillageAttackedStart_dispatch_sig = new NativeFunction(ptr(0x84DF47A
 const village_attacked_CVillageMonsterMgr_OnDestroyVillageMonster = new NativeFunction(ptr(0x086B43D4), 'pointer', ['pointer', 'int'], { "abi": "sysv" });
 const GlobalData_s_villageMonsterMgr = ptr(0x941F77C);
 const nullptr = Memory.alloc(4);
-var Inven_Item = new NativeFunction(ptr(0x080CB854), 'void', ['pointer'], { "abi": "sysv" });
-var GetItem_index = new NativeFunction(ptr(0x08110C48), 'int', ['pointer'], { "abi": "sysv" });
-var GetCurCharacNo = new NativeFunction(ptr(0x80CBC4E), 'int', ['pointer'], { "abi": "sysv" });
-var GetServerGroup = new NativeFunction(ptr(0x080CBC90), 'int', ['pointer'], { "abi": "sysv" });
-var GetCurVAttackCount = new NativeFunction(ptr(0x084EC216), 'int', ['pointer'], { "abi": "sysv" });
-var ReqDBSendNewSystemMail = new NativeFunction(ptr(0x085555E8), 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'int', 'int', 'int', 'char', 'char'], { "abi": "sysv" });
+const Inven_Item = new NativeFunction(ptr(0x080CB854), 'void', ['pointer'], { "abi": "sysv" });
+const GetItem_index = new NativeFunction(ptr(0x08110C48), 'int', ['pointer'], { "abi": "sysv" });
+const GetCurCharacNo = new NativeFunction(ptr(0x80CBC4E), 'int', ['pointer'], { "abi": "sysv" });
+const GetServerGroup = new NativeFunction(ptr(0x080CBC90), 'int', ['pointer'], { "abi": "sysv" });
+const GetCurVAttackCount = new NativeFunction(ptr(0x084EC216), 'int', ['pointer'], { "abi": "sysv" });
+const ReqDBSendNewSystemMail = new NativeFunction(ptr(0x085555E8), 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'int', 'int', 'int', 'char', 'char'], { "abi": "sysv" });
 
 //测试系统API
-var strlen = new NativeFunction(Module.getExportByName(null, 'strlen'), 'int', ['pointer'], { "abi": "sysv" });
+const strlen = new NativeFunction(Module.getExportByName(null, 'strlen'), 'int', ['pointer'], { "abi": "sysv" });
 var global_config = {};
 
 
 // ===== Utils: Logging / Config / Recharge =====
 //获取道具名
-var CItem_GetItemName = new NativeFunction(ptr(0x811ED82), 'pointer', ['pointer'], { "abi": "sysv" });
+const CItem_GetItemName = new NativeFunction(ptr(0x811ED82), 'pointer', ['pointer'], { "abi": "sysv" });
 
 //本地时间戳
 function get_timestamp() {
@@ -600,8 +600,8 @@ function get_timestamp() {
 
 //linux创建文件夹
 function api_mkdir(path) {
-	var opendir = new NativeFunction(Module.getExportByName(null, 'opendir'), 'int', ['pointer'], { "abi": "sysv" });
-	var mkdir = new NativeFunction(Module.getExportByName(null, 'mkdir'), 'int', ['pointer', 'int'], { "abi": "sysv" });
+	const opendir = new NativeFunction(Module.getExportByName(null, 'opendir'), 'int', ['pointer'], { "abi": "sysv" });
+	const mkdir = new NativeFunction(Module.getExportByName(null, 'mkdir'), 'int', ['pointer', 'int'], { "abi": "sysv" });
 	var path_ptr = Memory.allocUtf8String(path);
 	if (opendir(path_ptr))
 		return true;
@@ -1665,7 +1665,7 @@ function hook_VillageAttack() {
 				//返回值为下一次刷新的攻城怪物
 				if (retval != 0) {
 					//下一只刷新的攻城怪物
-					var next_village_monster = ptr(retval);
+					const next_village_monster = ptr(retval);
 					var next_village_monster_id = next_village_monster.readUShort();
 
 					//当前刷新的怪物为机制怪物
@@ -1728,7 +1728,7 @@ function hook_VillageAttack() {
 		});
 	//hook 副本刷怪函数 控制副本内怪物的数量和属性
 	//MapInfo::Add_Mob
-	var read_f = new NativeFunction(ptr(0x08151612), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
+	const read_f = new NativeFunction(ptr(0x08151612), 'int', ['pointer', 'pointer'], { "abi": "sysv" });
 	Interceptor.replace(ptr(0x08151612), new NativeCallback(function (map_info, monster) {
 		//当前刷怪的副本id
 		//var map_id = map_info.add(4).readUInt();
@@ -2027,10 +2027,10 @@ function clear_doing_questEx(user, quest_id) { //完成指定任务并领取奖�
 	}
 }
 
-var QUEST_GRADE_COMMON_UNIQUE = 5;                  //任务脚本中[grade]字段对应的常量定义 可以在importQuestScript函数中找到
-var QUEST_GRADE_NORMALLY_REPEAT = 4;                 //可重复提交的重复任务
-var QUEST_GRADE_DAILY = 3;                          //每日任务
-var QUEST_GRADE_EPIC = 0;
+const QUEST_GRADE_COMMON_UNIQUE = 5;                  //任务脚本中[grade]字段对应的常量定义 可以在importQuestScript函数中找到
+const QUEST_GRADE_NORMALLY_REPEAT = 4;                 //可重复提交的重复任务
+const QUEST_GRADE_DAILY = 3;                          //每日任务
+const QUEST_GRADE_EPIC = 0;
 //完成角色当前可接的所有任务(仅发送金币/经验/QP等基础奖励 无道具奖励)
 function clear_all_quest_by_character_level(user)
 {
@@ -2182,8 +2182,8 @@ function fix_TOD(skip_user_apc) {
 
 	//修复金币异常
 	//CParty::UseAncientDungeonItems
-	var CParty_UseAncientDungeonItems_ptr = ptr(0x859EAC2);
-	var CParty_UseAncientDungeonItems = new NativeFunction(CParty_UseAncientDungeonItems_ptr, 'int', ['pointer', 'pointer', 'pointer', 'pointer'], { "abi": "sysv" });
+	const CParty_UseAncientDungeonItems_ptr = ptr(0x859EAC2);
+	const CParty_UseAncientDungeonItems = new NativeFunction(CParty_UseAncientDungeonItems_ptr, 'int', ['pointer', 'pointer', 'pointer', 'pointer'], { "abi": "sysv" });
 	Interceptor.replace(CParty_UseAncientDungeonItems_ptr, new NativeCallback(function (party, dungeon, inven_item, a4) {
 		//当前进入的地下城id
 		var dungeon_index = CDungeon_get_index(dungeon);
@@ -2710,8 +2710,8 @@ function auto_unseal_random_option_equipment(user) {
 }
 
 //幸运点上下限
-var MAX_LUCK_POINT = 99999;
-var MIN_LUCK_POINT = 1;
+const MAX_LUCK_POINT = 99999;
+const MIN_LUCK_POINT = 1;
 
 //设置角色幸运点
 function api_CUserCharacInfo_SetCurCharacLuckPoint(user, new_luck_point) {
@@ -2784,8 +2784,8 @@ function enable_drop_use_luck_point() {
 
 	//修改决定出货品质(rarity)的函数 使出货率享受角色幸运值加成
 	//CLuckPoint::GetItemRarity
-	var CLuckPoint_GetItemRarity_ptr = ptr(0x8550BE4);
-	var CLuckPoint_GetItemRarity = new NativeFunction(CLuckPoint_GetItemRarity_ptr, 'int', ['pointer', 'pointer', 'int', 'int'], { "abi": "sysv" });
+	const CLuckPoint_GetItemRarity_ptr = ptr(0x8550BE4);
+	const CLuckPoint_GetItemRarity = new NativeFunction(CLuckPoint_GetItemRarity_ptr, 'int', ['pointer', 'pointer', 'int', 'int'], { "abi": "sysv" });
 	Interceptor.replace(CLuckPoint_GetItemRarity_ptr, new NativeCallback(function (a1, a2, roll, a4) {
 		//使用角色幸运值roll点代替纯随机roll点
 		if (cur_luck_user) {
@@ -2825,15 +2825,15 @@ function enable_drop_use_luck_point() {
 // ===== Patch: Random Option / Luck Point / Mobile Auth / Strengthen =====
 function InterSelectMobileAuthReward() {
 	//还原 InterSelectMobileAuthReward::dispatch_sig 函数
-	var Defptr = ptr(0x08161384);
+	const Defptr = ptr(0x08161384);
 	var value = Defptr.readU8()
 	if (value != 0x0F) {
 		Memory.protect(Defptr, 10, 'rwx');
 		Defptr.writeShort(0x840F);
 	}
 	//重写InterSelectMobileAuthReward::dispatch_sig 函数
-	var Inter_DispatchPr = ptr(0x0816132A);
-	var Inter_Dispatch = new NativeFunction(Inter_DispatchPr, 'int', ['pointer', 'pointer', 'pointer'], { "abi": "sysv" });
+	const Inter_DispatchPr = ptr(0x0816132A);
+	const Inter_Dispatch = new NativeFunction(Inter_DispatchPr, 'int', ['pointer', 'pointer', 'pointer'], { "abi": "sysv" });
 	Interceptor.replace(Inter_DispatchPr, new NativeCallback(function (InterSelectMobileAuthReward, CUser, a3) {
 		//var Inter_DispatchOpen = true;
 		var Inter_DispatchOpen = false;
@@ -3289,7 +3289,7 @@ function dp2_lua_call(arg1, arg2, _arg3) {
 // 准备工作
 function setup() {
 	//dp 安装 frida的
-	var addr = Module.getExportByName('libdp2.so', 'dp2_frida_resolver');
+	const addr = Module.getExportByName('libdp2.so', 'dp2_frida_resolver');
 	__dp2_resolver = new NativeFunction(addr, 'pointer', ['pointer']);
 
 	addr = dp2_resolver('lua.call');

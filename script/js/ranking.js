@@ -7,7 +7,7 @@ var g_rankList = {
 };
 
 function getRankScore(characNo) {
-  var query = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
+  const query = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
   if (api_MySQL_exec(mysql_taiwan_cain, query)) {
     if (MySQL_get_n_rows(mysql_taiwan_cain) == 1) {
       MySQL_fetch(mysql_taiwan_cain);
@@ -17,8 +17,8 @@ function getRankScore(characNo) {
 }
 
 function buildRankEntry(user) {
-  var entry = { "rank": 0, "characname": "", "job": 0, "lev": 0, "Grow": 0, "Guilkey": 0, "Guilname": "", "str": "", "equip": [] };
-  var characNo = CUserCharacInfo_getCurCharacNo(user);
+  const entry = { "rank": 0, "characname": "", "job": 0, "lev": 0, "Grow": 0, "Guilkey": 0, "Guilname": "", "str": "", "equip": [] };
+  const characNo = CUserCharacInfo_getCurCharacNo(user);
   entry.rank = getRankScore(characNo);
   entry.characname = api_CUserCharacInfo_getCurCharacName(user) + "";
   entry.job = CUserCharacInfo_get_charac_job(user);
@@ -27,7 +27,7 @@ function buildRankEntry(user) {
   entry.Guilkey = CUserCharacInfo_get_charac_guildkey(user);
   entry.Guilname = api_CUser_GetGuildName(user);
   if (!entry.Guilname) { entry.Guilname = '未加入公会'; }
-  var invenW = CUserCharacInfo_getCurCharacInvenW(user);
+  const invenW = CUserCharacInfo_getCurCharacInvenW(user);
   for (var i = 0; i <= 10; i++) {
     if (i != 9) {
       var invenItem = CInventory_GetInvenRef(invenW, INVENTORY_TYPE_BODY, i);
@@ -40,15 +40,15 @@ function buildRankEntry(user) {
 }
 
 function updateRanking(user) {
-  var entry = buildRankEntry(user);
-  var existingIndex = Object.values(g_rankList).findIndex(function(item) { return item.characname === entry.characname; });
+  const entry = buildRankEntry(user);
+  const existingIndex = Object.values(g_rankList).findIndex(function(item) { return item.characname === entry.characname; });
   if (entry.rank) {
     if (existingIndex !== -1) { g_rankList[existingIndex + 1] = entry; }
     else { g_rankList["4"] = entry; }
-    var rankArray = Object.values(g_rankList);
+    const rankArray = Object.values(g_rankList);
     rankArray.sort(function(a, b) { return b.rank - a.rank; });
-    var topThree = rankArray.slice(0, 3);
-    var tmp = {};
+    const topThree = rankArray.slice(0, 3);
+    const tmp = {};
     topThree.forEach(function(item, index) { tmp[(index + 1).toString()] = item; });
     delete g_rankList["4"];
     g_rankList = tmp;
@@ -56,7 +56,7 @@ function updateRanking(user) {
 }
 
 function sendRankListToUser(user, broadcast) {
-  var packet = api_PacketGuard_PacketGuard();
+  const packet = api_PacketGuard_PacketGuard();
   InterfacePacketBuf_put_header(packet, 0, 182);
   InterfacePacketBuf_put_byte(packet, Object.keys(g_rankList).length);
   for (var key in g_rankList) {
@@ -82,7 +82,7 @@ function loadRankFromDb() {
   if (api_MySQL_exec(mysql_frida, "select event_info from game_event where event_id = 'rankinfo';")) {
     if (MySQL_get_n_rows(mysql_frida) == 1) {
       MySQL_fetch(mysql_frida);
-      var info = api_MySQL_get_str(mysql_frida, 0);
+      const info = api_MySQL_get_str(mysql_frida, 0);
       g_rankList = JSON.parse(info);
     }
   }

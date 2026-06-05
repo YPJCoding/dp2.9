@@ -8,7 +8,7 @@ function addItemList(user, itemList) {
 }
 
 function sendItemNotification(user, itemList) {
-  var packet = api_PacketGuard_PacketGuard();
+  const packet = api_PacketGuard_PacketGuard();
   InterfacePacketBuf_put_header(packet, 1, 163);
   InterfacePacketBuf_put_byte(packet, 1);
   InterfacePacketBuf_put_short(packet, 0);
