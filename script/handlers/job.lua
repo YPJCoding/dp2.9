@@ -23,6 +23,20 @@ local function log_item_return(ctx, user, item_id, reason)
     end
 end
 
+local function log_success(ctx, user, item_id, action, extra)
+    local logger = ctx.logger
+    if logger then
+        logger.info(
+            "[useitem][job] action=%s acc=%d chr=%d item_id=%d extra=%s",
+            tostring(action),
+            user:GetAccId(),
+            user:GetCharacNo(),
+            item_id,
+            tostring(extra or "")
+        )
+    end
+end
+
 local function reject_sql_disabled(user, item_id, ctx, message, reason)
     local dpx = ctx.dpx
     local logger = ctx.logger
@@ -51,6 +65,7 @@ local function accept_quests(user, item_id, ctx, quest_ids, success_message)
             dpx.quest.accept(user.cptr, quest_id, 1)
         end
         user:SendNotiPacketMessage(success_message or "恭喜： 角色已获取转职任务！")
+        log_success(ctx, user, item_id, "accept_job_quests", "quest_count=" .. tostring(#quest_ids))
     else
         user:SendNotiPacketMessage("注意： 角色转职失败！")
         dpx.item.add(user.cptr, item_id)
@@ -90,6 +105,7 @@ function M.register(item_handler, ctx)
         if grow_type < 7 then
             user:ChangeGrowType(grow_type, 1)
             user:SendNotiPacketMessage("恭喜： 角色已成功完成一次觉醒！")
+            log_success(ctx, user, item_id, "first_awaken", "old_grow_type=" .. tostring(grow_type))
         else
             user:SendNotiPacketMessage("注意： 角色不满足觉醒要求， 觉醒失败！")
             dpx.item.add(user.cptr, item_id)
@@ -103,6 +119,7 @@ function M.register(item_handler, ctx)
         if grow_type > 15 and grow_type < 23 then
             user:ChangeGrowType(grow_type - 16, 2)
             user:SendNotiPacketMessage("恭喜： 角色已成功完成二次觉醒！")
+            log_success(ctx, user, item_id, "second_awaken", "old_grow_type=" .. tostring(grow_type))
         else
             user:SendNotiPacketMessage("注意： 角色不满足觉醒要求， 觉醒失败！")
             dpx.item.add(user.cptr, item_id)
