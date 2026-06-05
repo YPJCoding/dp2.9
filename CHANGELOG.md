@@ -43,6 +43,10 @@
 - Kept `UseItem2` as a compatibility dispatch entry.
 - Centralized DPX startup behavior in `script/config.lua` and `bootstrap.apply_dpx_startup(...)`.
 - Aligned high-risk handler defaults: SQL, delete, and shell handlers are disabled by default.
+- Tightened handler risk gates for combined-risk features:
+  - pet/avatar cleanup requires both delete and SQL risk switches.
+  - PVP experience book requires both shell and SQL risk switches.
+- Added business-level success/failure logging to quest, job, misc, inherit, cleanup, and PVP handlers.
 
 ### Notes
 
