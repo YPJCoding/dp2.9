@@ -4125,6 +4125,15 @@ function start() {
 	// 回归勇士
 	if (cfg.enable_return_user === true) { dp_load('return_user'); set_return_user(15); }
 
+	// 时装潜能
+	if (cfg.enable_hidden_option === true) { dp_load('hidden_option'); start_hidden_option(); }
+
+	// VIP 登录公告
+	if (cfg.enable_vip_login === true) { dp_load('vip_login'); vip_Login(); }
+
+	// 战力排行榜
+	if (cfg.enable_ranking === true) { dp_load('ranking'); start_ranking(); }
+
 	// VIP 登录公告（依赖 enable_user_inout_hook）
 	if (cfg.enable_vip_login === true) { vip_Login(); }
 
