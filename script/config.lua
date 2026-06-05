@@ -248,7 +248,7 @@ local config = {
         enable_hidden_option = false,
 
         -- [RISK:HIGH] 回归勇士时间设置
-        enable_return_user = false,
+        enable_return_user = true,
 
         -- [RISK:HIGH] 史诗/传说掉落全服公告+奖励
         enable_drop_announce = false,
