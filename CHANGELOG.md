@@ -8,16 +8,25 @@
 - Added architecture documentation.
 - Added coding standards.
 - Added initial code review notes for `df_game_r.lua` and `df_game_r.js`.
-- Added Lua config template: `script/config.lua`.
-- Added Lua utils template: `script/utils.lua`.
-- Added Lua bootstrap template: `script/bootstrap.lua`.
-- Added handler module directory and module templates.
-- Added handler module implementations for:
+- Added Lua config module: `script/config.lua`.
+- Added Lua utils module: `script/utils.lua`.
+- Added Lua bootstrap module: `script/bootstrap.lua`.
+- Added handler module directory and module implementations for:
   - quest
   - job
   - item cleanup
   - inherit
   - pvp
+  - misc
+- Added infrastructure and gameplay modules for:
+  - online tracking
+  - broadcast
+  - GM permission checks
+  - item query
+  - experience dungeon
+  - dungeon gate
+  - drop rules
+  - finish back home
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -26,12 +35,17 @@
 
 ### Changed
 
-- Updated README TODO list with completed documentation, template and audit steps.
+- Updated README TODO list with completed documentation, template, audit, runtime wiring, and server smoke-test steps.
 - Updated architecture document with current module migration status.
+- Changed `df_game_r.lua` into a lightweight runtime entry that loads `script/bootstrap.lua`.
+- Wired modular handlers through `bootstrap.setup(...)`.
+- Registered `UseItem1` as the normal right-click consumable dispatch entry.
+- Kept `UseItem2` as a compatibility dispatch entry.
+- Centralized DPX startup behavior in `script/config.lua` and `bootstrap.apply_dpx_startup(...)`.
+- Aligned high-risk handler defaults: SQL, delete, and shell handlers are disabled by default.
 
 ### Notes
 
-- Runtime entry wiring has not been changed yet.
-- `df_game_r.lua` still contains the original handlers.
-- Migrated handler modules are prepared but not yet loaded by the runtime entry.
-- `frida.js` is not treated as part of the default DP loading chain.
+- The migration branch now contains runtime entry wiring and modular handler loading.
+- High-risk handlers are present but gated by config switches and still require real item/PVF validation.
+- `frida.js` is not treated as part of the default DP loading chain; DP defaults to `df_game_r.lua` and `df_game_r.js`.
