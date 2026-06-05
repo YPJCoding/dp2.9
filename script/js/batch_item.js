@@ -1,13 +1,13 @@
 // 批量物品添加 + UI 通知（来源：dp2/df_game_r.js）
 
-function api_CUser_Add_Item_list(user, itemList) {
+function addItemList(user, itemList) {
   for (var i = 0; i < itemList.length; i++) {
     api_CUser_AddItem(user, itemList[i][0], itemList[i][1]);
   }
-  SendItemWindowNotification(user, itemList);
+  sendItemNotification(user, itemList);
 }
 
-function SendItemWindowNotification(user, itemList) {
+function sendItemNotification(user, itemList) {
   var packet = api_PacketGuard_PacketGuard();
   InterfacePacketBuf_put_header(packet, 1, 163);
   InterfacePacketBuf_put_byte(packet, 1);

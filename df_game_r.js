@@ -2964,23 +2964,35 @@ function start() {
 	// 账号金库扩展至 128 格
 	if (cfg.enable_account_cargo === true) { dp_load('account_cargo'); setMaxCAccountCargoSolt(128); }
 
-	// 加载独立修补程序模块
+	// 加载独立修补程序模块（始终加载，各功能按开关启用）
 	dp_load('patches');
 
 	// 解除每日创建角色数量限制
-	if (cfg.enable_create_character_unlimit !== false) { disable_check_create_character_limit(); }
+	if (cfg.enable_create_character_unlimit !== false) { disableCreateCharLimit(); }
 
 	// +13 以上强化券自动刷新物品栏
-	if (cfg.enable_strengthen_refresh !== false) { DP_Strengthen_SendUpdateItemList(); }
+	if (cfg.enable_strengthen_refresh !== false) { enableStrengthenRefresh(); }
 
 	// 黑暗武士技能栏修复
-	if (cfg.enable_dark_knight_skill_fix !== false) { check_move_comboSkillSlot_force_true(); }
+	if (cfg.enable_dark_knight_skill_fix !== false) { enableComboSkillFix(); }
 
 	// 取消新账号送成长契约
-	if (cfg.enable_mobile_auth === true) { InterSelectMobileAuthReward(); }
+	if (cfg.enable_mobile_auth === true) { disableMobileAuth(); }
 
 	// 抽取幸运在线玩家活动
 	if (cfg.enable_lucky_online === true) { start_event_lucky_online_user(); }
+
+	// 战力排行榜
+	if (cfg.enable_ranking === true) { dp_load('ranking'); startRanking(); }
+
+	// 时装潜能
+	if (cfg.enable_hidden_option === true) { dp_load('hidden_option'); startHiddenOption(); }
+
+	// 回归勇士
+	if (cfg.enable_return_user === true) { dp_load('return_user'); setReturnUser(15); }
+
+	// VIP 登录公告
+	if (cfg.enable_vip_login === true) { dp_load('vip_login'); startVipLogin(); }
 
 	// 初始化数据库
 	api_scheduleOnMainThread(init_db, null);
@@ -2990,24 +3002,6 @@ function start() {
 
 	// 怪物攻城活动
 	if (cfg.enable_village_attack === true) { api_scheduleOnMainThread(start_event_villageattack, null); }
-
-	// 战力排行榜
-	if (cfg.enable_ranking === true) { start_ranking(); }
-
-	// 时装潜能
-	if (cfg.enable_hidden_option === true) { start_hidden_option(); }
-
-	// 回归勇士
-	if (cfg.enable_return_user === true) { dp_load('return_user'); set_return_user(15); }
-
-	// 时装潜能
-	if (cfg.enable_hidden_option === true) { dp_load('hidden_option'); start_hidden_option(); }
-
-	// VIP 登录公告
-	if (cfg.enable_vip_login === true) { dp_load('vip_login'); vip_Login(); }
-
-	// 战力排行榜
-	if (cfg.enable_ranking === true) { dp_load('ranking'); start_ranking(); }
 
 	// VIP 登录公告（依赖 enable_user_inout_hook）
 	if (cfg.enable_vip_login === true) { vip_Login(); }

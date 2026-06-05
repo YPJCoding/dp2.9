@@ -1,6 +1,6 @@
 // 独立修补程序（来源：dp2.9/df_game_r.js）
 
-function InterSelectMobileAuthReward() {
+function disableMobileAuth() {
   var defPtr = ptr(0x08161384);
   var value = defPtr.readU8();
   if (value != 0x0F) {
@@ -14,12 +14,12 @@ function InterSelectMobileAuthReward() {
   }));
 }
 
-function disable_check_create_character_limit() {
+function disableCreateCharLimit() {
   Memory.protect(ptr(0x8401922), 2, 'rwx');
   ptr(0x8401922).writeUShort(0x01B0);
 }
 
-function DP_Strengthen_SendUpdateItemList() {
+function enableStrengthenRefresh() {
   Interceptor.attach(ptr(0x080FC850), {
     onEnter: function (args) {},
     onLeave: function (retval) {
@@ -29,7 +29,7 @@ function DP_Strengthen_SendUpdateItemList() {
   });
 }
 
-function check_move_comboSkillSlot_force_true() {
+function enableComboSkillFix() {
   Interceptor.attach(ptr(0x8608C98), {
     onEnter: function (args) {},
     onLeave: function (retval) { retval.replace(1); }
