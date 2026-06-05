@@ -1,9 +1,9 @@
 -- 翻牌回城模块
 --
 -- 副本完成后：按配置模式发放随机点券，并可选自动回城/分解/出售。
--- 模式通过配置控制：0=完全关闭，1=奖励+回城，2=奖励+诺顿分解+回城，3=奖励+玩家分解机+回城，4=奖励+出售+回城。
+-- 模式通过配置控制：0=完全关闭，1=奖励+回城，2=奖励+诺顿分解+回城，3=奖励+玩家分解机+回城，4=奖励+出售+回城，5=仅奖励。
 -- 依赖 online.lua（模式3查找在线玩家分解机）。
--- 测试服可通过热加载调用 M.configure(...) 动态切换模式，无需重复注册 GameEvent hook。
+-- 测试服可通过 hot_reload 监听 config.lua 后调用 M.configure(...) 动态切换模式，无需重复注册 GameEvent hook。
 
 local M = {}
 
@@ -14,14 +14,14 @@ local world = nil
 local dpx = nil
 local is_hook_registered = false
 
--- 当前模式：0=关 1=回城 2=诺顿分解 3=在线玩家分解机 4=出售
+-- 当前模式：0=关 1=回城 2=诺顿分解 3=在线玩家分解机 4=出售 5=仅奖励
 local mode = "0"
 local point_min = 100
 local point_max = 1000
 
 local function normalize_mode(value)
     local value_str = tostring(value or "0")
-    if value_str == "0" or value_str == "1" or value_str == "2" or value_str == "3" or value_str == "4" then
+    if value_str == "0" or value_str == "1" or value_str == "2" or value_str == "3" or value_str == "4" or value_str == "5" then
         return value_str
     end
     return "0"
@@ -148,7 +148,9 @@ local function on_game_event(fnext, event_type, _party, param)
 
     reward_party(party)
 
-    if mode == "1" then
+    if mode == "5" then
+        return result
+    elseif mode == "1" then
         party:ReturnToVillage()
     elseif mode == "2" or mode == "3" or mode == "4" then
         party:ForEachMember(function(user, pos)
