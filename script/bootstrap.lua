@@ -5,7 +5,7 @@
 -- 2. df_game_r.lua 调用 M.setup(item_handler, ctx) 完成运行时装配。
 -- 3. handler 是否注册由 script/config.lua 控制。
 -- 4. 当前默认配置已开启全部 handler 模块；SQL、删除、shell 等高风险能力仍由 risk 开关控制。
--- 5. 基础设施模块按依赖顺序加载：online -> broadcast, gm_permissions -> item_query。
+-- 5. 基础设施模块按依赖顺序加载：online -> gm_permissions -> broadcast -> item_query -> gameplay modules。
 
 local M = {}
 
@@ -62,6 +62,12 @@ function M.load_utils(logger)
         return {}
     end
     return utils
+end
+
+local function is_item_handlers_enabled(ctx)
+    local config = ctx.config or {}
+    local features = config.features or {}
+    return features.enable_item_handlers == true
 end
 
 local function is_modular_handlers_enabled(ctx)
@@ -121,6 +127,13 @@ function M.register_handlers(item_handler, ctx)
     if not item_handler then
         if ctx and ctx.logger then
             ctx.logger.error('[bootstrap] invalid item_handler')
+        end
+        return
+    end
+
+    if not is_item_handlers_enabled(ctx) then
+        if ctx and ctx.logger then
+            ctx.logger.info('[bootstrap] item handlers disabled')
         end
         return
     end
@@ -254,7 +267,7 @@ function M.apply_dpx_startup(ctx)
     end
 
     if startup.set_level_cap then
-        dpx.set_auction_min_level(startup.level_cap or 95)
+        dpx.set_max_level(startup.level_cap or 95)
     end
 
     if startup.enable_creator then
