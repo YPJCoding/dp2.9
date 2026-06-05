@@ -4092,6 +4092,9 @@ function start() {
 	// 账号金库扩展至 128 格
 	if (cfg.enable_account_cargo === true) { setMaxCAccountCargoSolt(128); }
 
+	// 加载独立修补程序模块
+	dp_load('patches');
+
 	// 解除每日创建角色数量限制
 	if (cfg.enable_create_character_unlimit !== false) { disable_check_create_character_limit(); }
 
