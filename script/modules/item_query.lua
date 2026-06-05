@@ -52,36 +52,36 @@ end
 -- 参数签名参考 dp2: function(fnext, _user, input)
 local function on_gm_input(fnext, _user, input)
     if not input or type(input) ~= "string" then
-        return fnext(_user, input)
+        return fnext()
     end
 
     local user = game.fac.user(_user)
     if not user then
-        return fnext(_user, input)
+        return fnext()
     end
 
     -- //viewid <名称>
     local name = string.match(input, "^//viewid%s+(.-)%s*$")
     if name and #name > 0 then
         handle_viewid(user, name)
-        return fnext(_user, input)
+        return fnext()
     end
 
     -- //viewname <ID>
     local id_str = string.match(input, "^//viewname%s+(%d+)%s*$")
     if id_str then
         handle_viewname(user, tonumber(id_str))
-        return fnext(_user, input)
+        return fnext()
     end
 
     -- //viewname 非数字参数，提示用法
     if string.match(input, "^//viewname%s+") then
         user:SendNotiPacketMessage("用法错误：//viewname <数字ID>", 14)
-        return fnext(_user, input)
+        return fnext()
     end
 
     -- 未匹配，传递到下一个 handler
-    return fnext(_user, input)
+    return fnext()
 end
 
 function M.setup(ctx, deps)
