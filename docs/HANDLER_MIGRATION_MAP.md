@@ -18,7 +18,7 @@
 
 | item_id | 原功能 | 目标模块 | 状态 | 风险 | 当前说明 / 后续动作 |
 |---:|---|---|---|---|---|
-| `2021458801` | 装备跨界石，背包装备栏第 1 格移动到账号金库 | `script/handlers/misc.lua` | `migrated` | `MEDIUM` | 已迁入 misc，失败返还道具并记录日志 |
+| `2021458801` | 装备跨界石，背包装备栏第 1 格移动到账号金库 | `script/handlers/misc.lua` | `migrated` | `MEDIUM` | 已迁入 misc，成功/失败均记录日志，失败返还道具 |
 | `2021458802` | 主线任务清理 | `script/handlers/quest.lua` | `migrated` | `MEDIUM` | 已迁入 quest，成功/失败均记录日志，待 PVF 正式道具验证 |
 | `2021458803` | 支线/普通任务清理 | `script/handlers/quest.lua` | `migrated` | `HIGH` | 已迁入 quest；会影响转职/觉醒任务，成功/失败均记录日志，待真实道具验证 |
 | `2021458808` | 每日任务清理 | `script/handlers/quest.lua` | `migrated` | `MEDIUM` | 已迁入 quest，成功/失败均记录日志，待 PVF 正式道具验证 |
@@ -26,21 +26,21 @@
 | `2021458807` | 女鬼剑职业转换 | `script/handlers/job.lua` | `gated` | `HIGH` | 已迁入 job；受 `config.risk.enable_sql_handlers` 控制，默认关闭 |
 | `2023458801` | 角色出战 | `script/handlers/misc.lua` | `gated` | `HIGH` | 已迁入 misc；受 `config.risk.enable_sql_handlers` 控制，默认关闭 |
 | `2023458803` | 装备设计图熟练度提升 | `script/handlers/misc.lua` | `gated` | `HIGH` | 已迁入 misc；受 `config.risk.enable_sql_handlers` 控制，默认关闭 |
-| `10157835` | 一次觉醒完成券 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
-| `10157836` | 二次觉醒完成券 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
-| `2023458001` | 转职任务获取券，任务 ID：8028/8029/8030/8031/8015 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
-| `2023458002` | 转职任务获取券，任务 ID：8024/8025/8026/8027/4064 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
-| `2023458003` | 转职任务获取券，任务 ID：8032/8033/8034/8035 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
-| `2023629237` | 转职任务获取券，任务 ID：8037/8038/8039/8040 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
-| `2023458063` | 转职任务获取券，任务 ID：5160 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
-| `2023458064` | 转职任务获取券，任务 ID：5163 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
-| `2023629238` | 转职任务获取券，任务 ID：12592 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，待真实道具验证 |
+| `10157835` | 一次觉醒完成券 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，成功/失败均记录日志，待真实道具验证 |
+| `10157836` | 二次觉醒完成券 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，成功/失败均记录日志，待真实道具验证 |
+| `2023458001` | 转职任务获取券，任务 ID：8028/8029/8030/8031/8015 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，成功/失败均记录日志，待真实道具验证 |
+| `2023458002` | 转职任务获取券，任务 ID：8024/8025/8026/8027/4064 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，成功/失败均记录日志，待真实道具验证 |
+| `2023458003` | 转职任务获取券，任务 ID：8032/8033/8034/8035 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，成功/失败均记录日志，待真实道具验证 |
+| `2023629237` | 转职任务获取券，任务 ID：8037/8038/8039/8040 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，成功/失败均记录日志，待真实道具验证 |
+| `2023458063` | 转职任务获取券，任务 ID：5160 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，成功/失败均记录日志，待真实道具验证 |
+| `2023458064` | 转职任务获取券，任务 ID：5163 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，成功/失败均记录日志，待真实道具验证 |
+| `2023629238` | 转职任务获取券，任务 ID：12592 | `script/handlers/job.lua` | `migrated` | `MEDIUM` | 已迁入 job，成功/失败均记录日志，待真实道具验证 |
 | `2541121` | PVP 经验书 | `script/handlers/pvp.lua` | `gated` | `HIGH` | 已迁入 pvp；需要同时开启 `enable_shell_handlers` 与 `enable_sql_handlers`，默认关闭 |
 | `2021458806` | 宠物清理券 | `script/handlers/item_cleanup.lua` | `gated` | `HIGH` | 已迁入 item_cleanup；需要同时开启 `enable_delete_handlers` 与 `enable_sql_handlers`，默认关闭 |
 | `2022110503` | 时装清理券 | `script/handlers/item_cleanup.lua` | `gated` | `HIGH` | 已迁入 item_cleanup；需要同时开启 `enable_delete_handlers` 与 `enable_sql_handlers`，默认关闭 |
 | `2022110504` | 副职业一键分解券 | `script/handlers/item_cleanup.lua` | `gated` | `HIGH` | 已迁入 item_cleanup；受 `config.risk.enable_delete_handlers` 控制，默认关闭 |
-| `2021458804` | 异界 E2 重置券 | `script/handlers/misc.lua` | `migrated` | `MEDIUM` | 已迁入 misc，待真实道具验证 |
-| `2021458805` | 异界 E3 重置券 | `script/handlers/misc.lua` | `migrated` | `MEDIUM` | 已迁入 misc，待真实道具验证 |
+| `2021458804` | 异界 E2 重置券 | `script/handlers/misc.lua` | `migrated` | `MEDIUM` | 已迁入 misc，成功记录日志，待真实道具验证 |
+| `2021458805` | 异界 E3 重置券 | `script/handlers/misc.lua` | `migrated` | `MEDIUM` | 已迁入 misc，成功记录日志，待真实道具验证 |
 | `2022110505` | 装备继承券 | `script/handlers/inherit.lua` | `migrated` | `HIGH` | 已迁入 inherit，成功/失败均记录日志，待真实道具验证 |
 
 ## 非 item_handler 但相关的运行逻辑
@@ -68,6 +68,7 @@
 
 - 迁移女鬼剑转换、一次觉醒、二次觉醒、转职任务获取。
 - SQL 类女鬼剑转换受 `config.risk.enable_sql_handlers` 控制，默认关闭。
+- 非 SQL 职业/觉醒/转职任务功能成功和失败都会记录业务级日志。
 
 ### `item_cleanup.lua`
 
@@ -92,6 +93,7 @@
 
 - 迁移跨界石、角色出战、装备设计图熟练度、异界 E2/E3 重置。
 - SQL 类能力受 `config.risk.enable_sql_handlers` 控制，默认关闭。
+- 跨界和异界重置成功会记录业务级日志，失败返还道具并记录原因。
 
 ## 下一步检查清单
 
