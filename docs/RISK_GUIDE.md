@@ -57,7 +57,9 @@
 - 说明影响的数据库和表
 - 说明是否可回滚
 - 受配置开关控制
+- 默认关闭
 - 记录账号、角色、操作、参数和结果
+- 失败或拒绝执行时返还道具并记录原因
 
 推荐配置开关：
 
@@ -80,16 +82,26 @@ risk = {
 
 - 标记 `[RISK:HIGH][DELETE]`
 - 受 `config.risk.enable_delete_handlers` 控制
+- 默认关闭
 - 明确删除范围，例如背包类型、槽位范围
 - 失败时返还道具
 - 成功时刷新对应背包空间
-- 记录操作日志
+- 成功和失败都记录操作日志
 
 推荐配置开关：
 
 ```lua
 risk = {
     enable_delete_handlers = false,
+}
+```
+
+如果删除类功能还会执行 SQL，例如宠物/时装清理需要删除数据库记录，则必须同时满足 `[DELETE]` 和 `[SQL]` 两类开关：
+
+```lua
+risk = {
+    enable_delete_handlers = true,
+    enable_sql_handlers = true,
 }
 ```
 
@@ -121,15 +133,26 @@ risk = {
 
 - 标记 `[RISK:HIGH][SHELL]`
 - 受 `config.risk.enable_shell_handlers` 控制
-- 参数必须白名单化
+- 默认关闭
+- 参数必须白名单化或类型校验
 - 不允许拼接未校验的用户输入
 - 必须记录执行结果
+- 失败或拒绝执行时返还道具并记录原因
 
 推荐配置开关：
 
 ```lua
 risk = {
     enable_shell_handlers = false,
+}
+```
+
+如果 shell 输出会继续被作为 SQL 执行，则必须同时满足 `[SHELL]` 和 `[SQL]` 两类开关：
+
+```lua
+risk = {
+    enable_shell_handlers = true,
+    enable_sql_handlers = true,
 }
 ```
 
@@ -179,13 +202,16 @@ risk = {
 当前分支优先做：
 
 - 文档化
-- 模板化
+- 模块化
 - 模块边界建立
 - 风险标记
+- 安全默认行为收敛
 
-暂不默认启用：
+默认不启用：
 
-- 新迁移的 handler 模块
+- SQL handler
+- 删除 handler
+- Shell handler
 - 热加载模块
 - 高风险 GM 指令
 - 高风险 JS Hook
