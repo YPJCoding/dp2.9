@@ -129,6 +129,10 @@ local config = {
         -- 注册 GmInput hook，提供 //viewid / //viewname 只读查询。
         enable_item_query = true,
 
+        -- 每日签到模块。
+        -- 注册 GmInput hook，提供 //qd 指令；默认关闭，开启后通过邮件发放奖励。
+        enable_signin = false,
+
         -- 经验副本/泡点模块。
         -- 定时检查在线玩家是否在指定副本，满足条件时发经验和代币。
         enable_exp_dungeon = true,
@@ -154,6 +158,43 @@ local config = {
     ------------------------------------------------
     -- [BOOT] 玩法模块参数（多数需要重启）
     ------------------------------------------------
+    signin = {
+        -- 每日签到指令。
+        -- 仅 features.enable_signin=true 后生效。
+        command = "//qd",
+
+        -- 每日重置小时，0~23。
+        -- 旧脚本口径为每日 6 点重置。
+        reset_hour = 6,
+
+        -- 邮件服务器组，旧脚本使用 3。
+        server_group = 3,
+
+        -- 签到奖励邮件标题与内容。
+        mail_title = "每日签到",
+        mail_content = "感谢您的支持",
+
+        -- 签到奖励列表。
+        -- 当前使用 dpx.mail.item 逐个发送，每封邮件最多 1 个道具。
+        -- 旧脚本默认奖励：3340 x1。
+        reward_items = {
+            { id = 3340, count = 1 },
+        },
+
+        -- 是否限制只有 GM 可签到。
+        -- 默认 false，保持旧脚本所有玩家可用的行为。
+        require_gm = false,
+
+        -- 是否全服广播签到消息。
+        -- 默认 false，避免刷屏；如需保持旧脚本广播行为可改为 true。
+        broadcast_enabled = false,
+        broadcast_message = "玩家【%s】通过每日签到获得了丰厚的奖励，快来试试吧！聊天框输入//qd",
+
+        -- 玩家提示文案。
+        success_message = "——————————每日签到——————————  签到奖励发送至邮箱，若空邮件请小退一下!",
+        duplicate_message = "——————————每日签到——————————  您今天已经签到完毕，请勿重复签到！",
+    },
+
     exp_dungeon = {
         -- 经验副本 ID。
         -- 当前 PVF 若不存在该副本，模块不会产生有效奖励。
