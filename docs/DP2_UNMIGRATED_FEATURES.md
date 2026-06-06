@@ -80,15 +80,18 @@
 - `script/Work_Reload.lua` 已移除。
 - `hot_reload.enabled = true`，默认开启。
 - 当前仅热应用显式支持的运行时配置：`hot.finish_back_home`。
-- 配置语法错误或 require 失败时，应保留旧配置并记录错误。
+- `hot.finish_back_home.default_mode=0/5/1` 已实测可实时生效。
+- `hot.finish_back_home.equipment_rarities={0,1}` 已实测对 `mode=2/3/4` 生效。
+- 配置语法错误或 require 失败时，应保留旧配置并记录错误；该异常路径仍待实测。
 
-状态：`[~] 已迁移，待 config 热更新实测`
+状态：`[~] 已迁移，主要热更新路径已验证，异常路径待测`
 
 验证点：
 
-- [ ] 修改 `hot.finish_back_home.default_mode = "0"` 后确认实时生效。
-- [ ] 修改 `hot.finish_back_home.default_mode = "5"` 后确认实时生效。
-- [ ] 修改 `hot.finish_back_home.default_mode = "1"` 后确认实时生效。
+- [x] 修改 `hot.finish_back_home.default_mode = "0"` 后确认实时生效。
+- [x] 修改 `hot.finish_back_home.default_mode = "5"` 后确认实时生效。
+- [x] 修改 `hot.finish_back_home.default_mode = "1"` 后确认实时生效。
+- [x] 修改 `hot.finish_back_home.equipment_rarities = {0, 1}` 后确认 `mode=2/3/4` 过滤生效。
 - [ ] 故意写入错误配置，确认记录错误且旧配置不失效。
 
 ---
@@ -156,17 +159,19 @@
 - 当前 `default_mode` 默认为 `5`。
 - 已新增 `equipment_rarities` 单一装备品质白名单，分解和出售共用。
 - 当前默认 `equipment_rarities = {0, 1}`，对应普通装备和高级装备。
+- `mode=0/1/5` 已实测通过。
+- `mode=2/3/4` 已实测遵守 `equipment_rarities={0,1}`，高级以上装备会跳过。
 
-状态：`[~] 已迁移，需测试服复测`
+状态：`[x] 已迁移，主要模式已测试通过`
 
 验证点：
 
-- [ ] `mode=5`：只发点券，不回城。
-- [ ] `mode=0`：完全无动作。
-- [ ] `mode=1`：发点券 + 回城。
-- [ ] `mode=2`：发点券 + 诺顿分解 + 回城，且只处理 `rarity=0/1`。
-- [ ] `mode=3`：发点券 + 在线玩家分解机 + 回城，且只处理 `rarity=0/1`。
-- [ ] `mode=4`：发点券 + 出售装备 + 回城，且只处理 `rarity=0/1`。
+- [x] `mode=5`：只发点券，不回城。
+- [x] `mode=0`：完全无动作。
+- [x] `mode=1`：发点券 + 回城。
+- [x] `mode=2`：发点券 + 诺顿分解 + 回城，且只处理 `rarity=0/1`。
+- [x] `mode=3`：发点券 + 在线玩家分解机 + 回城，且只处理 `rarity=0/1`。
+- [x] `mode=4`：发点券 + 出售装备 + 回城，且只处理 `rarity=0/1`。
 
 ---
 
