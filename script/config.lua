@@ -27,76 +27,30 @@ local config = {
             -- 4 = 发放随机点券 + 出售装备 + 回城。
             -- 5 = 仅发放随机点券：不回城、不分解、不出售。
             default_mode = "5",
-
-            -- 副本完成后随机点券下限。
-            -- 仅在 default_mode 不为 0 时生效。
             point_min = 100,
-
-            -- 副本完成后随机点券上限。
-            -- 仅在 default_mode 不为 0 时生效。
             point_max = 1000,
-
-            -- 装备处理品质白名单。
-            -- mode=2 / mode=3 分解装备、mode=4 出售装备时共用。
-            -- 为空或 nil 表示不限制品质；配置后只处理 rarity 命中的装备。
             -- 0 = 普通装备，1 = 高级装备。
             equipment_rarities = {0, 1},
         },
     },
 
-    ------------------------------------------------
-    -- [BOOT] 调试与热加载开关（多数需要重启）
-    ------------------------------------------------
     debug = {
-        -- 输出更详细的调试日志。
-        -- 当前仅作为统一调试开关预留，具体模块是否读取该开关取决于模块实现。
         enable_debug_log = false,
-
-        -- 临时调试 hook 总开关。
-        -- 生产环境不要开启。
         enable_debug_hooks = false,
-
-        -- 临时 UseItem 链路测试 handler。
-        -- 开启后会注册 test_useitem_ids 中的道具 ID，用于确认 UseItem1/UseItem2 入口是否可用。
-        -- 默认关闭，避免正式环境劫持 1034-1037 等已有道具。
         enable_test_useitem_handler = false,
-
-        -- 临时测试道具 ID 列表。
-        -- 仅 enable_test_useitem_handler=true 时生效。
         test_useitem_ids = {1034, 1035, 1036, 1037},
-
-        -- 测试 handler 执行后是否返还测试道具。
         test_useitem_return_item = true,
-
-        -- UseItem trace 日志。
-        -- 开启后每次使用道具都会打印 item_id、slot、是否命中 handler。
-        -- 排查道具入口时临时开启，平时关闭减少日志量。
         enable_useitem_trace = false,
     },
 
     hot_reload = {
-        -- 配置热加载模块总开关。
-        -- true = 启动后监听 config.lua 修改时间，并热应用支持的运行时配置。
-        -- false = 不创建热加载 timer。
         enabled = true,
-
-        -- 被监听的配置文件路径。
         config_filename = "/dp2/script/config.lua",
-
-        -- 被重新 require 的配置模块名。
-        -- 通常不需要修改。
         config_module = "script.config",
-
-        -- 启动后首次开始检查前的延迟，单位毫秒。
         start_delay_ms = 10000,
-
-        -- 检查 config.lua 修改时间的间隔，单位毫秒。
         interval_ms = 5000,
     },
 
-    ------------------------------------------------
-    -- [BOOT] 模块/handler 注册开关（需要重启）
-    ------------------------------------------------
     features = {
         enable_item_handlers = true,
         enable_modular_handlers = true,
@@ -122,9 +76,6 @@ local config = {
         enable_legacy_patches = false,
     },
 
-    ------------------------------------------------
-    -- [BOOT] 玩法模块参数（多数需要重启）
-    ------------------------------------------------
     player_info = {
         command = "//myinfo",
     },
@@ -136,6 +87,7 @@ local config = {
     command_help = {
         -- 低风险帮助菜单，只展示说明文本，不执行子命令。
         getq_command = "//getq",
+        clearq_command = "//clearq",
         zhiye_command = "//zhiye",
         trans_command = "//trans",
         pvp_command = "//pvp",
@@ -187,9 +139,6 @@ local config = {
         open_dungeon_ids = {11007},
     },
 
-    ------------------------------------------------
-    -- [BOOT] DPX 启动配置（必须重启）
-    ------------------------------------------------
     dpx_startup = {
         set_level_cap = true,
         level_cap = 85,
