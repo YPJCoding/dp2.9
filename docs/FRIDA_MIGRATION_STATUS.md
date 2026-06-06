@@ -40,7 +40,7 @@
 
 | 功能 | 状态 | 说明 |
 |---|---|---|
-| 掉落公告 / 掉落奖励 | `[ ]` | `script/config.lua` 有 `enable_drop_announce=true`，但当前仓库未找到 `drop_announce`、`startDropAnnounce` 或明确等价实现；需要从真实旧来源确认后再迁。 |
+| 掉落公告 / 掉落奖励 | `[ ]` | 当前仓库未找到 `drop_announce`、`startDropAnnounce` 或明确等价实现；`enable_drop_announce` 已改为默认 `false`，找到真实来源后再迁移。 |
 | frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
 | `df_game_r.js` 入口瘦身 | `[~]` | 当前 `df_game_r.js` 内仍混有大段旧功能和部分拆分模块的重复代码。后续应继续拆分成 `script/js/*.js`，避免入口文件过大。 |
 | `start()` 调度一致性 | `[~]` | 已修复部分模块断点，但仍需整体实测所有 `js_features` 开关组合，确认不会重复 hook 或函数不存在。 |
@@ -71,6 +71,10 @@
   - 增加参数校验。
   - 增加重复应用保护。
   - 增加旧入口 `set_return_user()` 兼容。
+
+- `script/config.lua`
+  - `enable_drop_announce` 改为默认 `false`。
+  - 注释标记该功能源实现未找到，待补齐后再开启。
 
 ## 4. 后续迁移建议
 
