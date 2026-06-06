@@ -109,14 +109,44 @@ features.enable_item_query = true
 - [ ] 输入 `//viewid` 空参数时提示正确用法。
 - [ ] 输入 `//viewname非数字` 时提示正确用法。
 
+### 1.5 command_help 低风险帮助入口
+
+状态：`[~] 已迁移，待测试`
+
+相关文件：
+
+```text
+script/modules/command_help.lua
+script/config.lua
+```
+
+配置状态：
+
+```lua
+features.enable_command_help = true
+command_help.getq_command = "//getq"
+command_help.clearq_command = "//clearq"
+command_help.zhiye_command = "//zhiye"
+command_help.trans_command = "//trans"
+command_help.pvp_command = "//pvp"
+```
+
+待办测试：
+
+- [ ] 输入 `//getq` 后只显示强制接任务风险说明，不执行 `dpx.quest.accept`。
+- [ ] 输入 `//clearq` 后只显示任务清理道具券说明，不执行聊天清任务逻辑。
+- [ ] 输入 `//zhiye` 后只显示职业/觉醒道具券说明，不执行 `//job`、`//grow`、`//wake` 改职业逻辑。
+- [ ] 输入 `//trans` 后只显示装备继承券说明，不执行旧聊天继承子命令。
+- [ ] 输入 `//pvp` 后只显示 PVP 经验书与风险开关说明，不执行 `//pvpg`、`//pvpe`、`//pvpp`、`//pvpw`、`//pvpl` 改库逻辑。
+- [ ] 日志出现 `[command_help] show`。
+
 ## 2. 下一批迁移候选
 
 优先低风险、只读或独立功能，避免先迁充值、发物品、清背包、改库等高风险 GM 指令。
 
 候选：
 
-- [ ] 任务/职业/继承等只读帮助菜单：例如 `//getq`、`//zhiye`、`//trans` 的帮助文本；仅展示当前已迁移的道具券或暂未开放提示，不迁移改库子命令。
-- [ ] `//pvp` 决斗信息帮助菜单：仅展示当前 PVP 经验书 handler 状态，不迁移 shell 执行命令。
+- [ ] 暂无新的低风险明确候选；优先验证已迁移待测队列。
 
 待确认：
 
