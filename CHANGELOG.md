@@ -23,6 +23,8 @@
   - broadcast
   - GM permission checks
   - item query
+  - player info
+  - command menu
   - signin
   - experience dungeon
   - dungeon gate
@@ -35,6 +37,8 @@
 - Added hot reload module `script/modules/hot_reload.lua` for config-driven runtime tuning.
 - Added runtime smoke test checklist: `docs/RUNTIME_SMOKE_TEST_CHECKLIST.md`.
 - Added signin test checklist: `docs/SIGNIN_TEST_CHECKLIST.md`.
+- Added player info test checklist: `docs/PLAYER_INFO_TEST_CHECKLIST.md`.
+- Added next migration TODO list: `docs/NEXT_MIGRATION_TODO.md`.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -69,6 +73,14 @@
   - default reward remains `3340 x1` by mail.
   - reset hour remains 6.
   - sign-in state remains in memory to match old script behavior.
+- Added `player_info` config and bootstrap wiring:
+  - `features.enable_player_info = true` by default.
+  - `player_info.command = "//myinfo"`.
+  - command only reads the current character's basic info.
+- Added `command_menu` config and bootstrap wiring:
+  - `features.enable_command_menu = true` by default.
+  - `command_menu.command = "//指令"`.
+  - menu only shows migrated safe commands and hides high-risk unavailable GM commands.
 - Synced `DP2_UNMIGRATED_FEATURES.md`, `HANDLER_MIGRATION_MAP.md`, and `ROADMAP.md` after implementation audits.
 - Synced `ROADMAP.md` and `DP2_UNMIGRATED_FEATURES.md` with current config-only hot reload and finish_back_home testing status.
 - Marked `hot.finish_back_home.default_mode` hot reload verification as passed for modes `0`, `5`, and `1`.
@@ -104,6 +116,6 @@
 - Legacy entry patches are present, default-disabled, and their enable paths are verified.
 - Hot reload is enabled by default and currently applies only explicitly supported runtime config, starting with `hot.finish_back_home`.
 - `finish_back_home` main modes and equipment rarity filtering are verified.
-- `signin` is migrated and wired but default-disabled; it needs test-server verification before enabling for players.
-- Remaining safety-blocking work is mainly PVF/real-item verification and signin verification.
+- `signin`, `player_info`, and `command_menu` are migrated and wired; they are listed in `docs/NEXT_MIGRATION_TODO.md` for later test-server verification.
+- Remaining safety-blocking work is mainly PVF/real-item verification and pending verification of newly migrated low-risk command modules.
 - `frida.js` is not treated as part of the default DP loading chain; DP defaults to `df_game_r.lua` and `df_game_r.js`.
