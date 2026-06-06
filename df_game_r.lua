@@ -67,6 +67,7 @@ end
 local utils = get_utils(bootstrap_ctx)
 local config = bootstrap_ctx and bootstrap_ctx.config or {}
 local debug_config = config.debug or {}
+local js_features = config.js_features or {}
 logger.info("[debug] enable_useitem_trace=%s", tostring(debug_config.enable_useitem_trace == true))
 
 -- enable frida framework
@@ -74,29 +75,52 @@ local frida = require("df.frida")
 
 -- frida 调用 dp 功能
 local function on_frida_call(arg1, arg2, arg3)
-    logger.info("from frida call, arg1=%d, arg2=%f, arg3=%s", arg1, arg2, arg3)
-    if not arg1 or arg1 < 0 then
-        logger.error("Invalid arguments on frida_call")
-        return 0
-    end
-    if not arg3 then
-        logger.error("Invalid arguments on frida_call")
+    logger.info("from frida call, arg1=%s, arg2=%s, arg3=%s", tostring(arg1), tostring(arg2), tostring(arg3))
+
+    local acc_id = tonumber(arg1)
+    if not acc_id or acc_id < 0 then
+        logger.error("[frida_call] invalid acc_id=%s", tostring(arg1))
         return 0
     end
 
-    local _ptr = world.FindUserByAcc(arg1)
-    local user = game.fac.user(_ptr)
+    if not arg3 or type(arg3) ~= "string" then
+        logger.error("[frida_call] invalid payload=%s", tostring(arg3))
+        return 0
+    end
+
     local data = utils.split(arg3, ',')
-    local f_name = string.lower(data[1])
+    local f_name = string.lower(tostring(data[1] or ""))
     local f_index = tonumber(data[2])
 
     if f_name == "additem" then
+        if js_features.enable_batch_item_add ~= true then
+            logger.warn("[frida_call][additem] disabled acc=%d item_id=%s", acc_id, tostring(f_index))
+            return 0
+        end
+
+        if not f_index or f_index <= 0 then
+            logger.error("[frida_call][additem] invalid item_id acc=%d item_id=%s", acc_id, tostring(data[2]))
+            return 0
+        end
+
+        local _ptr = world.FindUserByAcc(acc_id)
+        if not _ptr then
+            logger.error("[frida_call][additem] user not online acc=%d item_id=%d", acc_id, f_index)
+            return 0
+        end
+
+        local user = game.fac.user(_ptr)
+        if not user then
+            logger.error("[frida_call][additem] user wrapper failed acc=%d item_id=%d", acc_id, f_index)
+            return 0
+        end
+
         dpx.item.add(user.cptr, f_index)
-        logger.info("[additem] acc: %d chr: %d item_id: %d", user:GetAccId(), user:GetCharacNo(), f_index)
+        logger.info("[frida_call][additem] acc=%d chr=%d item_id=%d", user:GetAccId(), user:GetCharacNo(), f_index)
     elseif f_name == "enterdungeon" then
         logger.info("[enterdungeon] No function")
     else
-        logger.info("[default] No function")
+        logger.info("[frida_call][default] unsupported function=%s", tostring(f_name))
     end
 
     return 0
