@@ -18,6 +18,8 @@ local is_hook_registered = false
 local mode = "0"
 local point_min = 100
 local point_max = 1000
+local disjoint_rarity_set = nil
+local sell_rarity_set = nil
 
 local function normalize_mode(value)
     local value_str = tostring(value or "0")
@@ -41,15 +43,75 @@ local function normalize_points(min_value, max_value)
     return math.floor(min_n), math.floor(max_n)
 end
 
+local function build_number_set(values)
+    if values == nil then
+        return nil
+    end
+
+    if type(values) ~= "table" then
+        return nil
+    end
+
+    local set = {}
+    local has_value = false
+
+    for _, value in ipairs(values) do
+        local n = tonumber(value)
+        if n then
+            set[math.floor(n)] = true
+            has_value = true
+        end
+    end
+
+    if not has_value then
+        return nil
+    end
+
+    return set
+end
+
+local function is_rarity_allowed(info, rarity_set)
+    if not rarity_set then
+        return true
+    end
+
+    if not info or info.rarity == nil then
+        return false
+    end
+
+    return rarity_set[tonumber(info.rarity)] == true
+end
+
+local function count_set(set)
+    if not set then
+        return 0
+    end
+
+    local count = 0
+    for _ in pairs(set) do
+        count = count + 1
+    end
+    return count
+end
+
 -- 执行分解操作（背包槽位 9-56）
 local function exec_disjoint(user, callee)
     local q = 0
+    local skipped = 0
     for i = 9, 56, 1 do
         local info = dpx.item.info(user.cptr, game.ItemSpace.INVENTORY, i)
         if info then
-            user:Disjoint(game.ItemSpace.INVENTORY, i, callee)
-            if not dpx.item.info(user.cptr, game.ItemSpace.INVENTORY, i) then
-                q = q + 1
+            if is_rarity_allowed(info, disjoint_rarity_set) then
+                user:Disjoint(game.ItemSpace.INVENTORY, i, callee)
+                if not dpx.item.info(user.cptr, game.ItemSpace.INVENTORY, i) then
+                    q = q + 1
+                end
+            else
+                skipped = skipped + 1
+                if logger then
+                    logger.info("[finish_back_home][disjoint][skip] acc=%d chr=%d slot=%d item_id=%s rarity=%s",
+                        user:GetAccId(), user:GetCharacNo(), i, tostring(info.id), tostring(info.rarity))
+                end
             end
         end
     end
@@ -58,10 +120,16 @@ local function exec_disjoint(user, callee)
         user:SendItemSpace(game.ItemSpace.INVENTORY)
         user:SendNotiPacketMessage(
             string.format("分解成功，%d件装备已分解", q), 14)
-        if logger then
-            logger.info("[finish_back_home][disjoint] acc=%d chr=%d count=%d",
-                user:GetAccId(), user:GetCharacNo(), q)
-        end
+    end
+
+    if skipped > 0 then
+        user:SendNotiPacketMessage(
+            string.format("已跳过%d件不符合品质限制的装备", skipped), 14)
+    end
+
+    if logger then
+        logger.info("[finish_back_home][disjoint] acc=%d chr=%d count=%d skipped=%d",
+            user:GetAccId(), user:GetCharacNo(), q, skipped)
     end
 end
 
@@ -92,12 +160,21 @@ end
 -- 出售装备（背包槽位 9-56）
 local function sell_equipment(user)
     local q = 0
+    local skipped = 0
     for i = 9, 56, 1 do
         local info = dpx.item.info(user.cptr, game.ItemSpace.INVENTORY, i)
         if info then
-            user:Sell(game.ItemSpace.INVENTORY, i, 1)
-            if not dpx.item.info(user.cptr, game.ItemSpace.INVENTORY, i) then
-                q = q + 1
+            if is_rarity_allowed(info, sell_rarity_set) then
+                user:Sell(game.ItemSpace.INVENTORY, i, 1)
+                if not dpx.item.info(user.cptr, game.ItemSpace.INVENTORY, i) then
+                    q = q + 1
+                end
+            else
+                skipped = skipped + 1
+                if logger then
+                    logger.info("[finish_back_home][sell][skip] acc=%d chr=%d slot=%d item_id=%s rarity=%s",
+                        user:GetAccId(), user:GetCharacNo(), i, tostring(info.id), tostring(info.rarity))
+                end
             end
         end
     end
@@ -106,10 +183,16 @@ local function sell_equipment(user)
         user:SendItemSpace(game.ItemSpace.INVENTORY)
         user:SendNotiPacketMessage(
             string.format("出售成功，%d件装备已出售", q), 14)
-        if logger then
-            logger.info("[finish_back_home][sell] acc=%d chr=%d count=%d",
-                user:GetAccId(), user:GetCharacNo(), q)
-        end
+    end
+
+    if skipped > 0 then
+        user:SendNotiPacketMessage(
+            string.format("已跳过%d件不符合品质限制的装备", skipped), 14)
+    end
+
+    if logger then
+        logger.info("[finish_back_home][sell] acc=%d chr=%d count=%d skipped=%d",
+            user:GetAccId(), user:GetCharacNo(), q, skipped)
     end
 end
 
@@ -182,16 +265,20 @@ function M.configure(cfg)
 
     mode = normalize_mode(cfg.default_mode or cfg.mode or mode)
     point_min, point_max = normalize_points(cfg.point_min or point_min, cfg.point_max or point_max)
+    disjoint_rarity_set = build_number_set(cfg.disjoint_rarities)
+    sell_rarity_set = build_number_set(cfg.sell_rarities)
 
     if logger then
         logger.info(
-            "[finish_back_home] configured old_mode=%s new_mode=%s old_points=%d-%d new_points=%d-%d",
+            "[finish_back_home] configured old_mode=%s new_mode=%s old_points=%d-%d new_points=%d-%d disjoint_rarity_count=%d sell_rarity_count=%d",
             tostring(old_mode),
             tostring(mode),
             old_min,
             old_max,
             point_min,
-            point_max
+            point_max,
+            count_set(disjoint_rarity_set),
+            count_set(sell_rarity_set)
         )
     end
 
@@ -199,6 +286,8 @@ function M.configure(cfg)
         mode = mode,
         point_min = point_min,
         point_max = point_max,
+        disjoint_rarity_count = count_set(disjoint_rarity_set),
+        sell_rarity_count = count_set(sell_rarity_set),
     }
 end
 
@@ -207,6 +296,8 @@ function M.get_config()
         mode = mode,
         point_min = point_min,
         point_max = point_max,
+        disjoint_rarity_count = count_set(disjoint_rarity_set),
+        sell_rarity_count = count_set(sell_rarity_set),
         is_hook_registered = is_hook_registered,
     }
 end
