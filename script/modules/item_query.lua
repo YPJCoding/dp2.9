@@ -1,14 +1,25 @@
 -- 物品查询指令模块
 --
--- 提供 //viewid <名称> 和 //viewname <ID> 聊天指令，
+-- 提供 //view、//viewid <名称> 和 //viewname <ID> 聊天指令，
 -- 通过 GmInput hook 拦截，使用 dpx.item.query_by_name / query_by_id 查询。
--- //viewid / //viewname 为只读查询，所有玩家均可使用。
+-- //view / //viewid / //viewname 均为只读查询，所有玩家均可使用。
 
 local M = {}
 
 local logger = nil
 local dpx = nil
 local game = nil
+
+local function handle_view_help(user)
+    user:SendNotiPacketMessage("——————————查询代码——————————", 14)
+    user:SendNotiPacketMessage("查询物品代码：//viewid <物品名称>", 14)
+    user:SendNotiPacketMessage("查询物品名称：//viewname <物品ID>", 14)
+    user:SendNotiPacketMessage("兼容旧写法：//viewid物品名称 / //viewname物品ID", 14)
+
+    if logger then
+        logger.info("[item_query][view] acc=%d chr=%d", user:GetAccId(), user:GetCharacNo())
+    end
+end
 
 -- 按名称查询物品 ID。
 local function handle_viewid(user, name)
@@ -60,23 +71,41 @@ local function on_gm_input(fnext, _user, input)
         return fnext()
     end
 
-    -- //viewid <名称>
+    -- //view 查询帮助
+    if input == "//view" then
+        handle_view_help(user)
+        return fnext()
+    end
+
+    -- //viewid <名称>，同时兼容旧写法 //viewid名称
     local name = string.match(input, "^//viewid%s+(.-)%s*$")
+    if not name then
+        name = string.match(input, "^//viewid(.+)$")
+    end
     if name and #name > 0 then
         handle_viewid(user, name)
         return fnext()
     end
 
-    -- //viewname <ID>
+    -- //viewname <ID>，同时兼容旧写法 //viewnameID
     local id_str = string.match(input, "^//viewname%s+(%d+)%s*$")
+    if not id_str then
+        id_str = string.match(input, "^//viewname(%d+)$")
+    end
     if id_str then
         handle_viewname(user, tonumber(id_str))
         return fnext()
     end
 
     -- //viewname 非数字参数，提示用法
-    if string.match(input, "^//viewname%s+") then
+    if string.match(input, "^//viewname") then
         user:SendNotiPacketMessage("用法错误：//viewname <数字ID>", 14)
+        return fnext()
+    end
+
+    -- //viewid 空参数，提示用法
+    if input == "//viewid" then
+        user:SendNotiPacketMessage("用法错误：//viewid <物品名称>", 14)
         return fnext()
     end
 
