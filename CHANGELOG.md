@@ -81,6 +81,10 @@
   - `features.enable_command_menu = true` by default.
   - `command_menu.command = "//指令"`.
   - menu only shows migrated safe commands and hides high-risk unavailable GM commands.
+- Added `//view` item query help and legacy no-space query compatibility:
+  - `//view` shows query usage.
+  - `//viewid <name>` and `//viewid<name>` both query item IDs.
+  - `//viewname <id>` and `//viewname<id>` both query item names.
 - Synced `DP2_UNMIGRATED_FEATURES.md`, `HANDLER_MIGRATION_MAP.md`, and `ROADMAP.md` after implementation audits.
 - Synced `ROADMAP.md` and `DP2_UNMIGRATED_FEATURES.md` with current config-only hot reload and finish_back_home testing status.
 - Marked `hot.finish_back_home.default_mode` hot reload verification as passed for modes `0`, `5`, and `1`.
@@ -116,6 +120,6 @@
 - Legacy entry patches are present, default-disabled, and their enable paths are verified.
 - Hot reload is enabled by default and currently applies only explicitly supported runtime config, starting with `hot.finish_back_home`.
 - `finish_back_home` main modes and equipment rarity filtering are verified.
-- `signin`, `player_info`, and `command_menu` are migrated and wired; they are listed in `docs/NEXT_MIGRATION_TODO.md` for later test-server verification.
+- `signin`, `player_info`, `command_menu`, and `item_query` help are migrated and wired; they are listed in `docs/NEXT_MIGRATION_TODO.md` for later test-server verification.
 - Remaining safety-blocking work is mainly PVF/real-item verification and pending verification of newly migrated low-risk command modules.
 - `frida.js` is not treated as part of the default DP loading chain; DP defaults to `df_game_r.lua` and `df_game_r.js`.
