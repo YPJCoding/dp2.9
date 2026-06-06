@@ -83,13 +83,38 @@ command_menu.command = "//指令"
 - [ ] 菜单不展示 `//send`、`//cz*`、`//set*`、`//clearp*` 等高风险未开放命令。
 - [ ] 关闭 `features.enable_command_menu=false` 并重启后，`//指令` 不触发模块逻辑。
 
+### 1.4 item_query 查询帮助
+
+状态：`[~] 已迁移，待测试`
+
+相关文件：
+
+```text
+script/modules/item_query.lua
+```
+
+配置状态：
+
+```lua
+features.enable_item_query = true
+```
+
+待办测试：
+
+- [ ] 输入 `//view` 后展示物品查询帮助。
+- [ ] 输入 `//viewid <物品名称>` 可查询物品 ID。
+- [ ] 输入 `//viewname <物品ID>` 可查询物品名称。
+- [ ] 兼容旧写法：`//viewid物品名称`。
+- [ ] 兼容旧写法：`//viewname物品ID`。
+- [ ] 输入 `//viewid` 空参数时提示正确用法。
+- [ ] 输入 `//viewname非数字` 时提示正确用法。
+
 ## 2. 下一批迁移候选
 
 优先低风险、只读或独立功能，避免先迁充值、发物品、清背包、改库等高风险 GM 指令。
 
 候选：
 
-- [ ] `//view` 帮助菜单：当前 `item_query` 已支持 `//viewid` / `//viewname`，可补帮助菜单。
 - [ ] `//postwn` 城镇坐标：如仅查询/展示则可低风险迁移；需先确认旧实现是否改状态。
 
 暂缓：
