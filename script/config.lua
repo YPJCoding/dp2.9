@@ -129,6 +129,10 @@ local config = {
         -- 注册 GmInput hook，提供 //viewid / //viewname 只读查询。
         enable_item_query = true,
 
+        -- 玩家个人信息模块。
+        -- 注册 GmInput hook，提供 //myinfo 只读查询。
+        enable_player_info = true,
+
         -- 每日签到模块。
         -- 注册 GmInput hook，提供 //qd 指令；默认关闭，开启后通过邮件发放奖励。
         enable_signin = false,
@@ -158,6 +162,12 @@ local config = {
     ------------------------------------------------
     -- [BOOT] 玩法模块参数（多数需要重启）
     ------------------------------------------------
+    player_info = {
+        -- 玩家个人信息查询指令。
+        -- 仅 features.enable_player_info=true 后生效。
+        command = "//myinfo",
+    },
+
     signin = {
         -- 每日签到指令。
         -- 仅 features.enable_signin=true 后生效。
