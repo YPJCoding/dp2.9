@@ -7,39 +7,8 @@ local M = {}
 
 local logger = nil
 local game = nil
+local is_hook_registered = false
 local rules = {}  -- {[dungeon_id] = {item_id, message}}
-
-function M.setup(ctx, deps)
-    logger = ctx.logger
-    game = ctx.game
-
-    local config = ctx.config or {}
-    local gate_cfg = config.dungeon_gate or {}
-    local gate_rules = gate_cfg.rules or {}
-
-    -- 解析规则：{dungeon_id = 5000, item_id = 80206, message = "..."}
-    rules = {}
-    for _, rule in ipairs(gate_rules) do
-        if rule.dungeon_id and rule.item_id then
-            rules[rule.dungeon_id] = {
-                item_id = rule.item_id,
-                message = rule.message or "持有特殊凭证才能进入此副本！",
-            }
-        end
-    end
-
-    if next(rules) ~= nil then
-        ctx.dpx.hook(game.HookType.GameEvent, on_game_event)
-        if logger then
-            logger.info("[dungeon_gate] registered GameEvent hook, rules=%d",
-                #gate_rules)
-        end
-    elseif logger then
-        logger.info("[dungeon_gate] no rules configured, skip hook")
-    end
-
-    return M
-end
 
 -- GameEvent hook 回调
 -- 签名: function(fnext, type, _party, param) return fnext() end
@@ -81,6 +50,45 @@ local function on_game_event(fnext, event_type, _party, param)
     end
 
     return fnext()
+end
+
+function M.setup(ctx, deps)
+    logger = ctx.logger
+    game = ctx.game
+
+    local config = ctx.config or {}
+    local gate_cfg = config.dungeon_gate or {}
+    local gate_rules = gate_cfg.rules or {}
+
+    -- 解析规则：{dungeon_id = 5000, item_id = 80206, message = "..."}
+    rules = {}
+    for _, rule in ipairs(gate_rules) do
+        local dungeon_id = tonumber(rule.dungeon_id)
+        local item_id = tonumber(rule.item_id)
+        if dungeon_id and item_id then
+            rules[dungeon_id] = {
+                item_id = item_id,
+                message = rule.message or "持有特殊凭证才能进入此副本！",
+            }
+        end
+    end
+
+    if next(rules) ~= nil then
+        if not is_hook_registered then
+            ctx.dpx.hook(game.HookType.GameEvent, on_game_event)
+            is_hook_registered = true
+            if logger then
+                logger.info("[dungeon_gate] registered GameEvent hook, rules=%d",
+                    #gate_rules)
+            end
+        elseif logger then
+            logger.info("[dungeon_gate] setup skipped hook registration, rules=%d", #gate_rules)
+        end
+    elseif logger then
+        logger.info("[dungeon_gate] no rules configured, skip hook")
+    end
+
+    return M
 end
 
 return M
