@@ -446,7 +446,8 @@ local config = {
         enable_return_user = true,
 
         -- [RISK:HIGH] 史诗/传说掉落全服公告和奖励。
-        enable_drop_announce = true,
+        -- 当前未找到旧实现来源，默认关闭；找到真实实现后再迁移和开启。
+        enable_drop_announce = false,
 
         -- [RISK:HIGH] VIP 等级登录公告。
         enable_vip_login = true,
