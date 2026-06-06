@@ -23,6 +23,7 @@ local infra_modules = {
     { key = 'gm_permissions', module = 'script.modules.gm_permissions' },
     { key = 'broadcast', module = 'script.modules.broadcast' },
     { key = 'item_query', module = 'script.modules.item_query' },
+    { key = 'player_info', module = 'script.modules.player_info' },
     { key = 'signin', module = 'script.modules.signin' },
     { key = 'exp_dungeon', module = 'script.modules.exp_dungeon' },
     { key = 'dungeon_gate', module = 'script.modules.dungeon_gate' },
@@ -101,6 +102,9 @@ local function is_module_enabled(ctx, module_key)
     end
     if module_key == 'item_query' then
         return features.enable_item_query == true
+    end
+    if module_key == 'player_info' then
+        return features.enable_player_info == true
     end
     if module_key == 'signin' then
         return features.enable_signin == true
