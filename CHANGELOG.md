@@ -96,6 +96,9 @@
   - `script/js/ranking.js` now waits/retries when DB handles are not ready and falls back when guild-name helpers are unavailable.
   - `script/js/vip_login.js` now uses the correct broadcast helper name, adds duplicate hook protection, and keeps the old `vip_Login()` alias.
   - `script/js/patches.js` now guards duplicate patch startup and restores the old strengthen-refresh user/slot argument behavior.
+  - `script/js/hidden_option.js` now guards duplicate hook startup and keeps the old `start_hidden_option()` alias.
+  - `script/js/return_user.js` now validates day values, avoids duplicate patch writes, and keeps the old `set_return_user()` alias.
+  - `js_features.enable_drop_announce` is now default-disabled because no source-equivalent implementation was found.
 - Synced `DP2_UNMIGRATED_FEATURES.md`, `HANDLER_MIGRATION_MAP.md`, and `ROADMAP.md` after implementation audits.
 - Synced `ROADMAP.md` and `DP2_UNMIGRATED_FEATURES.md` with current config-only hot reload and finish_back_home testing status.
 - Marked `hot.finish_back_home.default_mode` hot reload verification as passed for modes `0`, `5`, and `1`.
