@@ -32,6 +32,7 @@
   - save-town fix
   - open extra dungeons
 - Added hot reload module `script/modules/hot_reload.lua` for config-driven runtime tuning.
+- Added runtime smoke test checklist: `docs/RUNTIME_SMOKE_TEST_CHECKLIST.md`.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -65,6 +66,13 @@
 - Marked `hot.finish_back_home.default_mode` hot reload verification as passed for modes `0`, `5`, and `1`.
 - Marked `finish_back_home` mode `5` random-point-only behavior as verified.
 - Marked `finish_back_home` equipment rarity filtering as verified for modes `2`, `3`, and `4`.
+- Marked runtime smoke tests as verified:
+  - handler total switch disables handler registration.
+  - level cap remains 85 and auction minimum level remains 10.
+  - hot_reload timer starts and watches `script/config.lua`.
+  - legacy_patches default-disabled and per-feature enable paths work.
+  - SQL/delete/shell high-risk handlers reject and return items by default.
+- Updated safety progress estimates to approximately 96% for the safe deployable base and 70% for complete feature recovery.
 
 ### Fixed
 
@@ -83,8 +91,10 @@
 ### Notes
 
 - The migration branch now contains runtime entry wiring and modular handler loading.
-- High-risk handlers are present but gated by config switches and still require real item/PVF validation.
-- Legacy entry patches are present but disabled by default and require test-server validation before enabling.
+- Runtime smoke tests for the safe deployable base have passed.
+- High-risk handlers are present but gated by config switches; default rejection/return behavior is verified.
+- Legacy entry patches are present, default-disabled, and their enable paths are verified.
 - Hot reload is enabled by default and currently applies only explicitly supported runtime config, starting with `hot.finish_back_home`.
-- `finish_back_home` main modes and equipment rarity filtering are verified; remaining finish-related check is the config syntax-error fallback path.
+- `finish_back_home` main modes and equipment rarity filtering are verified.
+- Remaining safety-blocking work is mainly PVF/real-item verification and the next migration decision: `signin.lua` or GM command modules.
 - `frida.js` is not treated as part of the default DP loading chain; DP defaults to `df_game_r.lua` and `df_game_r.js`.
