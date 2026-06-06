@@ -24,6 +24,7 @@
 - `legacy_patches` 已迁移旧 dp2 入口 hook：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛；模块默认关闭，待测试服逐项开启验证。
 - `hot_reload` 已改为 **只监听 `script/config.lua`**，不再使用 `Work_Reload.lua`。
 - `hot_reload.enabled = true`，当前只热应用显式支持的运行时配置：`hot.finish_back_home`。
+- `hot_reload` 已补强错误保护：配置加载失败、返回类型异常或模块配置失败时会保留旧配置并记录 `keep previous config`。
 - `hot.finish_back_home.default_mode` 热更新已实测通过：`0`、`5`、`1` 均可实时生效。
 - `finish_back_home` 已支持 mode `0`~`5`，当前默认 `mode=5`，即只发随机点券、不回城、不分解、不出售。
 - `finish_back_home.equipment_rarities = {0, 1}` 已实测通过，mode `2`/`3`/`4` 均只处理普通装备和高级装备，高级以上装备会跳过。
@@ -54,6 +55,7 @@
 - [x] `legacy_patches` 模块已迁移，默认关闭。
 - [x] `hot_reload` 模块已迁移并改为 config-only 热更新，默认开启。
 - [x] `hot_reload` config 热更新实测：`hot.finish_back_home.default_mode=0/5/1` 均可实时生效。
+- [x] `hot_reload` 异常路径已做代码保护，语法错误实测为可选项，不阻塞当前收尾。
 - [x] `finish_back_home` 已修正为 `mode=0` 完全关闭，并避免副本完成事件重复调用 `fnext()`。
 - [x] `finish_back_home` 已支持 `mode=5` 仅发随机点券，并已实测只发点券、不回城。
 - [x] `finish_back_home` 已支持 `equipment_rarities` 单一装备品质白名单，并已实测 mode `2`/`3`/`4` 生效。
@@ -198,7 +200,8 @@ hot = {
 - [x] 默认开启 `hot_reload.enabled = true`。
 - [x] 实测修改 `default_mode=0/5/1` 可实时生效。
 - [x] 实测 `equipment_rarities={0,1}` 对 mode `2`/`3`/`4` 生效。
-- [ ] 实测配置语法错误时是否保留旧配置并记录错误。
+- [x] 异常路径已做代码保护：加载失败、返回类型异常或配置应用失败时保留旧配置并记录 `keep previous config`。
+- [ ] 可选：仅在本地副本或临时测试环境验证配置错误时是否保留旧配置；不需要在正常测试服故意写错 `config.lua`。
 
 当前不支持自动热更新：
 
@@ -239,6 +242,7 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [x] 测试 config 热更新：修改 `default_mode=0/5/1` 是否实时生效。
 - [x] 测试 finish_back_home mode=5：只发点券，不回城。
 - [x] 测试 mode=2/3/4 的 `equipment_rarities={0,1}` 是否正确跳过高级以上装备。
+- [x] 补强 hot_reload 异常保护；错误配置实测改为可选，不阻塞收尾。
 
 ### Step 2：服务器烟测补充
 
