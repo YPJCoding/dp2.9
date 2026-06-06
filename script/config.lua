@@ -133,6 +133,10 @@ local config = {
         -- 注册 GmInput hook，提供 //myinfo 只读查询。
         enable_player_info = true,
 
+        -- 指令菜单模块。
+        -- 注册 GmInput hook，提供 //指令 安全菜单。
+        enable_command_menu = true,
+
         -- 每日签到模块。
         -- 注册 GmInput hook，提供 //qd 指令；默认关闭，开启后通过邮件发放奖励。
         enable_signin = false,
@@ -166,6 +170,12 @@ local config = {
         -- 玩家个人信息查询指令。
         -- 仅 features.enable_player_info=true 后生效。
         command = "//myinfo",
+    },
+
+    command_menu = {
+        -- 安全指令菜单。
+        -- 仅展示当前已迁移/已开放的低风险命令。
+        command = "//指令",
     },
 
     signin = {
