@@ -68,7 +68,23 @@ local function reload_config_module(module_name, logger)
     if not ok then
         package.loaded[module_name] = old_module
         if logger then
-            logger.error("[hot_reload] reload config failed module=%s err=%s", tostring(module_name), tostring(module_or_err))
+            logger.error(
+                "[hot_reload] reload config failed module=%s err=%s, keep previous config",
+                tostring(module_name),
+                tostring(module_or_err)
+            )
+        end
+        return nil
+    end
+
+    if type(module_or_err) ~= "table" then
+        package.loaded[module_name] = old_module
+        if logger then
+            logger.error(
+                "[hot_reload] reload config returned invalid type module=%s type=%s, keep previous config",
+                tostring(module_name),
+                type(module_or_err)
+            )
         end
         return nil
     end
@@ -85,7 +101,13 @@ end
 
 local function apply_hot_config(ctx, new_config)
     local logger = ctx.logger
-    ctx.config = new_config
+
+    if type(new_config) ~= "table" then
+        if logger then
+            logger.error("[hot_reload] invalid config table, keep previous config")
+        end
+        return false
+    end
 
     local features = new_config.features or {}
     local fbh_config = get_finish_back_home_config(new_config)
@@ -93,13 +115,24 @@ local function apply_hot_config(ctx, new_config)
     -- 当前支持安全热应用的模块：finish_back_home。
     -- 只更新模块运行时配置，不重复注册 GameEvent hook。
     if features.enable_finish_back_home == true and fbh_config then
-        local ok, finish_back_home_or_err = pcall(require, "script.modules.finish_back_home")
-        if ok and finish_back_home_or_err and type(finish_back_home_or_err.configure) == "function" then
-            finish_back_home_or_err.configure(fbh_config)
-        elseif logger then
-            logger.error("[hot_reload] finish_back_home hot configure failed: %s", tostring(finish_back_home_or_err))
+        local ok_require, finish_back_home_or_err = pcall(require, "script.modules.finish_back_home")
+        if not ok_require or not finish_back_home_or_err or type(finish_back_home_or_err.configure) ~= "function" then
+            if logger then
+                logger.error("[hot_reload] finish_back_home hot configure unavailable: %s, keep previous config", tostring(finish_back_home_or_err))
+            end
+            return false
+        end
+
+        local ok_configure, configure_err = pcall(finish_back_home_or_err.configure, fbh_config)
+        if not ok_configure then
+            if logger then
+                logger.error("[hot_reload] finish_back_home hot configure failed: %s, keep previous config", tostring(configure_err))
+            end
+            return false
         end
     end
+
+    ctx.config = new_config
 
     if logger then
         logger.info(
@@ -109,6 +142,8 @@ local function apply_hot_config(ctx, new_config)
             tostring(fbh_config and fbh_config.point_max)
         )
     end
+
+    return true
 end
 
 local function check_config_reload(lfs, filename, ctx, logger, module_name)
@@ -132,8 +167,7 @@ local function check_config_reload(lfs, filename, ctx, logger, module_name)
         end
 
         local new_config = reload_config_module(module_name, logger)
-        if new_config then
-            apply_hot_config(ctx, new_config)
+        if new_config and apply_hot_config(ctx, new_config) then
             last_config_mtime = mtime
         end
     end
@@ -158,7 +192,10 @@ function M.reload_config_now(ctx)
         return false
     end
 
-    apply_hot_config(ctx, new_config)
+    if not apply_hot_config(ctx, new_config) then
+        return false
+    end
+
     last_config_mtime = read_mtime(lfs, config_filename, logger)
     return true
 end
