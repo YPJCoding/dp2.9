@@ -25,6 +25,7 @@ local infra_modules = {
     { key = 'item_query', module = 'script.modules.item_query' },
     { key = 'player_info', module = 'script.modules.player_info' },
     { key = 'command_menu', module = 'script.modules.command_menu' },
+    { key = 'command_help', module = 'script.modules.command_help' },
     { key = 'signin', module = 'script.modules.signin' },
     { key = 'exp_dungeon', module = 'script.modules.exp_dungeon' },
     { key = 'dungeon_gate', module = 'script.modules.dungeon_gate' },
@@ -109,6 +110,9 @@ local function is_module_enabled(ctx, module_key)
     end
     if module_key == 'command_menu' then
         return features.enable_command_menu == true
+    end
+    if module_key == 'command_help' then
+        return features.enable_command_help == true
     end
     if module_key == 'signin' then
         return features.enable_signin == true
