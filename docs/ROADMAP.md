@@ -4,13 +4,13 @@
 
 ## 1. 当前阶段
 
-当前分支处于：**安全可部署底板验证 + 玩法模块实测收尾阶段**。
+当前分支处于：**安全可部署底板收尾阶段**。
 
 当前进度口径：
 
 ```text
-安全可部署版：约 94%
-完全功能恢复版：约 68%
+安全可部署版：约 96%
+完全功能恢复版：约 70%
 ```
 
 关键事实：
@@ -19,9 +19,10 @@
 - 所有 `item_handler` 旧实现已经从 `df_game_r.lua` 移除。
 - 所有 handler 模块已经通过 `script/bootstrap.lua` 接入加载链路。
 - `features.enable_item_handlers` 和 `features.enable_modular_handlers` 都会影响 handler 注册。
-- SQL、删除、shell 类高风险 handler 仍默认关闭。
+- SQL、删除、shell 类高风险 handler 仍默认关闭，且默认拒绝并返还已通过测试服验证。
 - DPX 启动配置已集中到 `script/config.lua` 和 `bootstrap.apply_dpx_startup`，等级上限使用 `dpx.set_max_level`，当前内容上限为 85。
-- `legacy_patches` 已迁移旧 dp2 入口 hook：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛；模块默认关闭，待测试服逐项开启验证。
+- 等级上限 85 和拍卖行最低等级 10 已通过测试服烟测。
+- `legacy_patches` 已迁移旧 dp2 入口 hook：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛；默认关闭与三个子功能开启路径均已通过测试服验证。
 - `hot_reload` 已改为 **只监听 `script/config.lua`**，不再使用 `Work_Reload.lua`。
 - `hot_reload.enabled = true`，当前只热应用显式支持的运行时配置：`hot.finish_back_home`。
 - `hot_reload` 已补强错误保护：配置加载失败、返回类型异常或模块配置失败时会保留旧配置并记录 `keep previous config`。
@@ -36,7 +37,7 @@
 
 目标：服务器能启动，入口链路可用，高风险功能默认关闭；正式 DP 道具因 PVF 暂未添加，放到后置阶段验证。
 
-当前估算进度：约 94%。
+当前估算进度：约 96%。
 
 已完成：
 
@@ -49,11 +50,17 @@
 - [x] 保留 `UseItem2` 兼容入口。
 - [x] 关闭 1034-1037 临时 debug handler。
 - [x] 高风险 handler 默认拒绝并返还道具：代码级确认完成。
+- [x] 高风险 handler 默认拒绝并返还道具：测试服验证通过。
 - [x] Phase 1 基础设施模块：online/broadcast/gm_permissions/item_query 已迁移。
 - [x] 配置口径收敛：SQL、删除、shell handler 均默认关闭。
 - [x] `features.enable_item_handlers` 已真正接入 handler 总开关。
+- [x] `features.enable_item_handlers=false` 重启后不注册 handler 已通过测试服烟测。
+- [x] 等级上限 85 与拍卖行最低等级 10 已通过测试服烟测。
 - [x] `legacy_patches` 模块已迁移，默认关闭。
+- [x] `legacy_patches` 默认关闭状态已通过测试服烟测。
+- [x] `legacy_patches` 三个子功能开启路径已通过测试服验证。
 - [x] `hot_reload` 模块已迁移并改为 config-only 热更新，默认开启。
+- [x] `hot_reload.enabled=true` 创建 timer 并监听 config 已通过测试服烟测。
 - [x] `hot_reload` config 热更新实测：`hot.finish_back_home.default_mode=0/5/1` 均可实时生效。
 - [x] `hot_reload` 异常路径已做代码保护，语法错误实测为可选项，不阻塞当前收尾。
 - [x] `finish_back_home` 已修正为 `mode=0` 完全关闭，并避免副本完成事件重复调用 `fnext()`。
@@ -62,8 +69,8 @@
 
 还缺：
 
-- [ ] 高风险 handler 默认拒绝并返还道具：真实道具实测（需 PVF 加入道具 ID）。
-- [ ] `legacy_patches` 三个子功能测试服逐项开启验证。
+- [ ] PVF 正式道具验证：任务清理、异界重置、继承、觉醒、转职、跨界等真实道具测试。
+- [ ] 是否进入下一批迁移：`signin.lua` 或 GM 指令模块。
 
 完成后可以作为“安全默认底板”部署。
 
@@ -71,7 +78,7 @@
 
 目标：原 `df_game_r.lua` 中所有道具功能、入口补丁、JS/Frida 功能和开发辅助能力都能按预期工作，包括 SQL、删除、shell 类功能。
 
-当前估算进度：约 68%。
+当前估算进度：约 70%。
 
 还缺：
 
@@ -82,8 +89,8 @@
 - [x] 为 PVP shell 功能补失败保护和日志。
 - [x] 将旧入口 hook 迁移为可配置模块：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛。
 - [x] 将热加载收敛为 `script/config.lua` 配置热应用。
-- [ ] 在测试服逐项开启风险开关验证。
-- [ ] 决定正式服默认是否保持关闭。
+- [x] 在测试服验证 SQL、删除、shell 类 handler 默认关闭时拒绝并返还。
+- [ ] 决定正式服高风险功能是否保持关闭，或按白名单逐项恢复。
 
 ## 4. 后置：PVF 正式道具验证
 
@@ -152,26 +159,6 @@ hot = {
 | `4` | 发随机点券 + 出售装备 + 回城 | 是 | 已通过 |
 | `5` | 仅发随机点券，不回城、不分解、不出售 | 是 | 已通过 |
 
-测试清单：
-
-- [x] 修改 `hot.finish_back_home.default_mode = "0"`，保存 `config.lua`，确认热更新日志出现，并确认通关后无奖励、无回城、无分解/出售。
-- [x] 修改 `hot.finish_back_home.default_mode = "5"`，确认热更新日志出现，并确认通关后只发点券、不回城。
-- [x] 修改 `hot.finish_back_home.default_mode = "1"`，确认热更新日志出现，并确认通关后发点券 + 回城。
-- [x] 修改 `hot.finish_back_home.default_mode = "2"`，放入普通/高级/稀有以上装备，确认仅分解 `equipment_rarities={0,1}` 命中的装备，高级以上被跳过并记录 skip 日志。
-- [x] 修改 `hot.finish_back_home.default_mode = "3"`，确认在线玩家分解机路径同样遵守 `equipment_rarities={0,1}`。
-- [x] 修改 `hot.finish_back_home.default_mode = "4"`，确认仅出售 `equipment_rarities={0,1}` 命中的装备，高级以上被跳过并记录 skip 日志。
-
-预期日志关键字：
-
-```text
-[hot_reload] detected config change
-[hot_reload] config applied
-[finish_back_home] configured
-[finish_back_home][reward]
-[finish_back_home][disjoint][skip]
-[finish_back_home][sell][skip]
-```
-
 ### 5.2 其他玩法模块
 
 - [ ] `exp_dungeon` — 经验副本泡点，需副本 5000 存在（当前 PVF 无此副本）。
@@ -180,14 +167,15 @@ hot = {
 
 ## 6. 旧入口补丁验证状态
 
-旧 dp2 入口 hook 已迁移到 `script/modules/legacy_patches.lua`，但默认关闭。
+旧 dp2 入口 hook 已迁移到 `script/modules/legacy_patches.lua`，默认关闭。
 
 - [x] 代码迁移：`CParty_UseAncientDungeonItems` 绝望之塔金币提示修复
 - [x] 代码迁移：`CUser_SaveTown` 城镇下线卡镇魂修复
 - [x] 代码迁移：`Open_Dungeon` 开放极限祭坛 / 指定副本
-- [ ] 测试服开启 `enable_tower_gold_notice_fix` 验证
-- [ ] 测试服开启 `enable_save_town_fix` 验证
-- [ ] 测试服开启 `enable_open_extra_dungeons` 验证
+- [x] 默认关闭状态验证通过
+- [x] 测试服开启 `enable_tower_gold_notice_fix` 验证通过
+- [x] 测试服开启 `enable_save_town_fix` 验证通过
+- [x] 测试服开启 `enable_open_extra_dungeons` 验证通过
 
 ## 7. 热加载模块验证状态
 
@@ -243,28 +231,11 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [x] 测试 finish_back_home mode=5：只发点券，不回城。
 - [x] 测试 mode=2/3/4 的 `equipment_rarities={0,1}` 是否正确跳过高级以上装备。
 - [x] 补强 hot_reload 异常保护；错误配置实测改为可选，不阻塞收尾。
+- [x] 完成运行时烟测清单。
 
-### Step 2：服务器烟测补充
+### Step 2：下一批迁移决策
 
-- [ ] 重启确认 `features.enable_item_handlers=false` 时 handler 不注册。
-- [ ] 重启确认等级上限配置调用正常。
-- [ ] 确认 `hot_reload.enabled=true` 时会创建 timer 并监听 config。
-
-### Step 3：高风险默认关闭测试
-
-- [ ] SQL 类功能应默认拒绝并返还。
-- [ ] 删除类功能应默认拒绝并返还。
-- [ ] PVP shell 功能应默认拒绝并返还。
-
-### Step 4：PVF 正式道具验证（最后阶段）
-
-- [ ] 任务清理券。
-- [ ] 异界重置券。
-- [ ] 继承券。
-
-### Step 5：下一批迁移决策
-
-当前 `finish_back_home` 主要模式已完成验证。下一步可在以下两个方向中选择：
+当前安全底板已接近完成。下一步可在以下两个方向中选择：
 
 - 继续迁 `signin.lua`；或
 - 开始迁 GM 指令模块。
