@@ -1,0 +1,73 @@
+# Frida / JS Migration Status
+
+本文档记录 `dp2/frida.js` 到 `dp2.9` 的迁移状态。
+
+状态说明：
+
+- `[x]` 已迁移代码并接入开关。
+- `[~]` 已迁移代码但仍需测试或存在已知收尾点。
+- `[!]` 高风险，已有代码但不建议直接开启。
+- `[ ]` 未迁移或未找到源实现。
+
+## 1. 当前已迁移 / 已接入的 JS 功能
+
+| 功能 | dp2.9 文件 | 配置开关 | 状态 | 说明 |
+|---|---|---|---|---|
+| Frida 基础入口 | `df_game_r.js` | N/A | `[x]` | 已保留 `rpc.exports.init`、`setup()`、Lua/JS 桥接。 |
+| Frida 回调发物品 | `df_game_r.lua` | `js_features.enable_batch_item_add` | `[x]` | Lua 侧已加开关、账号、物品、在线用户校验。 |
+| 绝望之塔修复 | `df_game_r.js` / Lua `legacy_patches.lua` | `enable_tod_fix` / `legacy_patches.*` | `[~]` | 金币/门票类入口已迁移；跳过 UserAPC 等细节仍需实测确认。 |
+| 时装镶嵌修复 | `df_game_r.js` | `enable_emblem_fix` | `[~]` | 旧 `fix_use_emblem()` 已在入口调用，需实测。 |
+| 历史日志追踪 | `df_game_r.js` | `enable_history_log` | `[~]` | 入口已有调用，需实测确认日志是否符合预期。 |
+| 上下线处理 | `df_game_r.js` | `enable_user_inout_hook` | `[~]` | 旧 `hook_user_inout_game_world()` 已保留，包含排行榜/怪物攻城 UI 相关逻辑，需实测。 |
+| 在线奖励 | `df_game_r.js` | `enable_online_reward=false` | `[!]` | 旧逻辑会发点券，默认关闭；需专项确认。 |
+| 随机属性继承 | `df_game_r.js` | `enable_random_option_inherit=false` | `[~]` | 已有 `change_random_option_inherit()`，默认关闭，需实测。 |
+| 自动解封魔法封印 | `df_game_r.js` | `enable_auto_unseal=false` | `[~]` | 已有 `auto_unseal_random_option_equipment()`，默认关闭，需实测。 |
+| 幸运点影响掉落 | `df_game_r.js` | `enable_luck_point_drop=true` | `[!]` | 已有 `enable_drop_use_luck_point()`，会替换爆率计算函数，高风险，需实测。 |
+| 账号仓库扩展 | `script/js/account_cargo.js` | `enable_account_cargo=false` | `[!]` | 已拆模块，默认关闭。功能极高风险，需专项验证。 |
+| 创建角色数量限制 | `script/js/patches.js` | `enable_create_character_unlimit=true` | `[~]` | 已迁移并加重复 hook 保护。 |
+| +13 强化券刷新 | `script/js/patches.js` | `enable_strengthen_refresh=true` | `[~]` | 已修复参数口径，恢复旧实现的 user/slot 更新方式。 |
+| 黑暗武士技能栏修复 | `script/js/patches.js` | `enable_dark_knight_skill_fix=true` | `[~]` | 已迁移并加重复 hook 保护。 |
+| 取消新账号成长契约 | `script/js/patches.js` | `enable_mobile_auth=false` | `[~]` | 已迁移并加重复 replace 保护，默认关闭。 |
+| 幸运在线玩家 | `df_game_r.js` | `enable_lucky_online=false` | `[!]` | 旧逻辑会随机抽在线玩家并发道具/点券，默认关闭，需专项确认。 |
+| 战力排行榜 | `script/js/ranking.js` | `enable_ranking=true` | `[~]` | 已拆模块；已修复 DB 初始化时序和 guild name 兜底。 |
+| 时装潜能 | `script/js/hidden_option.js` | `enable_hidden_option=true` | `[~]` | 已拆模块。需实测 hook 和属性范围。 |
+| 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块。需确认地址和默认 15 天口径。 |
+| VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名和重复 hook 保护。 |
+| 怪物攻城 | `df_game_r.js` | `enable_village_attack=true` | `[!]` | 大型系统已存在于 `df_game_r.js`，但依赖 DB、timer、UI 包、奖励邮件，需专项测试。 |
+| 批量物品 UI 通知 | `df_game_r.js` | `enable_batch_item_add=true` | `[~]` | 基础函数存在，Lua 回调发物品侧已加固；UI 通知仍需实测。 |
+
+## 2. 当前缺口 / 未完成项
+
+| 功能 | 状态 | 说明 |
+|---|---|---|
+| 掉落公告 / 掉落奖励 | `[ ]` | `script/config.lua` 有 `enable_drop_announce=true`，但当前仓库未找到 `drop_announce`、`startDropAnnounce` 或明确等价实现；需要从真实旧来源确认后再迁。 |
+| frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
+| `df_game_r.js` 入口瘦身 | `[~]` | 当前 `df_game_r.js` 内仍混有大段旧功能和部分拆分模块的重复代码。后续应继续拆分成 `script/js/*.js`，避免入口文件过大。 |
+| `start()` 调度一致性 | `[~]` | 已修复部分模块断点，但仍需整体实测所有 `js_features` 开关组合，确认不会重复 hook 或函数不存在。 |
+| 高风险 JS 默认开关策略 | `[!]` | 当前部分高风险功能默认为 true，如怪物攻城、幸运点掉落、排行榜、时装潜能、VIP 登录。上线前需按测试结果决定是否改为 false。 |
+
+## 3. 本轮已修复的迁移断点
+
+- `script/js/ranking.js`
+  - 增加 DB 未就绪重试。
+  - 避免 `mysql_frida` / `mysql_taiwan_cain` 为空时报错。
+  - `api_CUser_GetGuildName` 缺失时回退为“未加入公会”。
+
+- `script/js/vip_login.js`
+  - 修正广播函数名为 `api_GameWorld_SendNotiPacketMessage`。
+  - 增加重复 hook 保护。
+  - 增加 `vip_Login()` 兼容别名。
+
+- `script/js/patches.js`
+  - 创建角色限制、强化券刷新、黑暗武士技能栏、成长契约补重复启动保护。
+  - 强化券刷新恢复旧实现参数口径：从 hook 参数读取 `user` 和装备位置，并调用 `CUser_SendUpdateItemList(user, 1, 0, slot)`。
+
+## 4. 后续迁移建议
+
+优先级建议：
+
+1. 继续拆分 `df_game_r.js` 中剩余的大功能到 `script/js/*.js`。
+2. 补齐 `drop_announce` 的真实源实现；未找到来源前不要凭空实现。
+3. 对 `start()` 做统一安全调度封装，避免函数不存在、重复 hook、DB 未初始化导致启动失败。
+4. 将高风险默认 true 的 JS 功能逐项确认是否应保持开启。
+5. 最后再做测试服验证和 Bug 修复。
