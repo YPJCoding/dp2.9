@@ -57,7 +57,11 @@
 - Reorganized `script/config.lua` by reload scope:
   - `hot` for supported runtime hot-config values.
   - `[BOOT]` sections for restart-required registration, startup, risk, and JS/Frida settings.
-- Synced `DP2_UNMIGRATED_FEATURES.md`, `HANDLER_MIGRATION_MAP.md`, and `ROADMAP.md` after the implementation audit.
+- Updated `finish_back_home` defaults:
+  - `default_mode = "5"`, only random point reward by default.
+  - `equipment_rarities = {0, 1}`, only normal and advanced equipment are processed by disjoint/sell modes.
+- Synced `DP2_UNMIGRATED_FEATURES.md`, `HANDLER_MIGRATION_MAP.md`, and `ROADMAP.md` after implementation audits.
+- Synced `ROADMAP.md` and `DP2_UNMIGRATED_FEATURES.md` with current config-only hot reload and finish_back_home testing status.
 
 ### Fixed
 
@@ -78,4 +82,5 @@
 - High-risk handlers are present but gated by config switches and still require real item/PVF validation.
 - Legacy entry patches are present but disabled by default and require test-server validation before enabling.
 - Hot reload is enabled by default and currently applies only explicitly supported runtime config, starting with `hot.finish_back_home`.
+- `finish_back_home` is now the current test focus: verify config hot reload for modes 0/5/1 and equipment rarity filtering for modes 2/3/4.
 - `frida.js` is not treated as part of the default DP loading chain; DP defaults to `df_game_r.lua` and `df_game_r.js`.
