@@ -64,6 +64,7 @@
 - Synced `ROADMAP.md` and `DP2_UNMIGRATED_FEATURES.md` with current config-only hot reload and finish_back_home testing status.
 - Marked `hot.finish_back_home.default_mode` hot reload verification as passed for modes `0`, `5`, and `1`.
 - Marked `finish_back_home` mode `5` random-point-only behavior as verified.
+- Marked `finish_back_home` equipment rarity filtering as verified for modes `2`, `3`, and `4`.
 
 ### Fixed
 
@@ -84,5 +85,5 @@
 - High-risk handlers are present but gated by config switches and still require real item/PVF validation.
 - Legacy entry patches are present but disabled by default and require test-server validation before enabling.
 - Hot reload is enabled by default and currently applies only explicitly supported runtime config, starting with `hot.finish_back_home`.
-- `finish_back_home` remaining test focus: verify equipment rarity filtering for modes `2`, `3`, and `4`.
+- `finish_back_home` main modes and equipment rarity filtering are verified; remaining finish-related check is the config syntax-error fallback path.
 - `frida.js` is not treated as part of the default DP loading chain; DP defaults to `df_game_r.lua` and `df_game_r.js`.
