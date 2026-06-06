@@ -23,6 +23,7 @@ local infra_modules = {
     { key = 'gm_permissions', module = 'script.modules.gm_permissions' },
     { key = 'broadcast', module = 'script.modules.broadcast' },
     { key = 'item_query', module = 'script.modules.item_query' },
+    { key = 'signin', module = 'script.modules.signin' },
     { key = 'exp_dungeon', module = 'script.modules.exp_dungeon' },
     { key = 'dungeon_gate', module = 'script.modules.dungeon_gate' },
     { key = 'drop_rules', module = 'script.modules.drop_rules' },
@@ -100,6 +101,9 @@ local function is_module_enabled(ctx, module_key)
     end
     if module_key == 'item_query' then
         return features.enable_item_query == true
+    end
+    if module_key == 'signin' then
+        return features.enable_signin == true
     end
     if module_key == 'exp_dungeon' then
         return features.enable_exp_dungeon == true
@@ -261,157 +265,105 @@ function M.apply_dpx_startup(ctx)
 
     if not dpx then
         if logger then
-            logger.error('[bootstrap] missing dpx, skip startup config')
+            logger.error('[bootstrap] dpx missing, skip startup config')
         end
         return
     end
 
-    if startup.set_level_cap then
-        dpx.set_max_level(startup.level_cap or 95)
+    if startup.set_level_cap == true then
+        local level_cap = tonumber(startup.level_cap) or 85
+        dpx.set_max_level(level_cap)
+        if logger then logger.info('[dpx_startup] set_max_level=%d', level_cap) end
     end
 
-    if startup.enable_creator then
+    if startup.enable_creator == true then
         dpx.enable_creator()
+        if logger then logger.info('[dpx_startup] enable_creator') end
     end
 
-    if startup.enable_unlimit_towerofdespair then
+    if startup.enable_unlimit_towerofdespair == true then
         dpx.set_unlimit_towerofdespair()
+        if logger then logger.info('[dpx_startup] enable_unlimit_towerofdespair') end
     end
 
-    if startup.disable_item_routing then
+    if startup.disable_item_routing == true then
         dpx.disable_item_routing()
+        if logger then logger.info('[dpx_startup] disable_item_routing') end
     end
 
-    if startup.disable_security_protection then
+    if startup.disable_security_protection == true then
         dpx.disable_security_protection()
+        if logger then logger.info('[dpx_startup] disable_security_protection') end
     end
 
-    if startup.extend_teleport_item then
+    if startup.extend_teleport_item == true then
         dpx.extend_teleport_item()
+        if logger then logger.info('[dpx_startup] extend_teleport_item') end
     end
 
-    if startup.disable_trade_limit then
+    if startup.disable_trade_limit == true then
         dpx.disable_trade_limit()
+        if logger then logger.info('[dpx_startup] disable_trade_limit') end
     end
 
-    if startup.set_auction_min_level then
-        dpx.set_auction_min_level(startup.auction_min_level or 10)
+    if startup.set_auction_min_level == true then
+        local auction_min_level = tonumber(startup.auction_min_level) or 10
+        dpx.set_auction_min_level(auction_min_level)
+        if logger then logger.info('[dpx_startup] set_auction_min_level=%d', auction_min_level) end
     end
 
-    if startup.fix_auction_regist_item then
-        dpx.fix_auction_regist_item(startup.auction_max_total_price or 200000000)
+    if startup.fix_auction_regist_item == true then
+        local max_total_price = tonumber(startup.auction_max_total_price) or 200000000
+        dpx.fix_auction_regist_item(max_total_price)
+        if logger then logger.info('[dpx_startup] fix_auction_regist_item=%d', max_total_price) end
     end
 
-    if startup.liberate_random_option then
+    if startup.liberate_random_option == true then
         dpx.liberate_random_option()
+        if logger then logger.info('[dpx_startup] liberate_random_option') end
     end
 
-    if startup.disable_redeem_item then
+    if startup.disable_redeem_item == true then
         dpx.disable_redeem_item()
+        if logger then logger.info('[dpx_startup] disable_redeem_item') end
     end
 
-    if startup.disable_mobile_rewards then
+    if startup.disable_mobile_rewards == true then
         dpx.disable_mobile_rewards()
+        if logger then logger.info('[dpx_startup] disable_mobile_rewards') end
     end
 
-    if startup.enable_game_master then
+    if startup.set_item_unlock_time == true then
+        local unlock_time = tonumber(startup.item_unlock_time) or 1
+        dpx.set_item_unlock_time(unlock_time)
+        if logger then logger.info('[dpx_startup] set_item_unlock_time=%d', unlock_time) end
+    end
+
+    if startup.enable_game_master == true then
         dpx.enable_game_master()
+        if logger then logger.info('[dpx_startup] enable_game_master') end
     end
 
-    if startup.disable_giveup_panalty then
+    if startup.disable_giveup_panalty == true then
         dpx.disable_giveup_panalty()
-    end
-
-    if startup.set_item_unlock_time then
-        dpx.set_item_unlock_time(startup.item_unlock_time or 1)
-    end
-
-    if logger then
-        logger.info('[bootstrap] applied dpx startup config')
+        if logger then logger.info('[dpx_startup] disable_giveup_panalty') end
     end
 end
 
-function M.install_utils(ctx)
-    local utils = ctx and ctx.utils
-    if utils and type(utils.install_legacy_globals) == 'function' then
-        utils.install_legacy_globals(_G)
-        if ctx.logger then
-            ctx.logger.info('[bootstrap] installed legacy utils')
-        end
-    elseif ctx and ctx.logger then
-        ctx.logger.error('[bootstrap] utils.install_legacy_globals missing')
-    end
-end
-
-function M.write_js_config(ctx)
-    local config = ctx.config or {}
-    local js_features = config.js_features or {}
-    local logger = ctx.logger
-
-    local ok_json, json = pcall(require, "json")
-    if not ok_json then
-        if logger then
-            logger.error("[bootstrap] json module not available, skip js_config")
-        end
-        return
-    end
-
-    -- 尝试读取已有 frida_config.json
-    local existing = {}
-    local ok_read, raw = pcall(function()
-        local f = io.open("/dp2/frida/frida_config.json", "r")
-        if not f then return end
-        local content = f:read("*a")
-        f:close()
-        return content
-    end)
-    if ok_read and raw then
-        local ok_parse, parsed = pcall(json.decode, raw)
-        if ok_parse and type(parsed) == "table" then
-            existing = parsed
-        end
-    end
-
-    -- 合并 features
-    existing.features = {}
-    for k, v in pairs(js_features) do
-        existing.features[k] = v
-    end
-
-    -- 写入
-    local ok_write, err = pcall(function()
-        local encoded = json.encode(existing)
-        local f = io.open("/dp2/frida/frida_config.json", "w")
-        if not f then error("cannot open file") end
-        f:write(encoded)
-        f:close()
-    end)
-
-    if ok_write and logger then
-        local count = 0
-        for _ in pairs(js_features) do count = count + 1 end
-        logger.info("[bootstrap] wrote js_config features=%d to frida_config.json", count)
-    elseif logger then
-        logger.error("[bootstrap] failed to write js_config: %s", tostring(err))
-    end
-end
-
-function M.build_ctx(base_ctx)
-    local ctx = base_ctx or {}
+function M.setup(item_handler, ctx)
+    ctx = ctx or {}
     ctx.config = ctx.config or M.load_config(ctx.logger)
     ctx.utils = ctx.utils or M.load_utils(ctx.logger)
-    return ctx
-end
 
-function M.setup(item_handler, base_ctx)
-    local ctx = M.build_ctx(base_ctx)
-    ctx.item_handler = item_handler
-    M.install_utils(ctx)
-    M.load_modules(ctx)
-    M.write_js_config(ctx)
     M.register_handlers(item_handler, ctx)
     M.register_debug_handlers(item_handler, ctx)
-    return ctx
+    local modules = M.load_modules(ctx)
+
+    return {
+        config = ctx.config,
+        utils = ctx.utils,
+        modules = modules,
+    }
 end
 
 return M
