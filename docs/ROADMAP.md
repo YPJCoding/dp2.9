@@ -9,8 +9,8 @@
 当前进度口径：
 
 ```text
-安全可部署版：约 93%+
-完全功能恢复版：约 67%
+安全可部署版：约 94%
+完全功能恢复版：约 68%
 ```
 
 关键事实：
@@ -26,7 +26,7 @@
 - `hot_reload.enabled = true`，当前只热应用显式支持的运行时配置：`hot.finish_back_home`。
 - `hot.finish_back_home.default_mode` 热更新已实测通过：`0`、`5`、`1` 均可实时生效。
 - `finish_back_home` 已支持 mode `0`~`5`，当前默认 `mode=5`，即只发随机点券、不回城、不分解、不出售。
-- `finish_back_home.equipment_rarities = {0, 1}`，当前默认仅处理普通装备和高级装备。
+- `finish_back_home.equipment_rarities = {0, 1}` 已实测通过，mode `2`/`3`/`4` 均只处理普通装备和高级装备，高级以上装备会跳过。
 - 服务器实测确认普通右键消耗品走 `UseItem1`，并已正式接入 `UseItem1 -> item_handler` 分发。
 - `UseItem2` 保留作为兼容入口。
 - 当前 PVF 暂不添加 DP 正式道具，正式道具验证移到最后阶段。
@@ -35,7 +35,7 @@
 
 目标：服务器能启动，入口链路可用，高风险功能默认关闭；正式 DP 道具因 PVF 暂未添加，放到后置阶段验证。
 
-当前估算进度：约 93%+。
+当前估算进度：约 94%。
 
 已完成：
 
@@ -56,13 +56,12 @@
 - [x] `hot_reload` config 热更新实测：`hot.finish_back_home.default_mode=0/5/1` 均可实时生效。
 - [x] `finish_back_home` 已修正为 `mode=0` 完全关闭，并避免副本完成事件重复调用 `fnext()`。
 - [x] `finish_back_home` 已支持 `mode=5` 仅发随机点券，并已实测只发点券、不回城。
-- [x] `finish_back_home` 已支持 `equipment_rarities` 单一装备品质白名单。
+- [x] `finish_back_home` 已支持 `equipment_rarities` 单一装备品质白名单，并已实测 mode `2`/`3`/`4` 生效。
 
 还缺：
 
 - [ ] 高风险 handler 默认拒绝并返还道具：真实道具实测（需 PVF 加入道具 ID）。
 - [ ] `legacy_patches` 三个子功能测试服逐项开启验证。
-- [ ] `finish_back_home` mode=2/3/4 实测：确认 `equipment_rarities={0,1}` 会跳过高级以上装备。
 
 完成后可以作为“安全默认底板”部署。
 
@@ -70,7 +69,7 @@
 
 目标：原 `df_game_r.lua` 中所有道具功能、入口补丁、JS/Frida 功能和开发辅助能力都能按预期工作，包括 SQL、删除、shell 类功能。
 
-当前估算进度：约 67%。
+当前估算进度：约 68%。
 
 还缺：
 
@@ -125,7 +124,7 @@
 
 ### 5.1 `finish_back_home`
 
-代码已迁移并修正，当前重点进入测试服验证。
+代码已迁移并修正，当前主要模式已经测试通过。
 
 当前配置默认值：
 
@@ -146,9 +145,9 @@ hot = {
 |---|---|---|---|
 | `0` | 完全关闭：不发点券、不回城、不分解、不出售 | 是 | 已通过 |
 | `1` | 发随机点券 + 回城 | 是 | 已通过 |
-| `2` | 发随机点券 + 诺顿分解 + 回城 | 是 | 待测品质过滤 |
-| `3` | 发随机点券 + 在线玩家分解机 + 回城 | 是 | 待测品质过滤 |
-| `4` | 发随机点券 + 出售装备 + 回城 | 是 | 待测品质过滤 |
+| `2` | 发随机点券 + 诺顿分解 + 回城 | 是 | 已通过 |
+| `3` | 发随机点券 + 在线玩家分解机 + 回城 | 是 | 已通过 |
+| `4` | 发随机点券 + 出售装备 + 回城 | 是 | 已通过 |
 | `5` | 仅发随机点券，不回城、不分解、不出售 | 是 | 已通过 |
 
 测试清单：
@@ -156,9 +155,9 @@ hot = {
 - [x] 修改 `hot.finish_back_home.default_mode = "0"`，保存 `config.lua`，确认热更新日志出现，并确认通关后无奖励、无回城、无分解/出售。
 - [x] 修改 `hot.finish_back_home.default_mode = "5"`，确认热更新日志出现，并确认通关后只发点券、不回城。
 - [x] 修改 `hot.finish_back_home.default_mode = "1"`，确认热更新日志出现，并确认通关后发点券 + 回城。
-- [ ] 修改 `hot.finish_back_home.default_mode = "2"`，放入普通/高级/稀有以上装备，确认仅分解 `equipment_rarities={0,1}` 命中的装备，高级以上被跳过并记录 skip 日志。
-- [ ] 修改 `hot.finish_back_home.default_mode = "3"`，确认在线玩家分解机路径同样遵守 `equipment_rarities={0,1}`。
-- [ ] 修改 `hot.finish_back_home.default_mode = "4"`，确认仅出售 `equipment_rarities={0,1}` 命中的装备，高级以上被跳过并记录 skip 日志。
+- [x] 修改 `hot.finish_back_home.default_mode = "2"`，放入普通/高级/稀有以上装备，确认仅分解 `equipment_rarities={0,1}` 命中的装备，高级以上被跳过并记录 skip 日志。
+- [x] 修改 `hot.finish_back_home.default_mode = "3"`，确认在线玩家分解机路径同样遵守 `equipment_rarities={0,1}`。
+- [x] 修改 `hot.finish_back_home.default_mode = "4"`，确认仅出售 `equipment_rarities={0,1}` 命中的装备，高级以上被跳过并记录 skip 日志。
 
 预期日志关键字：
 
@@ -198,6 +197,7 @@ hot = {
 - [x] 移除 `Work_Reload.lua` 脚本执行入口。
 - [x] 默认开启 `hot_reload.enabled = true`。
 - [x] 实测修改 `default_mode=0/5/1` 可实时生效。
+- [x] 实测 `equipment_rarities={0,1}` 对 mode `2`/`3`/`4` 生效。
 - [ ] 实测配置语法错误时是否保留旧配置并记录错误。
 
 当前不支持自动热更新：
@@ -238,7 +238,7 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [x] 同步 `CHANGELOG.md` 与 `DP2_UNMIGRATED_FEATURES.md`。
 - [x] 测试 config 热更新：修改 `default_mode=0/5/1` 是否实时生效。
 - [x] 测试 finish_back_home mode=5：只发点券，不回城。
-- [ ] 测试 mode=2/3/4 的 `equipment_rarities={0,1}` 是否正确跳过高级以上装备。
+- [x] 测试 mode=2/3/4 的 `equipment_rarities={0,1}` 是否正确跳过高级以上装备。
 
 ### Step 2：服务器烟测补充
 
@@ -260,7 +260,7 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 
 ### Step 5：下一批迁移决策
 
-在完成 `finish_back_home` 品质过滤实测后，再决定：
+当前 `finish_back_home` 主要模式已完成验证。下一步可在以下两个方向中选择：
 
 - 继续迁 `signin.lua`；或
 - 开始迁 GM 指令模块。
