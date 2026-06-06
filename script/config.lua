@@ -39,9 +39,8 @@ local config = {
             -- 装备处理品质白名单。
             -- mode=2 / mode=3 分解装备、mode=4 出售装备时共用。
             -- 为空或 nil 表示不限制品质；配置后只处理 rarity 命中的装备。
-            -- rarity 数字含义以当前服务端/PVF 实际 item.info.rarity 为准，建议先看日志确认。
-            -- 示例：只处理低品质时可配置 {0, 1, 2}，具体数值需按服内确认。
-            equipment_rarities = {0, 1, 2},
+            -- 0 = 普通装备，1 = 高级装备。
+            equipment_rarities = {0, 1},
         },
     },
 
