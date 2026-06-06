@@ -30,8 +30,8 @@
 | 取消新账号成长契约 | `script/js/patches.js` | `enable_mobile_auth=false` | `[~]` | 已迁移并加重复 replace 保护，默认关闭。 |
 | 幸运在线玩家 | `df_game_r.js` | `enable_lucky_online=false` | `[!]` | 旧逻辑会随机抽在线玩家并发道具/点券，默认关闭，需专项确认。 |
 | 战力排行榜 | `script/js/ranking.js` | `enable_ranking=true` | `[~]` | 已拆模块；已修复 DB 初始化时序和 guild name 兜底。 |
-| 时装潜能 | `script/js/hidden_option.js` | `enable_hidden_option=true` | `[~]` | 已拆模块。需实测 hook 和属性范围。 |
-| 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块。需确认地址和默认 15 天口径。 |
+| 时装潜能 | `script/js/hidden_option.js` | `enable_hidden_option=true` | `[~]` | 已拆模块；已补重复 hook 保护和旧入口 `start_hidden_option()` 兼容。 |
+| 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块；已补参数校验、重复应用保护和旧入口 `set_return_user()` 兼容。 |
 | VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名和重复 hook 保护。 |
 | 怪物攻城 | `df_game_r.js` | `enable_village_attack=true` | `[!]` | 大型系统已存在于 `df_game_r.js`，但依赖 DB、timer、UI 包、奖励邮件，需专项测试。 |
 | 批量物品 UI 通知 | `df_game_r.js` | `enable_batch_item_add=true` | `[~]` | 基础函数存在，Lua 回调发物品侧已加固；UI 通知仍需实测。 |
@@ -61,6 +61,16 @@
 - `script/js/patches.js`
   - 创建角色限制、强化券刷新、黑暗武士技能栏、成长契约补重复启动保护。
   - 强化券刷新恢复旧实现参数口径：从 hook 参数读取 `user` 和装备位置，并调用 `CUser_SendUpdateItemList(user, 1, 0, slot)`。
+
+- `script/js/hidden_option.js`
+  - 增加重复 hook 保护。
+  - 增加日志。
+  - 增加旧入口 `start_hidden_option()` 兼容。
+
+- `script/js/return_user.js`
+  - 增加参数校验。
+  - 增加重复应用保护。
+  - 增加旧入口 `set_return_user()` 兼容。
 
 ## 4. 后续迁移建议
 
