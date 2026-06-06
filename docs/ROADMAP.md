@@ -2,37 +2,39 @@
 
 本文档用于跟踪 `dp2.9` 当前重构方向，避免 TODO 随着实现变化而偏航。
 
-## 1. 当前结论
+## 1. 当前阶段
 
-当前分支已经从“只做文档和草稿”推进到了“安全可部署底板验证”阶段。
+当前分支处于：**安全可部署底板验证 + 玩法模块实测收尾阶段**。
+
+当前进度口径：
+
+```text
+安全可部署版：约 93%+
+完全功能恢复版：约 67%
+```
 
 关键事实：
 
 - `df_game_r.lua` 已经瘦身为轻量入口。
 - 所有 `item_handler` 旧实现已经从 `df_game_r.lua` 移除。
 - 所有 handler 模块已经通过 `script/bootstrap.lua` 接入加载链路。
-- `features.enable_item_handlers` 和 `features.enable_modular_handlers` 现在都会影响 handler 注册。
-- SQL、删除、shell 类高风险能力仍默认关闭。
-- 已完成 handler 日志和组合风险开关收敛。
-- DPX 启动配置已集中到 `script/config.lua` 和 `bootstrap.apply_dpx_startup`，等级上限使用 `dpx.set_max_level`。
-- 已新增 `script/modules/legacy_patches.lua`，迁移旧 dp2 入口 hook：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛。
-- 已新增 `script/modules/hot_reload.lua`，迁移旧 dp2 的 `Work_Reload.lua` 热加载机制。
-- `legacy_patches` 和 `hot_reload` 均默认关闭，待测试服逐项开启验证。
+- `features.enable_item_handlers` 和 `features.enable_modular_handlers` 都会影响 handler 注册。
+- SQL、删除、shell 类高风险 handler 仍默认关闭。
+- DPX 启动配置已集中到 `script/config.lua` 和 `bootstrap.apply_dpx_startup`，等级上限使用 `dpx.set_max_level`，当前内容上限为 85。
+- `legacy_patches` 已迁移旧 dp2 入口 hook：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛；模块默认关闭，待测试服逐项开启验证。
+- `hot_reload` 已改为 **只监听 `script/config.lua`**，不再使用 `Work_Reload.lua`。
+- `hot_reload.enabled = true`，当前只热应用显式支持的运行时配置：`hot.finish_back_home`。
+- `finish_back_home` 已支持 mode `0`~`5`，当前默认 `mode=5`，即只发随机点券、不回城、不分解、不出售。
+- `finish_back_home.equipment_rarities = {0, 1}`，当前默认仅处理普通装备和高级装备。
 - 服务器实测确认普通右键消耗品走 `UseItem1`，并已正式接入 `UseItem1 -> item_handler` 分发。
 - `UseItem2` 保留作为兼容入口。
-- 1034-1037 临时 debug handler 已关闭。
 - 当前 PVF 暂不添加 DP 正式道具，正式道具验证移到最后阶段。
-
-因此，后续 TODO 不能继续只按旧的 P0-P7 文档阶段推进，需要拆成两个目标：
-
-1. 安全可部署版。
-2. 完全功能恢复版。
 
 ## 2. 目标 A：安全可部署版
 
 目标：服务器能启动，入口链路可用，高风险功能默认关闭；正式 DP 道具因 PVF 暂未添加，放到后置阶段验证。
 
-当前估算进度：约 93%。
+当前估算进度：约 93%+。
 
 已完成：
 
@@ -49,38 +51,38 @@
 - [x] 配置口径收敛：SQL、删除、shell handler 均默认关闭。
 - [x] `features.enable_item_handlers` 已真正接入 handler 总开关。
 - [x] `legacy_patches` 模块已迁移，默认关闭。
-- [x] `hot_reload` 模块已迁移，默认关闭。
+- [x] `hot_reload` 模块已迁移并改为 config-only 热更新，默认开启。
 - [x] `finish_back_home` 已修正为 `mode=0` 完全关闭，并避免副本完成事件重复调用 `fnext()`。
+- [x] `finish_back_home` 已支持 `mode=5` 仅发随机点券。
+- [x] `finish_back_home` 已支持 `equipment_rarities` 单一装备品质白名单。
 
 还缺：
 
 - [ ] 高风险 handler 默认拒绝并返还道具：真实道具实测（需 PVF 加入道具 ID）。
-- [ ] `legacy_patches` 模块加载验证：默认关闭时不注册 hook。
-- [ ] `hot_reload` 默认关闭启动验证：确认不会创建 timer。
 - [ ] `legacy_patches` 三个子功能测试服逐项开启验证。
-- [ ] `hot_reload` 测试服开启验证：文件不存在、编译失败、执行失败、修改后 reload。
+- [ ] `hot_reload` config 热更新实测：修改 `hot.finish_back_home.default_mode` 后确认运行时生效。
+- [ ] `finish_back_home` mode=5 实测：只发点券，不回城。
+- [ ] `finish_back_home` mode=2/3/4 实测：确认 `equipment_rarities={0,1}` 会跳过高级以上装备。
 
 完成后可以作为“安全默认底板”部署。
 
 ## 3. 目标 B：完全功能恢复版
 
-目标：原 `df_game_r.lua` 中所有道具功能、入口补丁和开发辅助能力都能按预期工作，包括 SQL、删除、shell 类功能。
+目标：原 `df_game_r.lua` 中所有道具功能、入口补丁、JS/Frida 功能和开发辅助能力都能按预期工作，包括 SQL、删除、shell 类功能。
 
 当前估算进度：约 67%。
 
 还缺：
 
-- [ ] 明确哪些高风险功能允许恢复原行为。
+- [ ] 明确哪些高风险 Lua handler 允许恢复原行为。
 - [ ] 对 SQL 类 handler 做数据库备份和回滚方案。
 - [ ] 对删除类 handler 做二次确认或白名单策略。
 - [ ] 对 PVP shell handler 确认脚本路径、脚本输出和 SQL 安全性。
 - [x] 为 PVP shell 功能补失败保护和日志。
 - [x] 将旧入口 hook 迁移为可配置模块：绝望之塔金币提示修复、城镇下线卡镇魂修复、开放极限祭坛。
-- [x] 将旧 `Work_Reload.lua` 热加载机制迁移为可配置模块。
+- [x] 将热加载收敛为 `script/config.lua` 配置热应用。
 - [ ] 在测试服逐项开启风险开关验证。
 - [ ] 决定正式服默认是否保持关闭。
-
-完成后才能称为“所有功能完全恢复”。
 
 ## 4. 后置：PVF 正式道具验证
 
@@ -119,54 +121,106 @@
 
 这些不再阻塞当前“安全可部署版”的启动链路验收。
 
-## 4.5 Phase 3 玩法模块验证状态
+## 5. 玩法模块验证状态
 
-四个玩法模块已部署到服务器，`finish_back_home` 已做代码级修正，仍需复测。
+### 5.1 `finish_back_home`
 
-- [~] `finish_back_home` — 代码已迁移并修正，需复测 mode=0、mode=1~4
-- [ ] `exp_dungeon` — 经验副本泡点，需副本 5000 存在（当前 PVF 无此副本）
-- [ ] `drop_rules` — 等级差限制掉落，需高级角色 + 低级副本 + 无豁免道具
-- [ ] `dungeon_gate` — 持物进图限制，需先配置规则（当前规则表为空）
+代码已迁移并修正，当前重点进入测试服验证。
 
-## 4.6 旧入口补丁验证状态
+当前配置默认值：
+
+```lua
+hot = {
+    finish_back_home = {
+        default_mode = "5",
+        point_min = 100,
+        point_max = 1000,
+        equipment_rarities = {0, 1},
+    },
+}
+```
+
+模式说明：
+
+| mode | 行为 | 是否热更新 |
+|---|---|---|
+| `0` | 完全关闭：不发点券、不回城、不分解、不出售 | 是 |
+| `1` | 发随机点券 + 回城 | 是 |
+| `2` | 发随机点券 + 诺顿分解 + 回城 | 是 |
+| `3` | 发随机点券 + 在线玩家分解机 + 回城 | 是 |
+| `4` | 发随机点券 + 出售装备 + 回城 | 是 |
+| `5` | 仅发随机点券，不回城、不分解、不出售 | 是 |
+
+测试清单：
+
+- [ ] 修改 `hot.finish_back_home.default_mode = "0"`，保存 `config.lua`，确认热更新日志出现，并确认通关后无奖励、无回城、无分解/出售。
+- [ ] 修改 `hot.finish_back_home.default_mode = "5"`，确认热更新日志出现，并确认通关后只发点券、不回城。
+- [ ] 修改 `hot.finish_back_home.default_mode = "1"`，确认热更新日志出现，并确认通关后发点券 + 回城。
+- [ ] 修改 `hot.finish_back_home.default_mode = "2"`，放入普通/高级/稀有以上装备，确认仅分解 `equipment_rarities={0,1}` 命中的装备，高级以上被跳过并记录 skip 日志。
+- [ ] 修改 `hot.finish_back_home.default_mode = "3"`，确认在线玩家分解机路径同样遵守 `equipment_rarities={0,1}`。
+- [ ] 修改 `hot.finish_back_home.default_mode = "4"`，确认仅出售 `equipment_rarities={0,1}` 命中的装备，高级以上被跳过并记录 skip 日志。
+
+预期日志关键字：
+
+```text
+[hot_reload] detected config change
+[hot_reload] config applied
+[finish_back_home] configured
+[finish_back_home][reward]
+[finish_back_home][disjoint][skip]
+[finish_back_home][sell][skip]
+```
+
+### 5.2 其他玩法模块
+
+- [ ] `exp_dungeon` — 经验副本泡点，需副本 5000 存在（当前 PVF 无此副本）。
+- [ ] `drop_rules` — 等级差限制掉落，需高级角色 + 低级副本 + 无豁免道具。
+- [ ] `dungeon_gate` — 持物进图限制，需先配置规则（当前规则表为空）。
+
+## 6. 旧入口补丁验证状态
 
 旧 dp2 入口 hook 已迁移到 `script/modules/legacy_patches.lua`，但默认关闭。
 
 - [x] 代码迁移：`CParty_UseAncientDungeonItems` 绝望之塔金币提示修复
 - [x] 代码迁移：`CUser_SaveTown` 城镇下线卡镇魂修复
 - [x] 代码迁移：`Open_Dungeon` 开放极限祭坛 / 指定副本
-- [ ] 默认关闭状态下启动验证：确认不会注册额外 hook
 - [ ] 测试服开启 `enable_tower_gold_notice_fix` 验证
 - [ ] 测试服开启 `enable_save_town_fix` 验证
 - [ ] 测试服开启 `enable_open_extra_dungeons` 验证
 
-## 4.7 热加载模块验证状态
+## 7. 热加载模块验证状态
 
-旧 dp2 的 `Work_Reload.lua` 热加载逻辑已迁移到 `script/modules/hot_reload.lua`，但默认关闭。
+`hot_reload` 当前定位：**config-only 热更新**。
 
-- [x] 代码迁移：`lfs.attributes` 检测文件修改时间
-- [x] 代码迁移：`loadfile(filename, "t", env)` 执行隔离环境脚本
-- [x] 代码迁移：注入 `dp/dpx/game/world/logger/item_handler/utils/config`
-- [x] 接入 bootstrap：加载模块前注入 `ctx.item_handler`
-- [x] 配置化：`hot_reload.enabled/filename/start_delay_ms/interval_ms/run_on_start`
-- [ ] 默认关闭状态下启动验证：确认不会创建 timer
-- [ ] 文件不存在验证：只记录日志，不影响启动
-- [ ] 编译失败验证：记录错误，不更新修改时间
-- [ ] 执行失败验证：记录错误，不更新修改时间
-- [ ] 修改后 reload 验证：成功执行后更新修改时间
+- [x] 监听 `/dp2/script/config.lua` 修改时间。
+- [x] 重新加载 `script.config`。
+- [x] 热应用 `hot.finish_back_home`。
+- [x] 移除 `Work_Reload.lua` 脚本执行入口。
+- [x] 默认开启 `hot_reload.enabled = true`。
+- [ ] 实测修改 `default_mode=0/5/1` 是否实时生效。
+- [ ] 实测配置语法错误时是否保留旧配置并记录错误。
 
-## 5. 当前偏航点
+当前不支持自动热更新：
 
-### 5.1 “尽量不改变行为”已经不完全准确
+- handler/module 注册开关。
+- DPX 启动开关。
+- risk 高风险能力开关。
+- legacy_patches hook 注册。
+- JS/Frida 配置写入。
+- 其他尚未提供 `configure(...)` 的玩法模块。
 
-当前重构为了安全，已经把 SQL、删除、shell 类功能默认改为关闭；旧入口补丁和热加载也默认关闭。
+## 8. 当前偏航点
+
+### 8.1 “尽量不改变行为”已经不完全准确
+
+当前重构为了安全，已经把 SQL、删除、shell 类功能默认改为关闭；旧入口补丁默认关闭。
 
 这意味着：
 
 - 对安全可部署版，这是正确方向。
-- 对完全功能恢复版，还需要后续开启和测试风险开关 / legacy patch 开关 / hot reload 开关。
+- 对完全功能恢复版，还需要后续开启和测试风险开关 / legacy patch 开关。
 
-### 5.2 README TODO 需要继续保留，但不应作为唯一进度依据
+### 8.2 README TODO 需要继续保留，但不应作为唯一进度依据
 
 README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收。
 
@@ -176,35 +230,21 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - 本路线图
 - 必要时更新 CHANGELOG
 
-## 6. 建议接下来的执行顺序
+## 9. 建议接下来的执行顺序
 
-### Step 1：代码自检
+### Step 1：当前收尾
 
-- [x] 修正过时注释，例如 `bootstrap.lua` 仍称自己为模板。
-- [x] 检查 `script/config.lua` 是否需要恢复说明注释。
-- [x] 检查模块注册顺序是否需要固定。
-- [x] 检查所有 handler 是否都有日志和失败返还。
-- [x] 补充代码自检记录：`docs/CODE_SELF_CHECK.md`。
-- [x] 将旧入口 hook 收敛为 `legacy_patches` 模块。
-- [x] 将热加载收敛为 `hot_reload` 模块。
-- [x] 修复 `features.enable_item_handlers` 未生效问题。
-- [x] 修复等级上限误调用 `set_auction_min_level` 问题。
-- [x] 修复 `finish_back_home` 重复 `fnext()` 与 mode=0 仍发点券问题。
-- [x] 修复 `item_query` GmInput 透传参数口径。
-- [x] 同步 `DP2_UNMIGRATED_FEATURES.md` 和 `HANDLER_MIGRATION_MAP.md` 状态。
+- [x] 同步 `ROADMAP.md` 中 hot_reload 与 finish_back_home 最新状态。
+- [ ] 同步 `CHANGELOG.md` 与 `DP2_UNMIGRATED_FEATURES.md`。
+- [ ] 测试 config 热更新：修改 `default_mode=0/5/1` 是否实时生效。
+- [ ] 测试 finish_back_home mode=5：只发点券，不回城。
+- [ ] 测试 mode=2/3/4 的 `equipment_rarities={0,1}` 是否正确跳过高级以上装备。
 
-### Step 2：服务器烟测
+### Step 2：服务器烟测补充
 
-- [x] 部署到测试服或普通频道。
-- [x] 启动 `df_game_r`。
-- [x] 观察 bootstrap 日志。
-- [x] 登录角色验证上线提示。
-- [x] 验证 `UseItem1` 是普通右键消耗品入口。
-- [x] 正式接入 `UseItem1 -> item_handler` 分发。
 - [ ] 重启确认 `features.enable_item_handlers=false` 时 handler 不注册。
 - [ ] 重启确认等级上限配置调用正常。
-- [ ] 重启确认 `legacy_patches` 默认关闭时不会注册额外 hook。
-- [ ] 重启确认 `hot_reload` 默认关闭时不会创建 timer。
+- [ ] 确认 `hot_reload.enabled=true` 时会创建 timer 并监听 config。
 
 ### Step 3：高风险默认关闭测试
 
@@ -218,27 +258,9 @@ README 的 P0-P7 适合记录重构任务；本路线图用于记录部署验收
 - [ ] 异界重置券。
 - [ ] 继承券。
 
-### Step 5：按需恢复高风险功能
+### Step 5：下一批迁移决策
 
-仅在测试服开启：
+在完成 `finish_back_home` 和 config 热更新实测后，再决定：
 
-```lua
-risk = {
-    enable_sql_handlers = true,
-    enable_delete_handlers = true,
-    enable_shell_handlers = true,
-}
-```
-
-逐项验证后再决定正式服默认值。
-
-## 7. 进度口径
-
-后续汇报进度时分两条：
-
-```text
-安全可部署版：93%
-完全功能恢复版：67%
-```
-
-如果只说“总进度”，默认指安全可部署版。
+- 继续迁 `signin.lua`；或
+- 开始迁 GM 指令模块。
