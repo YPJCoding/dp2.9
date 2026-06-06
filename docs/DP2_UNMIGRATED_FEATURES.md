@@ -7,7 +7,7 @@
 1. `dp2.9` 继续作为主底板，不整包覆盖 `dp2`。
 2. 每次只迁移一个明确功能或一个小模块。
 3. 所有新功能必须有配置开关。
-4. 高风险功能默认关闭。
+4. 高风险功能默认关闭，除非明确决定恢复旧行为。
 5. 涉及发物品、改库、删除、shell、经济系统的功能必须有日志。
 6. JS/Frida 地址强绑定功能必须先记录版本、地址、风险，再决定是否迁移。
 
@@ -16,20 +16,13 @@
 - `[ ]` 未迁移。
 - `[~]` 已迁移代码，待测试服验证或配置验证。
 - `[x]` 已迁移并接入当前分支。
-- `[!]` 高风险，默认暂缓。
+- `[!]` 高风险，默认暂缓或需专项验证。
 
-## A. 低风险基础能力
+## A. 已迁移基础能力
 
 ### A1. 在线玩家表 / 上下线记录
 
 来源：`dp2/script/Work_Reload.lua`
-
-功能：
-
-- `Reach_GameWord` 时记录玩家在线。
-- `Leave_GameWord` 时移除在线状态。
-- 记录账号 ID、角色名等信息。
-- 可作为全服广播、GM 工具、在线查询的基础模块。
 
 当前 `dp2.9` 状态：
 
@@ -45,11 +38,6 @@
 ### A2. 全服消息 / 在线广播
 
 来源：`dp2/script/Work_Reload.lua` 的 `sendPacketMessage(message, type)`。
-
-功能：
-
-- 遍历在线玩家。
-- 对每个在线玩家调用 `SendNotiPacketMessage`。
 
 当前 `dp2.9` 状态：
 
@@ -67,11 +55,6 @@
 
 来源：`dp2/script/Work_Reload.lua` 中 `//viewid`、`//viewname`。
 
-功能：
-
-- `//viewid 名称`：按名称查询物品 ID。
-- `//viewname ID`：按 ID 查询物品名称。
-
 当前 `dp2.9` 状态：
 
 - 已迁移到 `script/modules/item_query.lua`。
@@ -84,26 +67,29 @@
 
 ---
 
-## B. 玩法规则模块
+## B. 已迁移玩法规则模块
 
-### B1. 热加载 `Work_Reload.lua`
+### B1. 配置热加载
 
-来源：`dp2/df_game_r.lua`
-
-功能：
-
-- 通过 `lfs.attributes` 检查 `/dp2/script/Work_Reload.lua` 修改时间。
-- 使用 `loadfile(filename, "t", env)` 热加载脚本。
-- `env` 暴露 `dp`、`dpx`、`game`、`world`、`logger`、`item_handler` 等上下文。
+来源：旧 `dp2/df_game_r.lua` 的 `Work_Reload.lua` 热加载思路。
 
 当前 `dp2.9` 状态：
 
 - 已迁移到 `script/modules/hot_reload.lua`。
-- 已配置 `hot_reload.enabled/filename/start_delay_ms/interval_ms/run_on_start`。
-- 默认关闭，仅建议测试服或开发环境启用。
-- 文件不存在、编译失败、执行失败均只记录日志，不影响主入口。
+- 当前实现已从 `Work_Reload.lua` 脚本执行改为 **只监听 `/dp2/script/config.lua`**。
+- `script/Work_Reload.lua` 已移除。
+- `hot_reload.enabled = true`，默认开启。
+- 当前仅热应用显式支持的运行时配置：`hot.finish_back_home`。
+- 配置语法错误或 require 失败时，应保留旧配置并记录错误。
 
-状态：`[~] 已迁移，待测试服验证`
+状态：`[~] 已迁移，待 config 热更新实测`
+
+验证点：
+
+- [ ] 修改 `hot.finish_back_home.default_mode = "0"` 后确认实时生效。
+- [ ] 修改 `hot.finish_back_home.default_mode = "5"` 后确认实时生效。
+- [ ] 修改 `hot.finish_back_home.default_mode = "1"` 后确认实时生效。
+- [ ] 故意写入错误配置，确认记录错误且旧配置不失效。
 
 ---
 
@@ -111,17 +97,13 @@
 
 来源：`dp2/script/Work_Reload.lua`
 
-功能：
-
-- 定时遍历在线玩家。
-- 当玩家位于指定副本且等级低于上限时，按配置增加经验和代币。
-
 当前 `dp2.9` 状态：
 
 - 已迁移到 `script/modules/exp_dungeon.lua`。
 - 依赖 `online.lua`。
 - 已配置副本 ID、等级上限、经验比例、代币数量、执行间隔。
 - 当前由 `features.enable_exp_dungeon` 控制。
+- 当前配置等级上限为 85。
 - 仍需测试服确认副本 `5000` 是否存在。
 
 状态：`[~] 已迁移，待测试服验证`
@@ -131,10 +113,6 @@
 ### B3. 持物进图限制
 
 来源：`dp2/script/Work_Reload.lua`
-
-功能：
-
-- 进入指定副本时检查队伍成员是否持有指定道具。
 
 当前 `dp2.9` 状态：
 
@@ -152,10 +130,6 @@
 
 来源：`dp2/script/Work_Reload.lua`
 
-功能：
-
-- 如果角色等级高于副本等级超过阈值，且没有指定道具，则阻止掉落。
-
 当前 `dp2.9` 状态：
 
 - 已迁移到 `script/modules/drop_rules.lua`。
@@ -167,23 +141,32 @@
 
 ---
 
-### B5. 翻牌后自动回城 / 自动分解 / 自动出售
+### B5. 翻牌后自动回城 / 自动分解 / 自动出售 / 随机点券
 
 来源：`dp2/script/Work_Reload.lua`
-
-功能：
-
-- 副本完成后按模式处理：关闭、奖励+回城、奖励+分解+回城、奖励+玩家分解机+回城、奖励+出售+回城。
 
 当前 `dp2.9` 状态：
 
 - 已迁移到 `script/modules/finish_back_home.lua`。
 - 当前由 `features.enable_finish_back_home` 控制。
+- 运行时配置位于 `hot.finish_back_home`，支持 config 热更新。
 - 已修正 `mode=0`：完全关闭，不发点券、不回城、不分解/出售。
 - 已修正 `GameEvent` 流程：副本完成事件只调用一次 `fnext()`。
-- `default_mode` 默认为 `0`。
+- 已新增 `mode=5`：仅发放随机点券，不回城、不分解、不出售。
+- 当前 `default_mode` 默认为 `5`。
+- 已新增 `equipment_rarities` 单一装备品质白名单，分解和出售共用。
+- 当前默认 `equipment_rarities = {0, 1}`，对应普通装备和高级装备。
 
-状态：`[~] 已迁移，需复测`
+状态：`[~] 已迁移，需测试服复测`
+
+验证点：
+
+- [ ] `mode=5`：只发点券，不回城。
+- [ ] `mode=0`：完全无动作。
+- [ ] `mode=1`：发点券 + 回城。
+- [ ] `mode=2`：发点券 + 诺顿分解 + 回城，且只处理 `rarity=0/1`。
+- [ ] `mode=3`：发点券 + 在线玩家分解机 + 回城，且只处理 `rarity=0/1`。
+- [ ] `mode=4`：发点券 + 出售装备 + 回城，且只处理 `rarity=0/1`。
 
 ---
 
@@ -229,7 +212,7 @@
 - 不整体迁移。
 - 继续按命令逐个迁移。
 - 每个命令必须有配置开关和日志。
-- 默认关闭高风险命令。
+- 高风险命令需要专项确认。
 
 状态：`[!] 高风险暂缓`
 
@@ -254,7 +237,7 @@
 - 新增 `script/modules/signin.lua`。
 - 奖励配置化。
 - 签到记录不应只存在内存，至少应支持按日期持久化或数据库记录。
-- 默认关闭。
+- 默认关闭或仅测试服/GM 开启。
 
 状态：`[ ] 未迁移`
 
@@ -283,7 +266,7 @@
 
 - 必须先实现 GM 权限。
 - 必须写操作日志。
-- 必须默认关闭。
+- 必须默认保守。
 - 不建议进入安全可部署版。
 
 状态：`[!] 高风险暂缓`
@@ -293,10 +276,6 @@
 ### C4. 背包清理 GM 指令
 
 来源：`dp2/script/Work_Reload.lua` 的 `//clearp*`。
-
-功能：
-
-- 清理装备栏、消耗品栏、材料栏、任务栏、副职业材料栏、徽章栏、装扮栏、宠物栏、宠物装备栏等。
 
 当前 `dp2.9` 状态：
 
@@ -325,7 +304,7 @@
 迁移建议：
 
 - 需要先确认 hook 签名、保护道具、装备槽位和失败回滚方式。
-- 影响经济和装备成长，默认关闭。
+- 影响经济和装备成长，默认保守。
 
 状态：`[ ] 未迁移`
 
@@ -343,7 +322,7 @@
 
 - 先建立邮件/发奖封装模块。
 - 所有调用必须记录账号、角色、物品、数量、来源。
-- 默认关闭高风险入口。
+- 高风险入口默认保守。
 
 状态：`[ ] 未迁移`
 
@@ -354,11 +333,6 @@
 ### D1. 绝望之塔金币提示修复
 
 来源：`dp2/df_game_r.lua`
-
-功能：
-
-- 注册 `CParty_UseAncientDungeonItems`。
-- 对绝望之塔副本 `11008`~`11107` 直接返回 true。
 
 当前 `dp2.9` 状态：
 
@@ -373,11 +347,6 @@
 ### D2. 城镇下线卡镇魂修复
 
 来源：`dp2/df_game_r.lua`
-
-功能：
-
-- 注册 `CUser_SaveTown`。
-- 当下线城镇为 `13` 时改为 `11`。
 
 当前 `dp2.9` 状态：
 
@@ -394,11 +363,6 @@
 
 来源：`dp2/df_game_r.lua`
 
-功能：
-
-- 注册 `Open_Dungeon`。
-- 对副本 `11007` 返回 true。
-
 当前 `dp2.9` 状态：
 
 - 已迁移到 `script/modules/legacy_patches.lua`。
@@ -413,10 +377,6 @@
 ### D4. `dp.mem.hotfix` 修复小明炸街
 
 来源：`dp2/df_game_r.lua`
-
-功能：
-
-- 调用 `dp.mem.hotfix(dpx.reloc(...))` 修改内存。
 
 当前 `dp2.9` 状态：
 
@@ -453,17 +413,24 @@
 - `df_game_r.js` 中已存在的功能不在本清单内重复展开。
 - 新迁移 JS/Frida 地址强绑定能力前，必须先记录地址、版本、风险和回滚方式。
 
+当前 `config.lua` 中部分 JS/Frida 功能已按需求默认开启，例如：
+
+- `enable_village_attack`
+- `enable_luck_point_drop`
+- `enable_user_inout_hook`
+- `enable_ranking`
+- `enable_hidden_option`
+- `enable_drop_announce`
+- `enable_vip_login`
+- `enable_batch_item_add`
+
 仍需继续索引 / 确认的方向：
 
 - 账号仓库扩展。
-- 怪物攻城活动。
 - 幸运在线玩家。
 - 在线奖励。
 - 随机属性继承。
 - 自动解封随机属性装备。
-- 幸运点影响掉落率。
-- 战力排行榜系统。
-- 时装潜能系统。
-- 掉落公告 / VIP 登录公告。
+- 取消新账号成长契约。
 
 状态：`[~] 按功能逐项确认`
