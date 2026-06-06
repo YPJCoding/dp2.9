@@ -24,6 +24,13 @@ local function reject(user, item_id, ctx, message, reason)
     log_item_return(ctx, user, item_id, reason)
 end
 
+local function get_amplify_type(info)
+    if not info or type(info.amplify) ~= "table" then
+        return 0
+    end
+    return tonumber(info.amplify.type) or 0
+end
+
 function M.register(item_handler, ctx)
     local dpx = ctx.dpx
     local game = ctx.game
@@ -43,11 +50,11 @@ function M.register(item_handler, ctx)
             return reject(user, item_id, ctx, "注意：相同的装备类型才可以继承！", "type_mismatch")
         elseif item1.rarity ~= item2.rarity then
             return reject(user, item_id, ctx, "注意：品级相同才可以继承！", "rarity_mismatch")
-        elseif math.abs(item2.usable_level - item1.usable_level) >= 10 then
+        elseif math.abs(item2.usable_level - item1.usable_level) > 10 then
             return reject(user, item_id, ctx, "注意：等级差必须小于等于10级的装备才可以被继承！", "level_gap_too_large")
         elseif item1.usable_level < 50 or item2.usable_level < 50 then
             return reject(user, item_id, ctx, "注意：低于50级的装备不可以继承！", "level_too_low")
-        elseif item1.amplify.type == 0 and item2.amplify.type ~= 0 then
+        elseif get_amplify_type(item1) == 0 and get_amplify_type(item2) ~= 0 then
             return reject(user, item_id, ctx, "注意：强化装备不可以继承给增幅装备！", "amplify_mismatch")
         elseif dpx.item.inherit(user.cptr, 9, 10, mask) then
             if logger then
