@@ -23,6 +23,7 @@
   - broadcast
   - GM permission checks
   - item query
+  - signin
   - experience dungeon
   - dungeon gate
   - drop rules
@@ -33,6 +34,7 @@
   - open extra dungeons
 - Added hot reload module `script/modules/hot_reload.lua` for config-driven runtime tuning.
 - Added runtime smoke test checklist: `docs/RUNTIME_SMOKE_TEST_CHECKLIST.md`.
+- Added signin test checklist: `docs/SIGNIN_TEST_CHECKLIST.md`.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -61,6 +63,12 @@
 - Updated `finish_back_home` defaults:
   - `default_mode = "5"`, only random point reward by default.
   - `equipment_rarities = {0, 1}`, only normal and advanced equipment are processed by disjoint/sell modes.
+- Added `signin` config and bootstrap wiring:
+  - `features.enable_signin = false` by default.
+  - `signin.command = "//qd"`.
+  - default reward remains `3340 x1` by mail.
+  - reset hour remains 6.
+  - sign-in state remains in memory to match old script behavior.
 - Synced `DP2_UNMIGRATED_FEATURES.md`, `HANDLER_MIGRATION_MAP.md`, and `ROADMAP.md` after implementation audits.
 - Synced `ROADMAP.md` and `DP2_UNMIGRATED_FEATURES.md` with current config-only hot reload and finish_back_home testing status.
 - Marked `hot.finish_back_home.default_mode` hot reload verification as passed for modes `0`, `5`, and `1`.
@@ -96,5 +104,6 @@
 - Legacy entry patches are present, default-disabled, and their enable paths are verified.
 - Hot reload is enabled by default and currently applies only explicitly supported runtime config, starting with `hot.finish_back_home`.
 - `finish_back_home` main modes and equipment rarity filtering are verified.
-- Remaining safety-blocking work is mainly PVF/real-item verification and the next migration decision: `signin.lua` or GM command modules.
+- `signin` is migrated and wired but default-disabled; it needs test-server verification before enabling for players.
+- Remaining safety-blocking work is mainly PVF/real-item verification and signin verification.
 - `frida.js` is not treated as part of the default DP loading chain; DP defaults to `df_game_r.lua` and `df_game_r.js`.
