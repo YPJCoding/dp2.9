@@ -30,6 +30,7 @@ local function build_menu(config)
     end
 
     if features.enable_item_query == true then
+        table.insert(lines, "功能：查询帮助  指令：//view")
         table.insert(lines, "功能：查询物品代码  指令：//viewid <物品名称>")
         table.insert(lines, "功能：查询物品名称  指令：//viewname <物品ID>")
     end
@@ -40,7 +41,13 @@ local function build_menu(config)
         table.insert(lines, "功能：每日签到  状态：暂未开放")
     end
 
-    table.insert(lines, "——————————待迁移/高风险指令——————————")
+    table.insert(lines, "——————————功能说明——————————")
+    table.insert(lines, "任务清理：请使用已迁移的任务清理道具券")
+    table.insert(lines, "职业/觉醒/转职：请使用已迁移的职业相关道具券")
+    table.insert(lines, "装备继承：请使用已迁移的装备继承道具券")
+    table.insert(lines, "PVP 经验：请使用 PVP 经验书，道具受风险开关控制")
+
+    table.insert(lines, "——————————暂未开放——————————")
     table.insert(lines, "充值、发物品、改库、清背包等 GM 指令尚未开放")
     table.insert(lines, "——————————指令结束——————————")
 
