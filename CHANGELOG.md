@@ -74,6 +74,7 @@
 - Fixed `item_query` GmInput passthrough calls to use `fnext()` consistently.
 - Fixed `finish_back_home` so `mode=0` is fully inert and does not grant points or trigger return/disjoint/sell behavior.
 - Fixed `finish_back_home` GameEvent handling to avoid calling `fnext()` twice for dungeon-finish events.
+- Hardened config hot reload so syntax errors, invalid config return types, or module configure failures keep the previous config active and log `keep previous config`.
 
 ### Removed
 
