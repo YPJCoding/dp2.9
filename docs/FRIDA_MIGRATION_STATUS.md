@@ -16,7 +16,7 @@
 | Frida 基础入口 | `df_game_r.js` | N/A | `[x]` | 已保留 `rpc.exports.init`、`setup()`、Lua/JS 桥接。 |
 | Frida 回调发物品 | `df_game_r.lua` | `js_features.enable_batch_item_add` | `[x]` | Lua 侧已加开关、账号、物品、在线用户校验。 |
 | Frida 启动调度辅助 | `script/js/startup_helpers.js` | N/A | `[~]` | 已新增 `safeLoadModule` / `safeFeature` / `safeModuleFeature`，入口待接入。 |
-| 已迁移模块集中启动器 | `script/js/startup_modules.js` | `js_features.*` | `[~]` | 已新增 `startMigratedModules(cfg)`，用于集中启动已拆分模块；入口待接入。 |
+| 已迁移模块集中启动器 | `script/js/startup_modules.js` | `js_features.*` | `[~]` | 已新增 `startMigratedModules(cfg)`，用于集中启动已拆分模块；已补齐 patches 和 account_cargo 调度，入口待接入。 |
 | 绝望之塔修复 | `df_game_r.js` / Lua `legacy_patches.lua` | `enable_tod_fix` / `legacy_patches.*` | `[~]` | 金币/门票类入口已迁移；跳过 UserAPC 等细节仍需实测确认。 |
 | 时装镶嵌修复 | `script/js/emblem_fix.js` | `enable_emblem_fix` | `[~]` | 已从旧 `fix_use_emblem()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
 | 历史日志追踪 | `script/js/history_log.js` | `enable_history_log` | `[~]` | 已从旧 `hook_history_log()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
@@ -26,11 +26,11 @@
 | 幸运在线玩家 | `script/js/lucky_online.js` | `enable_lucky_online=false` | `[!]` | 当前仓库和旧仓库未找到真实 `start_event_lucky_online_user()` 实现；已补兼容桩避免 ReferenceError，不凭空实现抽奖/发奖逻辑。 |
 | 随机属性继承 / 自动解封 | `script/js/random_option.js` | `enable_random_option_inherit=false` / `enable_auto_unseal=false` | `[~]` | 已从旧 `change_random_option_inherit()` 和 `auto_unseal_random_option_equipment()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
 | 幸运点影响掉落 | `script/js/luck_point_drop.js` | `enable_luck_point_drop=true` | `[!]` | 已从旧 `enable_drop_use_luck_point()` 拆出独立模块，增加重复启动保护；会替换爆率计算函数，高风险，入口仍待切换。 |
-| 账号仓库扩展 | `script/js/account_cargo.js` | `enable_account_cargo=false` | `[!]` | 已拆模块，默认关闭。功能极高风险；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
-| 创建角色数量限制 | `script/js/patches.js` | `enable_create_character_unlimit=true` | `[~]` | 已迁移并加重复 hook 保护。 |
-| +13 强化券刷新 | `script/js/patches.js` | `enable_strengthen_refresh=true` | `[~]` | 已修复参数口径，恢复旧实现的 user/slot 更新方式。 |
-| 黑暗武士技能栏修复 | `script/js/patches.js` | `enable_dark_knight_skill_fix=true` | `[~]` | 已迁移并加重复 hook 保护。 |
-| 取消新账号成长契约 | `script/js/patches.js` | `enable_mobile_auth=false` | `[~]` | 已迁移并加重复 replace 保护，默认关闭。 |
+| 账号仓库扩展 | `script/js/account_cargo.js` | `enable_account_cargo=false` | `[!]` | 已拆模块，默认关闭；`startup_modules.js` 已纳入调度但仍默认关闭。功能极高风险；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
+| 创建角色数量限制 | `script/js/patches.js` | `enable_create_character_unlimit=true` | `[~]` | 已迁移并加重复 hook 保护；`startup_modules.js` 已纳入调度。 |
+| +13 强化券刷新 | `script/js/patches.js` | `enable_strengthen_refresh=true` | `[~]` | 已修复参数口径并纳入 `startup_modules.js` 调度。 |
+| 黑暗武士技能栏修复 | `script/js/patches.js` | `enable_dark_knight_skill_fix=true` | `[~]` | 已迁移并加重复 hook 保护；`startup_modules.js` 已纳入调度。 |
+| 取消新账号成长契约 | `script/js/patches.js` | `enable_mobile_auth=false` | `[~]` | 已迁移并加重复 replace 保护，默认关闭；`startup_modules.js` 已纳入调度。 |
 | 战力排行榜 | `script/js/ranking.js` | `enable_ranking=true` | `[~]` | 已拆模块；已修复 DB 初始化时序和 guild name 兜底。 |
 | 时装潜能 | `script/js/hidden_option.js` | `enable_hidden_option=true` | `[~]` | 已拆模块；已补重复 hook 保护和旧入口 `start_hidden_option()` 兼容。 |
 | 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块；已补参数校验、重复应用保护和旧入口 `set_return_user()` 兼容。 |
@@ -65,19 +65,9 @@
   - 新增 `startMigratedModules(cfg)` 集中启动器。
   - 统一调度已拆分模块，后续 `df_game_r.js` 可只调用该入口。
   - 避免在 `df_game_r.js` 中逐个手写模块加载和函数调用。
+  - 已纳入 `patches` 的创建角色、强化刷新、黑武技能栏、成长契约调度。
+  - 已纳入 `account_cargo` 调度，但仍默认关闭。
   - 不处理仍留在 `df_game_r.js` 的怪物攻城、TOD 等大型旧逻辑。
-
-- `script/js/lucky_online.js`
-  - 新增 `start_event_lucky_online_user()` 兼容入口。
-  - 当前仓库和旧仓库均未找到真实实现，因此只做保守兼容桩。
-  - 避免 `enable_lucky_online=true` 时入口因为函数不存在直接报错。
-  - 不凭空实现随机在线玩家抽取、发点券、发道具或邮件等经济逻辑。
-
-- `script/js/user_inout.js`
-  - 新增 `hook_user_inout_game_world()` 兼容入口。
-  - 当前仓库和旧仓库均未找到真实实现，因此只做保守兼容桩。
-  - 避免 `enable_user_inout_hook=true` 时入口因为函数不存在直接报错。
-  - 不凭空实现排行榜刷新、怪物攻城 UI、幸运点等业务逻辑。
 
 - 其他已拆模块状态详见上表。
 
