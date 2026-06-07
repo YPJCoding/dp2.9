@@ -16,7 +16,7 @@
 | Frida 基础入口 | `df_game_r.js` | N/A | `[x]` | 已保留 `rpc.exports.init`、`setup()`、Lua/JS 桥接。 |
 | Frida 回调发物品 | `df_game_r.lua` | `js_features.enable_batch_item_add` | `[x]` | Lua 侧已加开关、账号、物品、在线用户校验。 |
 | 绝望之塔修复 | `df_game_r.js` / Lua `legacy_patches.lua` | `enable_tod_fix` / `legacy_patches.*` | `[~]` | 金币/门票类入口已迁移；跳过 UserAPC 等细节仍需实测确认。 |
-| 时装镶嵌修复 | `df_game_r.js` | `enable_emblem_fix` | `[~]` | 旧 `fix_use_emblem()` 已在入口调用，需实测。 |
+| 时装镶嵌修复 | `script/js/emblem_fix.js` | `enable_emblem_fix` | `[~]` | 已从 `df_game_r.js` 旧 `fix_use_emblem()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
 | 历史日志追踪 | `df_game_r.js` | `enable_history_log` | `[~]` | 入口已有调用，需实测确认日志是否符合预期。 |
 | 上下线处理 | `df_game_r.js` | `enable_user_inout_hook` | `[~]` | 旧 `hook_user_inout_game_world()` 已保留，包含排行榜/怪物攻城 UI 相关逻辑，需实测。 |
 | 在线奖励 | `df_game_r.js` | `enable_online_reward=false` | `[!]` | 旧逻辑会发点券，默认关闭；需专项确认。 |
@@ -41,6 +41,7 @@
 
 | 功能 | 状态 | 说明 |
 |---|---|---|
+| 时装镶嵌入口切换 | `[~]` | `emblem_fix.js` 已新增，但入口调度仍需从旧内联 `fix_use_emblem()` 切换为 `dp_load('emblem_fix'); startEmblemFix()`。 |
 | 掉落公告入口接入 | `[~]` | `drop_announce.js` 已新增，但入口调度仍需接入 `js_features.enable_drop_announce`，默认保持关闭。 |
 | frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
 | `df_game_r.js` 入口瘦身 | `[~]` | 当前 `df_game_r.js` 内仍混有大段旧功能和部分拆分模块的重复代码。后续应继续拆分成 `script/js/*.js`，避免入口文件过大。 |
@@ -79,6 +80,11 @@
   - 增加重复 hook 保护。
   - 默认通过 `enable_drop_announce=false` 保持关闭。
 
+- `script/js/emblem_fix.js`
+  - 从 `df_game_r.js` 旧 `fix_use_emblem()` 逻辑拆出独立模块。
+  - 增加重复 hook 保护。
+  - 保留旧入口 `fix_use_emblem()` 兼容。
+
 - `script/config.lua`
   - `enable_drop_announce` 改为默认 `false`。
   - 注释标记该功能源实现未找到，待补齐后再开启。
@@ -96,7 +102,7 @@
 优先级建议：
 
 1. 继续拆分 `df_game_r.js` 中剩余的大功能到 `script/js/*.js`。
-2. 接入 `drop_announce.js` 到 `df_game_r.js` 启动调度，但默认保持关闭。
+2. 接入 `emblem_fix.js` 和 `drop_announce.js` 到 `df_game_r.js` 启动调度。
 3. 对 `start()` 做统一安全调度封装，避免函数不存在、重复 hook、DB 未初始化导致启动失败。
 4. 将高风险默认 true 的 JS 功能逐项确认是否应保持开启。
 5. 最后再做测试服验证和 Bug 修复。
