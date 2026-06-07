@@ -2944,9 +2944,6 @@ function start() {
 	// 挂接消息分发线程
 	hook_TimerDispatcher_dispatch();
 
-	// 怪物攻城活动：大型旧逻辑仍保留在入口内，后续再专项拆分。
-	if (cfg.enable_village_attack === true) { api_scheduleOnMainThread(start_event_villageattack, null); }
-
 	console.log('[' + get_timestamp() + '] [frida] [info] ----------------------- set function success ------------------------');
 }
 
