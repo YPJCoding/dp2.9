@@ -47,6 +47,8 @@ script/js/village_attack.js
 script/js/village_attack_state.js
 script/js/startup_modules.js
 script/config.lua
+tools/patch_df_game_r_village_attack_state.py
+tools/check_df_game_r_village_attack_state.py
 ```
 
 当前配置：
@@ -61,16 +63,19 @@ js_features.enable_village_attack = true
 - [x] `village_attack.js` 增加启动请求保护，避免适配入口被重复调用。
 - [x] `village_attack.js` 会对旧 `start_event_villageattack` 安装 guard，避免过渡期双路径重复启动。
 - [x] `startup_modules.js` 已按 `enable_village_attack` 调用 `startVillageAttack()`。
+- [x] `startup_modules.js` 已无条件加载 `village_attack_state.js`，供 DB 存档和关闭开关场景使用。
 - [x] 新增 `script/js/village_attack_state.js`，承接状态常量、默认状态对象和低风险状态 helper。
 - [x] `village_attack.js` 启动时会加载 `village_attack_state.js`。
+- [x] 新增 `tools/patch_df_game_r_village_attack_state.py`，用于安全删除 `df_game_r.js` 中已迁移的状态常量和默认状态对象。
+- [x] 新增 `tools/check_df_game_r_village_attack_state.py`，用于检查 `df_game_r.js` 状态定义是否已清理。
 - [x] 暂不迁移奖励、刷怪、UI 包、DB 结算等核心逻辑，避免一次性高风险变更。
 
 过渡期说明：
 
 - `df_game_r.js` 内的旧直接 `start_event_villageattack` 调度已由本地提交删除后，应只通过 `startup_modules.js -> startVillageAttack()` 启动。
-- `df_game_r.js` 内仍保留怪物攻城状态常量、`villageAttackEventInfo` 和旧状态函数定义。
+- `df_game_r.js` 内仍保留怪物攻城状态常量、`villageAttackEventInfo` 和旧状态函数定义，需本地执行清理脚本后再提交实际瘦身 diff。
 - `village_attack_state.js` 当前只在缺失时补齐全局定义，不强制覆盖旧状态，避免热加载或重复加载时重置活动进度。
-- 下一步确认启动日志稳定后，再从 `df_game_r.js` 删除重复状态定义和纯状态函数。
+- 下一步执行 `python3 tools/patch_df_game_r_village_attack_state.py`，再执行 `python3 tools/check_df_game_r_village_attack_state.py`，确认通过后提交 `df_game_r.js`。
 
 风险点：
 
@@ -87,6 +92,7 @@ js_features.enable_village_attack = true
 - [x] 删除 `df_game_r.js` 中旧的 `api_scheduleOnMainThread(start_event_villageattack, null)` 直接调度。
 - [x] 增加 DB 未就绪保护：`village_attack.js` 会等待 `mysql_taiwan_cain` / `mysql_frida` 初始化后再调用旧 `start_event_villageattack`。
 - [x] 小步拆出状态与常量承接模块：`village_attack_state.js`。
+- [~] `df_game_r.js` 状态定义清理：已提供自动 patch/check 脚本，待执行脚本并提交实际 `df_game_r.js` diff。
 - [~] 小步拆出纯状态函数：已在 `village_attack_state.js` 提供状态重置、剩余时间、难度设置、进度广播 helper；旧函数体仍保留在 `df_game_r.js`，待启动稳定后删除/切换。
 - [ ] 小步拆出定时器与启动流程。
 - [ ] 最后拆出高风险 hook、刷怪、PT、结算、奖励邮件。
