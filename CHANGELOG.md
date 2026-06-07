@@ -49,6 +49,7 @@
 - Added random option JS module: `script/js/random_option.js`.
 - Added online reward JS module: `script/js/online_reward.js`.
 - Added history log JS module: `script/js/history_log.js`.
+- Added batch item notify JS module: `script/js/batch_item_notify.js`.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -112,6 +113,7 @@
   - `script/js/random_option.js` was extracted from the old random-option inherit and auto-unseal implementations and adds duplicate hook protection while preserving old compatibility aliases.
   - `script/js/online_reward.js` was extracted from the old `enable_online_reward()` implementation and adds duplicate hook protection while preserving the old alias.
   - `script/js/history_log.js` was extracted from the old `hook_history_log()` implementation and adds duplicate hook protection while preserving the old alias.
+  - `script/js/batch_item_notify.js` was extracted from the old batch item add UI notification helpers while preserving old compatibility aliases.
   - `js_features.enable_drop_announce` is now default-disabled.
 - Synced Frida high-risk tracking:
   - `docs/FRIDA_HIGH_RISK_TODO.md` now tracks account cargo, village attack, luck-point drop, online rewards, lucky online users, and drop announce separately.
