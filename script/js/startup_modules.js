@@ -97,6 +97,10 @@ function anyPatchFeatureEnabled(cfg) {
 function startMigratedModules(cfg) {
   cfg = cfg || {};
 
+  // 怪物攻城状态会被 init_db()/uninit_db() 的存档逻辑使用。
+  // 即使 enable_village_attack=false，也必须先加载状态模块，避免后续清理 df_game_r.js 默认状态对象后出现缺失。
+  loadModuleOnly('village_attack_state', true, 'village_attack_state');
+
   // 纯 helper / callback 模块：先加载，供后续 history_log 或 Lua/JS 回调复用。
   loadModuleOnly('batch_item_notify', getFeatureFlag(cfg, 'enable_batch_item_add', true), 'batch_item_notify');
   loadModuleOnly('user_use_item_event', getFeatureFlag(cfg, 'enable_history_log', true), 'user_use_item_event');
