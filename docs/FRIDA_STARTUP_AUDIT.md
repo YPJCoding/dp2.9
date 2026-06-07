@@ -100,6 +100,23 @@ script/js/return_user.js
 
 状态：`[~] 辅助模块已新增，入口待接入`
 
+### 2.7 已拆出但待入口切换的模块
+
+这些模块已经从 `df_game_r.js` 或旧 `dp2/frida.js` 中拆出，保留旧入口兼容，但 `df_game_r.js` 入口仍待切换：
+
+| 模块 | 旧入口/旧来源 | 新入口 | 状态 |
+|---|---|---|---|
+| `script/js/history_log.js` | `hook_history_log()` | `startHistoryLog()` | `[~] 待入口切换` |
+| `script/js/user_use_item_event.js` | `UserUseItemEvent()` | `UserUseItemEvent()` / `dispatchUserUseItemEvent()` | `[~] 待随 history_log 一起加载` |
+| `script/js/batch_item_notify.js` | `api_CUser_Add_Item_list()` / `SendItemWindowNotification()` | 旧入口兼容 | `[~] 待入口切换` |
+| `script/js/emblem_fix.js` | `fix_use_emblem()` | `startEmblemFix()` | `[~] 待入口切换` |
+| `script/js/drop_announce.js` | `processing_data(...)` 残留逻辑 | `startDropAnnounce()` | `[~] 默认关闭，待入口接入` |
+| `script/js/luck_point_drop.js` | `enable_drop_use_luck_point()` | `startLuckPointDrop()` | `[~] 待入口切换` |
+| `script/js/random_option.js` | `change_random_option_inherit()` / `auto_unseal_random_option_equipment()` | `startRandomOptionInherit()` / `startAutoUnsealRandomOptionEquipment()` | `[~] 待入口切换` |
+| `script/js/online_reward.js` | `enable_online_reward()` | `startOnlineReward()` | `[~] 默认关闭，待入口切换` |
+
+状态：`[~] 模块已拆分，入口待统一接入`
+
 ## 3. 当前仍需处理的启动调度问题
 
 ### 3.1 `start()` 需要统一安全调用层
@@ -115,6 +132,11 @@ script/js/startup_helpers.js
 ```js
 safeModuleFeature('vip_login', cfg.enable_vip_login === true, 'vip_login', 'startVipLogin');
 safeModuleFeature('ranking', cfg.enable_ranking === true, 'ranking', 'startRanking');
+safeModuleFeature('history_log', cfg.enable_history_log !== false, 'history_log', 'startHistoryLog');
+safeModuleFeature('emblem_fix', cfg.enable_emblem_fix !== false, 'emblem_fix', 'startEmblemFix');
+safeModuleFeature('online_reward', cfg.enable_online_reward === true, 'online_reward', 'startOnlineReward');
+safeModuleFeature('luck_point_drop', cfg.enable_luck_point_drop === true, 'luck_point_drop', 'startLuckPointDrop');
+safeModuleFeature('drop_announce', cfg.enable_drop_announce === true, 'drop_announce', 'startDropAnnounce');
 ```
 
 目标：
@@ -169,6 +191,13 @@ safeModuleFeature('ranking', cfg.enable_ranking === true, 'ranking', 'startRanki
 - 旧函数定义作用域异常。
 - 新模块函数可能被旧同名函数覆盖。
 - 入口瘦身时容易误删或误包代码。
+
+最小修复方案：
+
+1. 在 `set function success` 日志后补 `}`。
+2. 删除文件后部原本用于闭合 `start()` 的孤立 `}`。
+3. 不删除任何业务函数，先只修作用域。
+4. 再逐步把入口调用切换到 `safeModuleFeature(...)`。
 
 状态：`[!] 需专项小步修复，不建议整文件替换`
 
