@@ -50,6 +50,7 @@
 - Added online reward JS module: `script/js/online_reward.js`.
 - Added history log JS module: `script/js/history_log.js`.
 - Added batch item notify JS module: `script/js/batch_item_notify.js`.
+- Added user use item event JS module: `script/js/user_use_item_event.js`.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -69,7 +70,7 @@
 - Tightened handler risk gates for combined-risk features:
   - pet/avatar cleanup requires both delete and SQL risk switches.
   - PVP experience book requires both shell and SQL risk switches.
-- Added business-level success/failure logging to quest, job, misc, inherit, cleanup, and PVP handlers.
+- Added business-level success/failure logging to quest, job, misc, inherit, and PVP handlers.
 - Wired `legacy_patches` through bootstrap and config; the module and all sub-features are disabled by default.
 - Reworked `hot_reload` to watch only `script/config.lua`; `Work_Reload.lua` script execution was removed.
 - Reorganized `script/config.lua` by reload scope:
@@ -114,6 +115,7 @@
   - `script/js/online_reward.js` was extracted from the old `enable_online_reward()` implementation and adds duplicate hook protection while preserving the old alias.
   - `script/js/history_log.js` was extracted from the old `hook_history_log()` implementation and adds duplicate hook protection while preserving the old alias.
   - `script/js/batch_item_notify.js` was extracted from the old batch item add UI notification helpers while preserving old compatibility aliases.
+  - `script/js/user_use_item_event.js` was extracted from the old `UserUseItemEvent()` implementation and keeps only the previously active mount-transformer return-mail branch.
   - `js_features.enable_drop_announce` is now default-disabled.
 - Synced Frida high-risk tracking:
   - `docs/FRIDA_HIGH_RISK_TODO.md` now tracks account cargo, village attack, luck-point drop, online rewards, lucky online users, and drop announce separately.
