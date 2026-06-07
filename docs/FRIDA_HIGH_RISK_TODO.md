@@ -82,7 +82,7 @@ js_features.enable_village_attack = true
 - [x] 增加启动适配层的重复启动保护。
 - [x] 将 `startup_modules.js` 接入 `startVillageAttack()`。
 - [ ] 删除 `df_game_r.js` 中旧的 `api_scheduleOnMainThread(start_event_villageattack, null)` 直接调度。
-- [ ] 增加 DB 未就绪保护。
+- [x] 增加 DB 未就绪保护：`village_attack.js` 会等待 `mysql_taiwan_cain` / `mysql_frida` 初始化后再调用旧 `start_event_villageattack`。
 - [ ] 小步拆出状态与常量：`villageAttackEventInfo`、`VILLAGEATTACK_STATE_*`、`EVENT_VILLAGEATTACK_*`。
 - [ ] 小步拆出纯状态函数：状态重置、剩余时间、难度设置、进度广播。
 - [ ] 小步拆出定时器与启动流程。

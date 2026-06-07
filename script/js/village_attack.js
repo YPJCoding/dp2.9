@@ -1,13 +1,19 @@
 // 怪物攻城启动适配模块
 //
 // 迁移策略：
-// - 本文件当前只提供启动适配与重复启动保护。
+// - 本文件当前只提供启动适配、重复启动保护和 DB ready 等待。
 // - 怪物攻城核心实现仍保留在 df_game_r.js，避免一次性搬迁奖励、刷怪、UI 包、DB 等高风险逻辑。
 // - 后续按状态、定时器、UI、hook、奖励结算分组逐步迁移。
 
 var g_village_attack_start_requested = false;
 var g_village_attack_legacy_guard_installed = false;
 var g_village_attack_legacy_start_original = null;
+var g_village_attack_pending_starter = null;
+var g_village_attack_pending_source = '';
+var g_village_attack_start_retry_count = 0;
+
+var VILLAGE_ATTACK_DB_RETRY_MS = 1000;
+var VILLAGE_ATTACK_DB_RETRY_MAX = 30;
 
 function villageAttackLog(message) {
   try {
@@ -40,6 +46,82 @@ function resolveLegacyVillageAttackStarter() {
   return null;
 }
 
+function isVillageAttackDbReady() {
+  try {
+    if (typeof mysql_taiwan_cain === 'undefined' || mysql_taiwan_cain == null) {
+      return false;
+    }
+    if (typeof mysql_frida === 'undefined' || mysql_frida == null) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function scheduleVillageAttackStarter() {
+  if (typeof api_scheduleOnMainThread_delay === 'function') {
+    api_scheduleOnMainThread_delay(runVillageAttackStarterWhenReady, null, VILLAGE_ATTACK_DB_RETRY_MS);
+    return true;
+  }
+
+  if (typeof api_scheduleOnMainThread === 'function') {
+    api_scheduleOnMainThread(runVillageAttackStarterWhenReady, null);
+    return true;
+  }
+
+  return false;
+}
+
+function resetVillageAttackPendingStart() {
+  g_village_attack_start_requested = false;
+  g_village_attack_pending_starter = null;
+  g_village_attack_pending_source = '';
+  g_village_attack_start_retry_count = 0;
+}
+
+function runVillageAttackStarterWhenReady() {
+  if (!g_village_attack_pending_starter) {
+    villageAttackLog('skip scheduled start: no pending starter');
+    return;
+  }
+
+  if (!isVillageAttackDbReady()) {
+    g_village_attack_start_retry_count += 1;
+
+    if (g_village_attack_start_retry_count <= VILLAGE_ATTACK_DB_RETRY_MAX) {
+      villageAttackLog(
+        'wait db ready for ' +
+        g_village_attack_pending_source +
+        ': retry=' +
+        g_village_attack_start_retry_count
+      );
+      scheduleVillageAttackStarter();
+      return;
+    }
+
+    villageAttackLog('start aborted: db not ready after retries');
+    resetVillageAttackPendingStart();
+    return;
+  }
+
+  var starter = g_village_attack_pending_starter;
+  var source = g_village_attack_pending_source;
+
+  g_village_attack_pending_starter = null;
+  g_village_attack_pending_source = '';
+  g_village_attack_start_retry_count = 0;
+
+  try {
+    starter();
+    villageAttackLog('start requested from ' + source);
+  } catch (e) {
+    g_village_attack_start_requested = false;
+    villageAttackLog('start failed from ' + source + ': ' + e.message);
+  }
+}
+
 function callVillageAttackStarterOnce(starter, source) {
   if (g_village_attack_start_requested) {
     villageAttackLog('skip start from ' + source + ': already requested');
@@ -52,12 +134,21 @@ function callVillageAttackStarterOnce(starter, source) {
   }
 
   g_village_attack_start_requested = true;
+  g_village_attack_pending_starter = starter;
+  g_village_attack_pending_source = source;
+  g_village_attack_start_retry_count = 0;
+
+  if (scheduleVillageAttackStarter()) {
+    villageAttackLog('start scheduled from ' + source);
+    return true;
+  }
+
   try {
     starter();
-    villageAttackLog('start requested from ' + source);
+    villageAttackLog('start requested immediately from ' + source);
     return true;
   } catch (e) {
-    g_village_attack_start_requested = false;
+    resetVillageAttackPendingStart();
     villageAttackLog('start failed from ' + source + ': ' + e.message);
     return false;
   }
@@ -100,6 +191,6 @@ function start_village_attack() {
   return startVillageAttack();
 }
 
-// 模块加载时先保护旧入口。当前 df_game_r.js 仍直接调度 start_event_villageattack，
-// 因此先安装 guard，后续再把实际启动入口切到 startup_modules.js。
+// 模块加载时先保护旧入口。若 df_game_r.js 中仍残留旧直接调度，
+// guard 会保证重复请求只记录 skip，不会重复启动。
 installVillageAttackLegacyStartGuard();
