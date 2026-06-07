@@ -3,6 +3,11 @@
 // 说明：
 // - 由 df_game_r.js 通过 dp_load('vip_login') 加载。
 // - df_game_r.js 旧入口中还可能调用 vip_Login()，这里保留兼容别名并避免重复 hook。
+// - 旧内联实现曾使用 api_gameWorld_SendNotiPacketMessage 小写函数名；这里补兼容别名，降低旧代码残留的运行风险。
+
+if (typeof api_gameWorld_SendNotiPacketMessage === 'undefined' && typeof api_GameWorld_SendNotiPacketMessage === 'function') {
+  var api_gameWorld_SendNotiPacketMessage = api_GameWorld_SendNotiPacketMessage;
+}
 
 var g_vip_login_started = false;
 
