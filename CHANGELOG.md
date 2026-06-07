@@ -44,6 +44,7 @@
 - Added Frida startup audit document: `docs/FRIDA_STARTUP_AUDIT.md`.
 - Added Frida high-risk TODO document: `docs/FRIDA_HIGH_RISK_TODO.md`.
 - Added drop announce JS module: `script/js/drop_announce.js`.
+- Added emblem fix JS module: `script/js/emblem_fix.js`.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -102,6 +103,7 @@
   - `script/js/hidden_option.js` now guards duplicate hook startup and keeps the old `start_hidden_option()` alias.
   - `script/js/return_user.js` now validates day values, avoids duplicate patch writes, and keeps the old `set_return_user()` alias.
   - `script/js/drop_announce.js` was extracted from the residual `processing_data(...)` logic in `df_game_r.js`; it remains default-disabled because it broadcasts drops and grants cera.
+  - `script/js/emblem_fix.js` was extracted from the old `fix_use_emblem()` implementation and adds duplicate hook protection while preserving the old `fix_use_emblem()` alias.
   - `js_features.enable_drop_announce` is now default-disabled.
 - Synced Frida high-risk tracking:
   - `docs/FRIDA_HIGH_RISK_TODO.md` now tracks account cargo, village attack, luck-point drop, online rewards, lucky online users, and drop announce separately.
