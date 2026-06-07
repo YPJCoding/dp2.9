@@ -108,6 +108,7 @@ script/js/return_user.js
 |---|---|---|---|
 | `script/js/history_log.js` | `hook_history_log()` | `startHistoryLog()` | `[~] 待入口切换` |
 | `script/js/user_use_item_event.js` | `UserUseItemEvent()` | `UserUseItemEvent()` / `dispatchUserUseItemEvent()` | `[~] 待随 history_log 一起加载` |
+| `script/js/user_inout.js` | `hook_user_inout_game_world()` 入口残留 | `startUserInoutHook()` / `hook_user_inout_game_world()` | `[~] 兼容桩，真实实现待确认` |
 | `script/js/batch_item_notify.js` | `api_CUser_Add_Item_list()` / `SendItemWindowNotification()` | 旧入口兼容 | `[~] 待入口切换` |
 | `script/js/emblem_fix.js` | `fix_use_emblem()` | `startEmblemFix()` | `[~] 待入口切换` |
 | `script/js/drop_announce.js` | `processing_data(...)` 残留逻辑 | `startDropAnnounce()` | `[~] 默认关闭，待入口接入` |
@@ -134,6 +135,7 @@ safeModuleFeature('vip_login', cfg.enable_vip_login === true, 'vip_login', 'star
 safeModuleFeature('ranking', cfg.enable_ranking === true, 'ranking', 'startRanking');
 safeModuleFeature('history_log', cfg.enable_history_log !== false, 'history_log', 'startHistoryLog');
 safeModuleFeature('emblem_fix', cfg.enable_emblem_fix !== false, 'emblem_fix', 'startEmblemFix');
+safeModuleFeature('user_inout', cfg.enable_user_inout_hook === true, 'user_inout', 'startUserInoutHook');
 safeModuleFeature('online_reward', cfg.enable_online_reward === true, 'online_reward', 'startOnlineReward');
 safeModuleFeature('luck_point_drop', cfg.enable_luck_point_drop === true, 'luck_point_drop', 'startLuckPointDrop');
 safeModuleFeature('drop_announce', cfg.enable_drop_announce === true, 'drop_announce', 'startDropAnnounce');
