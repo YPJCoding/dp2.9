@@ -37,12 +37,14 @@ js_features.enable_account_cargo = false
 
 ## 2. 怪物攻城 `village_attack`
 
-状态：`[!] 大型系统已存在于 df_game_r.js，默认开启但未专项验证`
+状态：`[!] 已新增启动适配模块，核心实现仍在 df_game_r.js，默认开启但未专项验证`
 
 相关文件：
 
 ```text
 df_game_r.js
+script/js/village_attack.js
+script/js/startup_modules.js
 script/config.lua
 ```
 
@@ -52,18 +54,30 @@ script/config.lua
 js_features.enable_village_attack = true
 ```
 
+已完成：
+
+- [x] 新增 `script/js/village_attack.js` 启动适配模块。
+- [x] `village_attack.js` 增加启动请求保护，避免适配入口被重复调用。
+- [x] `startup_modules.js` 已按 `enable_village_attack` 加载 `village_attack` 模块。
+- [x] 暂不迁移奖励、刷怪、UI 包、DB 结算等核心逻辑，避免一次性高风险变更。
+
 风险点：
 
 - 依赖 MySQL / `frida.game_event`。
 - 涉及定时器、刷怪、UI 包、攻城状态、PT、邮件奖励。
-- 当前仍混在 `df_game_r.js` 中，尚未拆成独立模块。
+- 核心实现当前仍混在 `df_game_r.js` 中，尚未完成独立模块迁移。
 - `start()` 调度中 DB 初始化时序仍需确认。
 
 后续迁移要求：
 
-- [ ] 拆为 `script/js/village_attack.js`。
-- [ ] 增加重复启动保护。
+- [x] 建立 `script/js/village_attack.js` 迁移承接文件。
+- [x] 增加启动适配层的重复启动保护。
+- [ ] 将 `df_game_r.js` 的直接 `start_event_villageattack` 调度切换到 `startup_modules.js` 的 `startVillageAttack()`。
 - [ ] 增加 DB 未就绪保护。
+- [ ] 小步拆出状态与常量：`villageAttackEventInfo`、`VILLAGEATTACK_STATE_*`、`EVENT_VILLAGEATTACK_*`。
+- [ ] 小步拆出纯状态函数：状态重置、剩余时间、难度设置、进度广播。
+- [ ] 小步拆出定时器与启动流程。
+- [ ] 最后拆出高风险 hook、刷怪、PT、结算、奖励邮件。
 - [ ] 拆分测试：状态初始化 -> 活动开始 -> UI -> 刷怪 -> PT -> 结算 -> 奖励邮件。
 - [ ] 决定默认开关是否继续保持 true。
 
@@ -102,7 +116,7 @@ js_features.enable_luck_point_drop = true
 
 后续迁移要求：
 
-- [ ] 将 `df_game_r.js` 启动入口从旧内联函数切换到 `script/js/luck_point_drop.js`。
+- [x] 将 `df_game_r.js` 启动入口从旧内联函数切换到 `script/js/luck_point_drop.js`。
 - [ ] 确认 `g_luck_point_current_user` 生命周期是否覆盖所有掉落入口。
 - [ ] 测试不同 rarity 的幸运值变化。
 - [ ] 决定默认开关是否继续保持 true。
@@ -133,6 +147,7 @@ js_features.enable_lucky_online = false
 - [x] `online_reward` 保留旧入口 `enable_online_reward()`。
 - [x] 新增 `script/js/lucky_online.js` 兼容入口 `start_event_lucky_online_user()`。
 - [x] `lucky_online` 默认保持关闭，且不凭空实现抽奖/发奖逻辑。
+- [x] `startup_modules.js` 已接入 `online_reward` / `lucky_online` 开关调度。
 
 风险点：
 
@@ -142,8 +157,8 @@ js_features.enable_lucky_online = false
 
 后续迁移要求：
 
-- [ ] 将 `df_game_r.js` 启动入口从旧内联函数切换到 `script/js/online_reward.js`。
-- [ ] 将 `df_game_r.js` 启动入口从旧缺失函数切换到 `script/js/lucky_online.js`。
+- [x] 将 `df_game_r.js` 启动入口从旧内联函数切换到 `script/js/online_reward.js`。
+- [x] 将 `df_game_r.js` 启动入口从旧缺失函数切换到 `script/js/lucky_online.js`。
 - [ ] 确认 `lucky_online` 的真实来源或旧实现。
 - [ ] 奖励项配置化。
 - [ ] 增加每日/每账号限制。
@@ -152,12 +167,13 @@ js_features.enable_lucky_online = false
 
 ## 5. 掉落公告 / 掉落奖励
 
-状态：`[~] 已拆模块，默认关闭，待入口接入/待测`
+状态：`[~] 已拆模块，默认关闭，待专项测试`
 
 相关文件：
 
 ```text
 script/js/drop_announce.js
+script/js/startup_modules.js
 script/config.lua
 ```
 
@@ -172,10 +188,10 @@ js_features.enable_drop_announce = false
 - [x] 从 `df_game_r.js` 残留 `processing_data(...)` 逻辑拆出 `script/js/drop_announce.js`。
 - [x] 增加重复 hook 保护。
 - [x] 默认保持关闭。
+- [x] `startup_modules.js` 已按开关加载 `drop_announce`，供 `history_log` 复用处理函数。
 
 后续要求：
 
-- [ ] 接入 `df_game_r.js` 启动调度。
 - [ ] 确认公告触发点、物品 rarity 阈值、奖励逻辑。
 - [ ] 确认点券奖励范围是否继续使用 `50 ~ 888`。
 - [ ] 测试通过前保持默认关闭。
