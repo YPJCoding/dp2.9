@@ -84,19 +84,26 @@ script/js/return_user.js
 
 ### 2.6 启动调度辅助函数
 
-文件：`script/js/startup_helpers.js`
+文件：
+
+```text
+script/js/startup_helpers.js
+script/js/startup_modules.js
+```
 
 已处理：
 
-- 新增 `safeLoadModule(moduleName)`。
-- 新增 `safeFeature(featureName, enabled, runner)`。
-- 新增 `safeModuleFeature(featureName, enabled, moduleName, functionName, args)`。
-- 新增 `isFeatureEnabled(config, featureName, defaultValue)`。
+- `startup_helpers.js` 新增 `safeLoadModule(moduleName)`。
+- `startup_helpers.js` 新增 `safeFeature(featureName, enabled, runner)`。
+- `startup_helpers.js` 新增 `safeModuleFeature(featureName, enabled, moduleName, functionName, args)`。
+- `startup_helpers.js` 新增 `isFeatureEnabled(config, featureName, defaultValue)`。
+- `startup_modules.js` 新增 `startMigratedModules(cfg)` 集中启动器。
 
 用途：
 
 - 后续 `df_game_r.js` 入口瘦身时统一处理模块加载、函数缺失、启动异常。
 - 单个功能启动失败时只记录日志，不中断整个 Frida 启动。
+- `df_game_r.js` 后续只需加载 `startup_helpers.js` / `startup_modules.js` 并调用 `startMigratedModules(cfg)`，即可集中启动已拆分模块。
 
 状态：`[~] 辅助模块已新增，入口待接入`
 
@@ -127,21 +134,25 @@ script/js/return_user.js
 
 ```text
 script/js/startup_helpers.js
+script/js/startup_modules.js
 ```
 
-后续入口应逐步替换为：
+后续入口建议先替换为集中启动器：
 
 ```js
-safeModuleFeature('vip_login', cfg.enable_vip_login === true, 'vip_login', 'startVipLogin');
-safeModuleFeature('ranking', cfg.enable_ranking === true, 'ranking', 'startRanking');
-safeModuleFeature('history_log', cfg.enable_history_log !== false, 'history_log', 'startHistoryLog');
-safeModuleFeature('user_use_item_event', cfg.enable_history_log !== false, 'user_use_item_event', 'UserUseItemEvent');
-safeModuleFeature('emblem_fix', cfg.enable_emblem_fix !== false, 'emblem_fix', 'startEmblemFix');
-safeModuleFeature('user_inout', cfg.enable_user_inout_hook === true, 'user_inout', 'startUserInoutHook');
-safeModuleFeature('lucky_online', cfg.enable_lucky_online === true, 'lucky_online', 'startLuckyOnlineUserEvent');
-safeModuleFeature('online_reward', cfg.enable_online_reward === true, 'online_reward', 'startOnlineReward');
-safeModuleFeature('luck_point_drop', cfg.enable_luck_point_drop === true, 'luck_point_drop', 'startLuckPointDrop');
-safeModuleFeature('drop_announce', cfg.enable_drop_announce === true, 'drop_announce', 'startDropAnnounce');
+dp_load('startup_helpers');
+dp_load('startup_modules');
+startMigratedModules(cfg);
+```
+
+`startup_modules.js` 内部已经集中调度：
+
+```js
+startModuleFeature('history_log', cfg.enable_history_log !== false, 'history_log', 'startHistoryLog');
+startModuleFeature('user_inout', cfg.enable_user_inout_hook === true, 'user_inout', 'startUserInoutHook');
+startModuleFeature('lucky_online', cfg.enable_lucky_online === true, 'lucky_online', 'startLuckyOnlineUserEvent');
+startModuleFeature('online_reward', cfg.enable_online_reward === true, 'online_reward', 'startOnlineReward');
+startModuleFeature('luck_point_drop', cfg.enable_luck_point_drop === true, 'luck_point_drop', 'startLuckPointDrop');
 ```
 
 目标：
@@ -149,6 +160,7 @@ safeModuleFeature('drop_announce', cfg.enable_drop_announce === true, 'drop_anno
 - 函数不存在时只记日志，不中断整个 Frida 启动。
 - 某个功能失败时不影响其他功能。
 - 每个功能有明确启动日志。
+- 减少 `df_game_r.js` 中逐个手写模块加载和函数调用。
 
 状态：`[~] 辅助模块已实现，df_game_r.js 入口待接入`
 
@@ -202,7 +214,7 @@ safeModuleFeature('drop_announce', cfg.enable_drop_announce === true, 'drop_anno
 1. 在 `set function success` 日志后补 `}`。
 2. 删除文件后部原本用于闭合 `start()` 的孤立 `}`。
 3. 不删除任何业务函数，先只修作用域。
-4. 再逐步把入口调用切换到 `safeModuleFeature(...)`。
+4. 再逐步把入口调用切换到 `startMigratedModules(cfg)`。
 
 状态：`[!] 需专项小步修复，不建议整文件替换`
 
@@ -245,7 +257,7 @@ safeModuleFeature('drop_announce', cfg.enable_drop_announce === true, 'drop_anno
 
 ## 5. 后续优先级
 
-1. 给 `df_game_r.js` 的 `start()` 接入 `startup_helpers.js`。
+1. 给 `df_game_r.js` 的 `start()` 接入 `startup_helpers.js` 和 `startup_modules.js`。
 2. 确认 `start()` 的大括号结构，避免旧功能定义被意外包进 `start()` 内部。
 3. 逐步从 `df_game_r.js` 中删除已拆分模块的旧内联实现。
 4. 把怪物攻城拆成独立模块。
