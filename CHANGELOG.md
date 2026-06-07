@@ -48,6 +48,7 @@
 - Added luck point drop JS module: `script/js/luck_point_drop.js`.
 - Added random option JS module: `script/js/random_option.js`.
 - Added online reward JS module: `script/js/online_reward.js`.
+- Added lucky online compatibility JS module: `script/js/lucky_online.js`.
 - Added history log JS module: `script/js/history_log.js`.
 - Added batch item notify JS module: `script/js/batch_item_notify.js`.
 - Added user use item event JS module: `script/js/user_use_item_event.js`.
@@ -114,6 +115,7 @@
   - `script/js/luck_point_drop.js` was extracted from the old `enable_drop_use_luck_point()` implementation and adds duplicate attach/replace protection while preserving old compatibility aliases.
   - `script/js/random_option.js` was extracted from the old random-option inherit and auto-unseal implementations and adds duplicate hook protection while preserving old compatibility aliases.
   - `script/js/online_reward.js` was extracted from the old `enable_online_reward()` implementation and adds duplicate hook protection while preserving the old alias.
+  - `script/js/lucky_online.js` was added as a compatibility stub for the missing `start_event_lucky_online_user()` implementation; it does not implement random-online-player draw, cera, item, or mail rewards.
   - `script/js/history_log.js` was extracted from the old `hook_history_log()` implementation and adds duplicate hook protection while preserving the old alias.
   - `script/js/batch_item_notify.js` was extracted from the old batch item add UI notification helpers while preserving old compatibility aliases.
   - `script/js/user_use_item_event.js` was extracted from the old `UserUseItemEvent()` implementation and keeps only the previously active mount-transformer return-mail branch.
