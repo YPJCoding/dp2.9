@@ -15,7 +15,7 @@
 |---|---|---|---|---|
 | Frida 基础入口 | `df_game_r.js` | N/A | `[x]` | 已保留 `rpc.exports.init`、`setup()`、Lua/JS 桥接。 |
 | Frida 回调发物品 | `df_game_r.lua` | `js_features.enable_batch_item_add` | `[x]` | Lua 侧已加开关、账号、物品、在线用户校验。 |
-| Frida 启动调度辅助 | `script/js/startup_helpers.js` | N/A | `[~]` | 已新增 `safeLoadModule` / `safeFeature` / `safeModuleFeature`，入口待接入。 |
+| Frida 启动调度辅助 | `script/js/startup_helpers.js` | N/A | `[~]` | 已新增 `safeLoadModule` / `safeFeature` / `safeModuleFeature` / `resolveStartupFunction`，入口待接入。 |
 | 已迁移模块集中启动器 | `script/js/startup_modules.js` | `js_features.*` | `[~]` | 已新增 `startMigratedModules(cfg)`，用于集中启动已拆分模块；已补齐 patches 和 account_cargo 调度，入口待接入。 |
 | 绝望之塔修复 | `df_game_r.js` / Lua `legacy_patches.lua` | `enable_tod_fix` / `legacy_patches.*` | `[~]` | 金币/门票类入口已迁移；跳过 UserAPC 等细节仍需实测确认。 |
 | 时装镶嵌修复 | `script/js/emblem_fix.js` | `enable_emblem_fix` | `[~]` | 已从旧 `fix_use_emblem()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
@@ -60,6 +60,11 @@
 | 高风险 JS 默认开关策略 | `[!]` | 当前部分高风险功能默认为 true，如怪物攻城、幸运点掉落、排行榜、时装潜能、VIP 登录。上线前需按测试结果决定是否保持开启。 |
 
 ## 3. 本轮已修复的迁移断点
+
+- `script/js/startup_helpers.js`
+  - 新增 `resolveStartupFunction(functionName)`。
+  - `safeModuleFeature(...)` 现在通过 `resolveStartupFunction(...)` 查找启动函数。
+  - 函数查找会依次尝试 `globalThis`、当前上下文和 `eval(functionName)`，降低 Frida 运行时作用域差异导致的误判缺失。
 
 - `script/js/startup_modules.js`
   - 新增 `startMigratedModules(cfg)` 集中启动器。
