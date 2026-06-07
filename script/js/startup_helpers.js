@@ -39,6 +39,29 @@ function safeLoadModule(moduleName) {
   }
 }
 
+function resolveStartupFunction(functionName) {
+  if (!functionName) {
+    return null;
+  }
+
+  if (typeof globalThis !== 'undefined' && typeof globalThis[functionName] === 'function') {
+    return globalThis[functionName];
+  }
+
+  if (typeof this !== 'undefined' && typeof this[functionName] === 'function') {
+    return this[functionName];
+  }
+
+  try {
+    var fn = eval(functionName);
+    if (typeof fn === 'function') {
+      return fn;
+    }
+  } catch (e) {}
+
+  return null;
+}
+
 function safeFeature(featureName, enabled, runner) {
   if (enabled !== true) {
     startupLog('skip feature=' + featureName);
@@ -66,7 +89,7 @@ function safeModuleFeature(featureName, enabled, moduleName, functionName, args)
       safeLoadModule(moduleName);
     }
 
-    var fn = (typeof globalThis !== 'undefined') ? globalThis[functionName] : null;
+    var fn = resolveStartupFunction(functionName);
     if (typeof fn !== 'function') {
       throw new Error('missing function ' + functionName);
     }
