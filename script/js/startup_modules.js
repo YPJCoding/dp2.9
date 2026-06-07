@@ -87,6 +87,13 @@ function startModuleFeature(featureName, enabled, moduleName, functionName, args
   return false;
 }
 
+function anyPatchFeatureEnabled(cfg) {
+  return getFeatureFlag(cfg, 'enable_create_character_unlimit', true) ||
+    getFeatureFlag(cfg, 'enable_strengthen_refresh', true) ||
+    getFeatureFlag(cfg, 'enable_dark_knight_skill_fix', true) ||
+    getFeatureFlag(cfg, 'enable_mobile_auth', false);
+}
+
 function startMigratedModules(cfg) {
   cfg = cfg || {};
 
@@ -102,12 +109,20 @@ function startMigratedModules(cfg) {
   startModuleFeature('random_option_inherit', getFeatureFlag(cfg, 'enable_random_option_inherit', false), 'random_option', 'startRandomOptionInherit');
   startModuleFeature('auto_unseal_random_option', getFeatureFlag(cfg, 'enable_auto_unseal', false), 'random_option', 'startAutoUnsealRandomOptionEquipment');
 
+  // 已拆分的 patch 模块。保持旧默认：创建角色限制、强化刷新、黑武技能栏默认开启，成长契约默认关闭。
+  loadModuleOnly('patches', anyPatchFeatureEnabled(cfg), 'patches');
+  startModuleFeature('create_character_unlimit', getFeatureFlag(cfg, 'enable_create_character_unlimit', true), 'patches', 'disableCreateCharLimit');
+  startModuleFeature('strengthen_refresh', getFeatureFlag(cfg, 'enable_strengthen_refresh', true), 'patches', 'enableStrengthenRefresh');
+  startModuleFeature('dark_knight_skill_fix', getFeatureFlag(cfg, 'enable_dark_knight_skill_fix', true), 'patches', 'enableComboSkillFix');
+  startModuleFeature('mobile_auth', getFeatureFlag(cfg, 'enable_mobile_auth', false), 'patches', 'disableMobileAuth');
+
   // 通用历史日志分发。若 drop_announce/random_option 已加载，会按模块内函数做可选联动。
   startModuleFeature('history_log', getFeatureFlag(cfg, 'enable_history_log', true), 'history_log', 'startHistoryLog');
 
   // 其余已拆分功能。
   startModuleFeature('emblem_fix', getFeatureFlag(cfg, 'enable_emblem_fix', true), 'emblem_fix', 'startEmblemFix');
   startModuleFeature('user_inout', getFeatureFlag(cfg, 'enable_user_inout_hook', true), 'user_inout', 'startUserInoutHook');
+  startModuleFeature('account_cargo', getFeatureFlag(cfg, 'enable_account_cargo', false), 'account_cargo', 'setMaxCAccountCargoSolt', [128]);
   startModuleFeature('online_reward', getFeatureFlag(cfg, 'enable_online_reward', false), 'online_reward', 'startOnlineReward');
   startModuleFeature('lucky_online', getFeatureFlag(cfg, 'enable_lucky_online', false), 'lucky_online', 'startLuckyOnlineUserEvent');
   startModuleFeature('luck_point_drop', getFeatureFlag(cfg, 'enable_luck_point_drop', true), 'luck_point_drop', 'startLuckPointDrop');
