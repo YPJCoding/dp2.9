@@ -6,6 +6,8 @@
 // - 单个功能启动失败时不影响其他功能。
 // - 后续 df_game_r.js 入口瘦身时逐步替换直接调用。
 
+var g_startup_loaded_modules = (typeof g_startup_loaded_modules !== 'undefined') ? g_startup_loaded_modules : {};
+
 function startupLog(message) {
   try {
     console.log('[' + get_timestamp() + '] [frida] [startup] ' + message);
@@ -25,12 +27,22 @@ function isFeatureEnabled(config, featureName, defaultValue) {
 }
 
 function safeLoadModule(moduleName) {
+  if (!moduleName) {
+    return false;
+  }
+
+  if (g_startup_loaded_modules[moduleName] === true) {
+    startupLog('module already loaded=' + moduleName);
+    return true;
+  }
+
   try {
     if (typeof dp_load !== 'function') {
       startupLog('missing dp_load, skip module=' + moduleName);
       return false;
     }
     dp_load(moduleName);
+    g_startup_loaded_modules[moduleName] = true;
     startupLog('loaded module=' + moduleName);
     return true;
   } catch (e) {
@@ -85,8 +97,8 @@ function safeFeature(featureName, enabled, runner) {
 
 function safeModuleFeature(featureName, enabled, moduleName, functionName, args) {
   return safeFeature(featureName, enabled, function () {
-    if (moduleName) {
-      safeLoadModule(moduleName);
+    if (moduleName && !safeLoadModule(moduleName)) {
+      throw new Error('load module failed ' + moduleName);
     }
 
     var fn = resolveStartupFunction(functionName);
