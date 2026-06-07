@@ -109,7 +109,14 @@ js_features.enable_luck_point_drop = true
 
 ## 4. 在线奖励 / 幸运在线玩家
 
-状态：`[!] 已有旧逻辑，默认关闭，待专项迁移`
+状态：`[~] online_reward 已拆模块，lucky_online 源实现待确认，默认关闭`
+
+相关文件：
+
+```text
+script/js/online_reward.js
+script/config.lua
+```
 
 当前配置：
 
@@ -118,15 +125,23 @@ js_features.enable_online_reward = false
 js_features.enable_lucky_online = false
 ```
 
+已完成：
+
+- [x] 从旧 `enable_online_reward()` 拆出 `script/js/online_reward.js`。
+- [x] 增加重复 hook 保护。
+- [x] 保留旧入口 `enable_online_reward()`。
+- [x] 默认保持关闭。
+
 风险点：
 
-- 可能发点券、发道具或邮件。
-- 依赖在线玩家表和定时器。
+- `online_reward` 会按在线时长发点券。
+- `lucky_online` 可能发点券、发道具或邮件，但当前未找到明确旧函数体。
 - 与经济系统强相关。
 
 后续迁移要求：
 
-- [ ] 拆为独立模块。
+- [ ] 将 `df_game_r.js` 启动入口从旧内联函数切换到 `script/js/online_reward.js`。
+- [ ] 确认 `lucky_online` 的真实来源或旧实现。
 - [ ] 奖励项配置化。
 - [ ] 增加每日/每账号限制。
 - [ ] 增加日志和防重复发放。
