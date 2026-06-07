@@ -37,7 +37,7 @@ js_features.enable_account_cargo = false
 
 ## 2. 怪物攻城 `village_attack`
 
-状态：`[!] 已新增启动适配模块，核心实现仍在 df_game_r.js，默认开启但未专项验证`
+状态：`[!] 已接入 startup_modules 启动适配，核心实现仍在 df_game_r.js，默认开启但未专项验证`
 
 相关文件：
 
@@ -58,8 +58,16 @@ js_features.enable_village_attack = true
 
 - [x] 新增 `script/js/village_attack.js` 启动适配模块。
 - [x] `village_attack.js` 增加启动请求保护，避免适配入口被重复调用。
-- [x] `startup_modules.js` 已按 `enable_village_attack` 加载 `village_attack` 模块。
+- [x] `village_attack.js` 会对旧 `start_event_villageattack` 安装 guard，避免过渡期双路径重复启动。
+- [x] `startup_modules.js` 已按 `enable_village_attack` 调用 `startVillageAttack()`。
 - [x] 暂不迁移奖励、刷怪、UI 包、DB 结算等核心逻辑，避免一次性高风险变更。
+
+过渡期说明：
+
+- `df_game_r.js` 内仍保留旧的 `api_scheduleOnMainThread(start_event_villageattack, null)` 调度。
+- `startup_modules.js` 已经调用 `startVillageAttack()`。
+- 为避免双启动，`village_attack.js` 会在模块加载时包装旧 `start_event_villageattack`，后续重复请求只记录 skip 日志。
+- 下一步确认启动日志稳定后，再删除 `df_game_r.js` 中的旧直接调度。
 
 风险点：
 
@@ -72,7 +80,8 @@ js_features.enable_village_attack = true
 
 - [x] 建立 `script/js/village_attack.js` 迁移承接文件。
 - [x] 增加启动适配层的重复启动保护。
-- [ ] 将 `df_game_r.js` 的直接 `start_event_villageattack` 调度切换到 `startup_modules.js` 的 `startVillageAttack()`。
+- [x] 将 `startup_modules.js` 接入 `startVillageAttack()`。
+- [ ] 删除 `df_game_r.js` 中旧的 `api_scheduleOnMainThread(start_event_villageattack, null)` 直接调度。
 - [ ] 增加 DB 未就绪保护。
 - [ ] 小步拆出状态与常量：`villageAttackEventInfo`、`VILLAGEATTACK_STATE_*`、`EVENT_VILLAGEATTACK_*`。
 - [ ] 小步拆出纯状态函数：状态重置、剩余时间、难度设置、进度广播。
