@@ -53,6 +53,7 @@
 - Added batch item notify JS module: `script/js/batch_item_notify.js`.
 - Added user use item event JS module: `script/js/user_use_item_event.js`.
 - Added user inout compatibility JS module: `script/js/user_inout.js`.
+- Added migrated JS startup module: `script/js/startup_modules.js`.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -97,7 +98,7 @@
   - menu only shows migrated safe commands and hides high-risk unavailable GM commands.
 - Added `command_help` config and bootstrap wiring:
   - `features.enable_command_help = true` by default.
-  - `//getq`, `//clearq`, `//zhiye`, `//trans`, and `//pvp` only show safe help text.
+  - `//getq`, `//clearq`, `//zhiye`, and `//pvp` only show safe help text.
   - legacy high-risk subcommands such as forced quest accept, job/grow/wake changes, and PVP SQL updates remain unavailable.
 - Added `//view` item query help and legacy no-space query compatibility:
   - `//view` shows query usage.
@@ -105,6 +106,7 @@
   - `//viewname <id>` and `//viewname<id>` both query item names.
 - Hardened Frida `additem` callback to check `js_features.enable_batch_item_add`, validate account and item IDs, and require the target user to be online before adding items.
 - Continued Frida migration hardening:
+  - `script/js/startup_modules.js` now provides `startMigratedModules(cfg)` to centralize startup for already split JS modules.
   - `script/js/ranking.js` now waits/retries when DB handles are not ready and falls back when guild-name helpers are unavailable.
   - `script/js/vip_login.js` now uses the correct broadcast helper name, adds duplicate hook protection, keeps the old `vip_Login()` alias, and adds compatibility for the old lowercase broadcast helper name.
   - `script/js/patches.js` now guards duplicate patch startup and restores the old strengthen-refresh user/slot argument behavior.
