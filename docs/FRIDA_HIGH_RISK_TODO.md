@@ -69,11 +69,12 @@ js_features.enable_village_attack = true
 
 ## 3. 幸运点掉落 `luck_point_drop`
 
-状态：`[!] 已有实现，默认开启，高风险待测`
+状态：`[~] 已拆模块，默认开启，高风险待入口切换/待测`
 
 相关文件：
 
 ```text
+script/js/luck_point_drop.js
 df_game_r.js
 script/config.lua
 ```
@@ -84,6 +85,14 @@ script/config.lua
 js_features.enable_luck_point_drop = true
 ```
 
+已完成：
+
+- [x] 从旧 `enable_drop_use_luck_point()` 拆出 `script/js/luck_point_drop.js`。
+- [x] 增加重复启动保护，避免重复 attach/replace。
+- [x] 保留旧入口 `enable_drop_use_luck_point()`。
+- [x] 保留命运硬币修改幸运点入口 `use_ftcoin_change_luck_point()`。
+- [x] 幸运点写入统一 clamp 到 `1 ~ 99999`。
+
 风险点：
 
 - 会 replace `CLuckPoint::GetItemRarity`。
@@ -93,9 +102,8 @@ js_features.enable_luck_point_drop = true
 
 后续迁移要求：
 
-- [ ] 增加重复 replace 保护。
-- [ ] 确认 `cur_luck_user` 生命周期是否覆盖所有掉落入口。
-- [ ] 确认幸运值上下限，避免负数或异常增长。
+- [ ] 将 `df_game_r.js` 启动入口从旧内联函数切换到 `script/js/luck_point_drop.js`。
+- [ ] 确认 `g_luck_point_current_user` 生命周期是否覆盖所有掉落入口。
 - [ ] 测试不同 rarity 的幸运值变化。
 - [ ] 决定默认开关是否继续保持 true。
 
@@ -126,7 +134,14 @@ js_features.enable_lucky_online = false
 
 ## 5. 掉落公告 / 掉落奖励
 
-状态：`[ ] 源实现未找到，默认关闭`
+状态：`[~] 已拆模块，默认关闭，待入口接入/待测`
+
+相关文件：
+
+```text
+script/js/drop_announce.js
+script/config.lua
+```
 
 当前配置：
 
@@ -134,8 +149,15 @@ js_features.enable_lucky_online = false
 js_features.enable_drop_announce = false
 ```
 
+已完成：
+
+- [x] 从 `df_game_r.js` 残留 `processing_data(...)` 逻辑拆出 `script/js/drop_announce.js`。
+- [x] 增加重复 hook 保护。
+- [x] 默认保持关闭。
+
 后续要求：
 
-- [ ] 找到真实旧实现来源。
+- [ ] 接入 `df_game_r.js` 启动调度。
 - [ ] 确认公告触发点、物品 rarity 阈值、奖励逻辑。
-- [ ] 未找到来源前不得凭空实现。
+- [ ] 确认点券奖励范围是否继续使用 `50 ~ 888`。
+- [ ] 测试通过前保持默认关闭。
