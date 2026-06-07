@@ -82,28 +82,39 @@ script/js/return_user.js
 
 状态：`[x] 已处理`
 
+### 2.6 启动调度辅助函数
+
+文件：`script/js/startup_helpers.js`
+
+已处理：
+
+- 新增 `safeLoadModule(moduleName)`。
+- 新增 `safeFeature(featureName, enabled, runner)`。
+- 新增 `safeModuleFeature(featureName, enabled, moduleName, functionName, args)`。
+- 新增 `isFeatureEnabled(config, featureName, defaultValue)`。
+
+用途：
+
+- 后续 `df_game_r.js` 入口瘦身时统一处理模块加载、函数缺失、启动异常。
+- 单个功能启动失败时只记录日志，不中断整个 Frida 启动。
+
+状态：`[~] 辅助模块已新增，入口待接入`
+
 ## 3. 当前仍需处理的启动调度问题
 
 ### 3.1 `start()` 需要统一安全调用层
 
-建议后续把类似逻辑集中封装：
+辅助模块已新增：
+
+```text
+script/js/startup_helpers.js
+```
+
+后续入口应逐步替换为：
 
 ```js
-function safeFeature(name, enabled, fn) {
-  if (!enabled) return false;
-  if (typeof fn !== 'function') {
-    log('[feature] missing ' + name);
-    return false;
-  }
-  try {
-    fn();
-    log('[feature] started ' + name);
-    return true;
-  } catch (e) {
-    log('[feature] failed ' + name + ': ' + e.message);
-    return false;
-  }
-}
+safeModuleFeature('vip_login', cfg.enable_vip_login === true, 'vip_login', 'startVipLogin');
+safeModuleFeature('ranking', cfg.enable_ranking === true, 'ranking', 'startRanking');
 ```
 
 目标：
@@ -112,7 +123,7 @@ function safeFeature(name, enabled, fn) {
 - 某个功能失败时不影响其他功能。
 - 每个功能有明确启动日志。
 
-状态：`[ ] 待实现`
+状态：`[~] 辅助模块已实现，df_game_r.js 入口待接入`
 
 ### 3.2 `init_db()` 应早于 DB 依赖功能
 
@@ -145,6 +156,21 @@ function safeFeature(name, enabled, fn) {
 - 入口文件瘦身时删除旧内联 `vip_Login()` 实现，统一使用 `script/js/vip_login.js`。
 
 状态：`[~] 已缓解，待入口瘦身`
+
+### 3.4 `start()` 大括号结构需专项修复
+
+当前观察到：
+
+- `start()` 在 `set function success` 日志后未立即闭合。
+- 后续旧功能定义可能被包进 `start()` 内部。
+
+风险：
+
+- 旧函数定义作用域异常。
+- 新模块函数可能被旧同名函数覆盖。
+- 入口瘦身时容易误删或误包代码。
+
+状态：`[!] 需专项小步修复，不建议整文件替换`
 
 ## 4. 不建议现在直接大改的部分
 
@@ -185,7 +211,7 @@ function safeFeature(name, enabled, fn) {
 
 ## 5. 后续优先级
 
-1. 给 `df_game_r.js` 的 `start()` 增加统一 `safeFeature` / `safeLoadModule` 调度层。
+1. 给 `df_game_r.js` 的 `start()` 接入 `startup_helpers.js`。
 2. 确认 `start()` 的大括号结构，避免旧功能定义被意外包进 `start()` 内部。
 3. 逐步从 `df_game_r.js` 中删除已拆分模块的旧内联实现。
 4. 把怪物攻城拆成独立模块。
