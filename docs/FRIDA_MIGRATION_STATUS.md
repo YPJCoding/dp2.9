@@ -34,13 +34,14 @@
 | 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块；已补参数校验、重复应用保护和旧入口 `set_return_user()` 兼容。 |
 | VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名、旧大小写函数名兼容和重复 hook 保护。 |
 | 怪物攻城 | `df_game_r.js` | `enable_village_attack=true` | `[!]` | 大型系统已存在于 `df_game_r.js`，但依赖 DB、timer、UI 包、奖励邮件；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
+| 掉落公告 / 掉落奖励 | `script/js/drop_announce.js` | `enable_drop_announce=false` | `[!]` | 已从 `df_game_r.js` 残留 `processing_data(...)` 拆出独立模块，默认关闭；会全服公告并发点券，需专项测试。 |
 | 批量物品 UI 通知 | `df_game_r.js` | `enable_batch_item_add=true` | `[~]` | 基础函数存在，Lua 回调发物品侧已加固；UI 通知仍需实测。 |
 
 ## 2. 当前缺口 / 未完成项
 
 | 功能 | 状态 | 说明 |
 |---|---|---|
-| 掉落公告 / 掉落奖励 | `[ ]` | 当前仓库未找到 `drop_announce`、`startDropAnnounce` 或明确等价实现；`enable_drop_announce` 已改为默认 `false`，找到真实来源后再迁移。 |
+| 掉落公告入口接入 | `[~]` | `drop_announce.js` 已新增，但入口调度仍需接入 `js_features.enable_drop_announce`，默认保持关闭。 |
 | frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
 | `df_game_r.js` 入口瘦身 | `[~]` | 当前 `df_game_r.js` 内仍混有大段旧功能和部分拆分模块的重复代码。后续应继续拆分成 `script/js/*.js`，避免入口文件过大。 |
 | `start()` 调度一致性 | `[~]` | 已新增 `docs/FRIDA_STARTUP_AUDIT.md` 记录调度风险和后续方案；当前已先做单点缓解，尚未全量重构入口。 |
@@ -73,6 +74,11 @@
   - 增加重复应用保护。
   - 增加旧入口 `set_return_user()` 兼容。
 
+- `script/js/drop_announce.js`
+  - 从 `df_game_r.js` 残留 `processing_data(...)` 逻辑拆出独立模块。
+  - 增加重复 hook 保护。
+  - 默认通过 `enable_drop_announce=false` 保持关闭。
+
 - `script/config.lua`
   - `enable_drop_announce` 改为默认 `false`。
   - 注释标记该功能源实现未找到，待补齐后再开启。
@@ -90,7 +96,7 @@
 优先级建议：
 
 1. 继续拆分 `df_game_r.js` 中剩余的大功能到 `script/js/*.js`。
-2. 补齐 `drop_announce` 的真实源实现；未找到来源前不要凭空实现。
+2. 接入 `drop_announce.js` 到 `df_game_r.js` 启动调度，但默认保持关闭。
 3. 对 `start()` 做统一安全调度封装，避免函数不存在、重复 hook、DB 未初始化导致启动失败。
 4. 将高风险默认 true 的 JS 功能逐项确认是否应保持开启。
 5. 最后再做测试服验证和 Bug 修复。
