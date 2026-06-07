@@ -20,7 +20,7 @@
 | 时装镶嵌修复 | `script/js/emblem_fix.js` | `enable_emblem_fix` | `[~]` | 已从 `df_game_r.js` 旧 `fix_use_emblem()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
 | 历史日志追踪 | `script/js/history_log.js` | `enable_history_log` | `[~]` | 已从旧 `hook_history_log()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
 | 角色使用道具事件 | `script/js/user_use_item_event.js` | `enable_history_log` | `[~]` | 已从旧 `UserUseItemEvent()` 拆出独立模块，仅保留原本实际启用的坐骑变身器返还邮件逻辑；入口仍待切换。 |
-| 上下线处理 | `df_game_r.js` | `enable_user_inout_hook` | `[~]` | 旧 `hook_user_inout_game_world()` 已保留，包含排行榜/怪物攻城 UI 相关逻辑，需实测。 |
+| 上下线处理 | `script/js/user_inout.js` | `enable_user_inout_hook=true` | `[~]` | 当前仓库和旧仓库未找到真实 `hook_user_inout_game_world()` 实现；已补兼容桩避免 ReferenceError，不凭空实现业务逻辑。 |
 | 在线奖励 | `script/js/online_reward.js` | `enable_online_reward=false` | `[!]` | 已从旧 `enable_online_reward()` 拆出独立模块，增加重复 hook 保护；会发点券，默认关闭，入口仍待切换。 |
 | 随机属性继承 / 自动解封 | `script/js/random_option.js` | `enable_random_option_inherit=false` / `enable_auto_unseal=false` | `[~]` | 已从旧 `change_random_option_inherit()` 和 `auto_unseal_random_option_equipment()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
 | 幸运点影响掉落 | `script/js/luck_point_drop.js` | `enable_luck_point_drop=true` | `[!]` | 已从旧 `enable_drop_use_luck_point()` 拆出独立模块，增加重复启动保护；会替换爆率计算函数，高风险，入口仍待切换。 |
@@ -46,6 +46,7 @@
 | 时装镶嵌入口切换 | `[~]` | `emblem_fix.js` 已新增，但入口调度仍需从旧内联 `fix_use_emblem()` 切换为 `dp_load('emblem_fix'); startEmblemFix()`。 |
 | 历史日志入口切换 | `[~]` | `history_log.js` 已新增，但入口调度仍需从旧内联 `hook_history_log()` 切换为 `dp_load('history_log'); startHistoryLog()`。 |
 | 角色使用道具事件入口切换 | `[~]` | `user_use_item_event.js` 已新增，但入口调度仍需和 `history_log.js` 一起加载。 |
+| 上下线处理真实实现 | `[ ]` | `user_inout.js` 当前只是兼容桩；真实 `hook_user_inout_game_world()` 未在当前仓库或旧仓库中找到。 |
 | 在线奖励入口切换 | `[~]` | `online_reward.js` 已新增，但入口调度仍需从旧内联 `enable_online_reward()` 切换为 `dp_load('online_reward'); startOnlineReward()`。 |
 | 随机属性入口切换 | `[~]` | `random_option.js` 已新增，但入口调度仍需从旧内联函数切换为 `startRandomOptionInherit()` / `startAutoUnsealRandomOptionEquipment()`。 |
 | 幸运点掉落入口切换 | `[~]` | `luck_point_drop.js` 已新增，但入口调度仍需从旧内联 `enable_drop_use_luck_point()` 切换为 `dp_load('luck_point_drop'); startLuckPointDrop()`。 |
@@ -63,6 +64,12 @@
   - 新增启动调度辅助函数。
   - 提供 `safeLoadModule`、`safeFeature`、`safeModuleFeature`、`isFeatureEnabled`。
   - 后续用于 `df_game_r.js` 入口瘦身和安全调度接入。
+
+- `script/js/user_inout.js`
+  - 新增 `hook_user_inout_game_world()` 兼容入口。
+  - 当前仓库和旧仓库均未找到真实实现，因此只做保守兼容桩。
+  - 避免 `enable_user_inout_hook=true` 时入口因为函数不存在直接报错。
+  - 不凭空实现排行榜刷新、怪物攻城 UI、幸运点等业务逻辑。
 
 - `script/js/history_log.js`
   - 从旧 `hook_history_log()` 逻辑拆出独立模块。
@@ -149,7 +156,7 @@
 
 1. 接入 `startup_helpers.js` 到 `df_game_r.js`。
 2. 继续拆分 `df_game_r.js` 中剩余的大功能到 `script/js/*.js`。
-3. 接入 `history_log.js`、`user_use_item_event.js`、`batch_item_notify.js`、`online_reward.js`、`emblem_fix.js`、`random_option.js`、`luck_point_drop.js` 和 `drop_announce.js` 到 `df_game_r.js` 启动调度。
+3. 接入 `history_log.js`、`user_use_item_event.js`、`user_inout.js`、`batch_item_notify.js`、`online_reward.js`、`emblem_fix.js`、`random_option.js`、`luck_point_drop.js` 和 `drop_announce.js` 到 `df_game_r.js` 启动调度。
 4. 对 `start()` 做统一安全调度封装，避免函数不存在、重复 hook、DB 未初始化导致启动失败。
 5. 将高风险默认 true 的 JS 功能逐项确认是否应保持开启。
 6. 最后再做测试服验证和 Bug 修复。
