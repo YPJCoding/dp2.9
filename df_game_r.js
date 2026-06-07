@@ -2930,62 +2930,13 @@ function start() {
 	load_config('/dp2/frida/frida_config.json');
 	const cfg = (global_config && global_config.features) ? global_config.features : {};
 
-	// 绝望之塔金币修复
+	// 绝望之塔金币修复：仍保留在入口内，后续再专项拆分。
 	if (cfg.enable_tod_fix !== false) { fix_TOD(true); }
 
-	// 时装镶嵌修复
-	if (cfg.enable_emblem_fix !== false) { fix_use_emblem(); }
-
-	// 历史日志追踪
-	if (cfg.enable_history_log !== false) { hook_history_log(); }
-
-	// 上下线处理（幸运点 + 怪物攻城 UI）
-	if (cfg.enable_user_inout_hook === true) { hook_user_inout_game_world(); }
-
-	// 在线奖励（发点券）
-	if (cfg.enable_online_reward === true) { enable_online_reward(); }
-
-	// 魔法封印属性转换时继承
-	if (cfg.enable_random_option_inherit === true) { change_random_option_inherit(); }
-
-	// 魔法封印自动解封
-	if (cfg.enable_auto_unseal === true) { auto_unseal_random_option_equipment(); }
-
-	// 角色幸运值加成装备爆率
-	if (cfg.enable_luck_point_drop === true) { enable_drop_use_luck_point(); }
-
-	// 账号金库扩展至 128 格
-	if (cfg.enable_account_cargo === true) { dp_load('account_cargo'); setMaxCAccountCargoSolt(128); }
-
-	// 加载独立修补程序模块（始终加载，各功能按开关启用）
-	dp_load('patches');
-
-	// 解除每日创建角色数量限制
-	if (cfg.enable_create_character_unlimit !== false) { disableCreateCharLimit(); }
-
-	// +13 以上强化券自动刷新物品栏
-	if (cfg.enable_strengthen_refresh !== false) { enableStrengthenRefresh(); }
-
-	// 黑暗武士技能栏修复
-	if (cfg.enable_dark_knight_skill_fix !== false) { enableComboSkillFix(); }
-
-	// 取消新账号送成长契约
-	if (cfg.enable_mobile_auth === true) { disableMobileAuth(); }
-
-	// 抽取幸运在线玩家活动
-	if (cfg.enable_lucky_online === true) { start_event_lucky_online_user(); }
-
-	// 战力排行榜
-	if (cfg.enable_ranking === true) { dp_load('ranking'); startRanking(); }
-
-	// 时装潜能
-	if (cfg.enable_hidden_option === true) { dp_load('hidden_option'); startHiddenOption(); }
-
-	// 回归勇士
-	if (cfg.enable_return_user === true) { dp_load('return_user'); setReturnUser(15); }
-
-	// VIP 登录公告
-	if (cfg.enable_vip_login === true) { dp_load('vip_login'); startVipLogin(); }
+	// 已拆分模块集中启动：统一处理模块加载、函数缺失、重复加载和单功能异常。
+	dp_load('startup_helpers');
+	dp_load('startup_modules');
+	startMigratedModules(cfg);
 
 	// 初始化数据库
 	api_scheduleOnMainThread(init_db, null);
@@ -2993,13 +2944,11 @@ function start() {
 	// 挂接消息分发线程
 	hook_TimerDispatcher_dispatch();
 
-	// 怪物攻城活动
+	// 怪物攻城活动：大型旧逻辑仍保留在入口内，后续再专项拆分。
 	if (cfg.enable_village_attack === true) { api_scheduleOnMainThread(start_event_villageattack, null); }
 
-	// VIP 登录公告（依赖 enable_user_inout_hook）
-	if (cfg.enable_vip_login === true) { vip_Login(); }
-
 	console.log('[' + get_timestamp() + '] [frida] [info] ----------------------- set function success ------------------------');
+}
 
 // ===== Feature: Return User (回归勇士) =====
 
@@ -3221,7 +3170,6 @@ function SendItemWindowNotification(user, item_list) {
 
 // Bridge: Frida Integration
 // dp2_resolver, frida_main, frida_handler, rpc.exports
-}
 
 
 //============================================= dp集成frida =============================================
