@@ -35,7 +35,7 @@
 | VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名、旧大小写函数名兼容和重复 hook 保护。 |
 | 怪物攻城 | `df_game_r.js` | `enable_village_attack=true` | `[!]` | 大型系统已存在于 `df_game_r.js`，但依赖 DB、timer、UI 包、奖励邮件；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
 | 掉落公告 / 掉落奖励 | `script/js/drop_announce.js` | `enable_drop_announce=false` | `[!]` | 已从 `df_game_r.js` 残留 `processing_data(...)` 拆出独立模块，默认关闭；会全服公告并发点券，需专项测试。 |
-| 批量物品 UI 通知 | `df_game_r.js` | `enable_batch_item_add=true` | `[~]` | 基础函数存在，Lua 回调发物品侧已加固；UI 通知仍需实测。 |
+| 批量物品 UI 通知 | `script/js/batch_item_notify.js` | `enable_batch_item_add=true` | `[~]` | 已从旧 `api_CUser_Add_Item_list()` / `SendItemWindowNotification()` 拆出独立模块；Lua 回调发物品侧已加固，入口仍待切换。 |
 
 ## 2. 当前缺口 / 未完成项
 
@@ -48,6 +48,7 @@
 | 随机属性入口切换 | `[~]` | `random_option.js` 已新增，但入口调度仍需从旧内联函数切换为 `startRandomOptionInherit()` / `startAutoUnsealRandomOptionEquipment()`。 |
 | 幸运点掉落入口切换 | `[~]` | `luck_point_drop.js` 已新增，但入口调度仍需从旧内联 `enable_drop_use_luck_point()` 切换为 `dp_load('luck_point_drop'); startLuckPointDrop()`。 |
 | 掉落公告入口接入 | `[~]` | `drop_announce.js` 已新增，但入口调度仍需接入 `js_features.enable_drop_announce`，默认保持关闭。 |
+| 批量物品 UI 通知入口切换 | `[~]` | `batch_item_notify.js` 已新增，但入口调度仍需切换旧内联函数。 |
 | 幸运在线玩家实现 | `[ ]` | `enable_lucky_online=false` 已保持关闭，但当前仓库和旧仓库未找到明确函数体，需继续确认真实来源。 |
 | frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
 | `df_game_r.js` 入口瘦身 | `[~]` | 当前 `df_game_r.js` 内仍混有大段旧功能和部分拆分模块的重复代码。后续应继续拆分成 `script/js/*.js`，避免入口文件过大。 |
@@ -66,6 +67,11 @@
   - 增加重复 hook 保护。
   - 保留旧入口 `hook_history_log()` 兼容。
   - 可选联动 `drop_announce.js` 与 `random_option.js`，但仍由入口配置决定是否加载相关模块。
+
+- `script/js/batch_item_notify.js`
+  - 从旧 `api_CUser_Add_Item_list()` 和 `SendItemWindowNotification()` 逻辑拆出独立模块。
+  - 保留旧入口名兼容。
+  - 对非法 item_id/count 做跳过日志。
 
 - `script/js/online_reward.js`
   - 从旧 `enable_online_reward()` 逻辑拆出独立模块。
@@ -136,7 +142,7 @@
 
 1. 接入 `startup_helpers.js` 到 `df_game_r.js`。
 2. 继续拆分 `df_game_r.js` 中剩余的大功能到 `script/js/*.js`。
-3. 接入 `history_log.js`、`online_reward.js`、`emblem_fix.js`、`random_option.js`、`luck_point_drop.js` 和 `drop_announce.js` 到 `df_game_r.js` 启动调度。
+3. 接入 `history_log.js`、`batch_item_notify.js`、`online_reward.js`、`emblem_fix.js`、`random_option.js`、`luck_point_drop.js` 和 `drop_announce.js` 到 `df_game_r.js` 启动调度。
 4. 对 `start()` 做统一安全调度封装，避免函数不存在、重复 hook、DB 未初始化导致启动失败。
 5. 将高风险默认 true 的 JS 功能逐项确认是否应保持开启。
 6. 最后再做测试服验证和 Bug 修复。
