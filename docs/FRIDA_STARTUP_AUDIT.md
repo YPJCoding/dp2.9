@@ -98,6 +98,8 @@ script/js/startup_modules.js
 - `startup_helpers.js` 新增 `safeModuleFeature(featureName, enabled, moduleName, functionName, args)`。
 - `startup_helpers.js` 新增 `isFeatureEnabled(config, featureName, defaultValue)`。
 - `startup_modules.js` 新增 `startMigratedModules(cfg)` 集中启动器。
+- `startup_modules.js` 已纳入 `patches` 调度：创建角色限制、强化刷新、黑武技能栏、成长契约。
+- `startup_modules.js` 已纳入 `account_cargo` 调度，但仍默认关闭。
 
 用途：
 
@@ -123,6 +125,8 @@ script/js/startup_modules.js
 | `script/js/luck_point_drop.js` | `enable_drop_use_luck_point()` | `startLuckPointDrop()` | `[~] 待入口切换` |
 | `script/js/random_option.js` | `change_random_option_inherit()` / `auto_unseal_random_option_equipment()` | `startRandomOptionInherit()` / `startAutoUnsealRandomOptionEquipment()` | `[~] 待入口切换` |
 | `script/js/online_reward.js` | `enable_online_reward()` | `startOnlineReward()` | `[~] 默认关闭，待入口切换` |
+| `script/js/patches.js` | patch 旧入口组 | `disableCreateCharLimit()` / `enableStrengthenRefresh()` / `enableComboSkillFix()` / `disableMobileAuth()` | `[~] 已纳入 startup_modules 调度，入口待切换` |
+| `script/js/account_cargo.js` | `setMaxCAccountCargoSolt(128)` | `setMaxCAccountCargoSolt(128)` | `[!] 已纳入 startup_modules 调度，默认关闭，待专项测试` |
 
 状态：`[~] 模块已拆分，入口待统一接入`
 
@@ -148,6 +152,10 @@ startMigratedModules(cfg);
 `startup_modules.js` 内部已经集中调度：
 
 ```js
+startModuleFeature('create_character_unlimit', cfg.enable_create_character_unlimit !== false, 'patches', 'disableCreateCharLimit');
+startModuleFeature('strengthen_refresh', cfg.enable_strengthen_refresh !== false, 'patches', 'enableStrengthenRefresh');
+startModuleFeature('dark_knight_skill_fix', cfg.enable_dark_knight_skill_fix !== false, 'patches', 'enableComboSkillFix');
+startModuleFeature('account_cargo', cfg.enable_account_cargo === true, 'account_cargo', 'setMaxCAccountCargoSolt', [128]);
 startModuleFeature('history_log', cfg.enable_history_log !== false, 'history_log', 'startHistoryLog');
 startModuleFeature('user_inout', cfg.enable_user_inout_hook === true, 'user_inout', 'startUserInoutHook');
 startModuleFeature('lucky_online', cfg.enable_lucky_online === true, 'lucky_online', 'startLuckyOnlineUserEvent');
