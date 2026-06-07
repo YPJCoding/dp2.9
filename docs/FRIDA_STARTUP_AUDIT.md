@@ -98,6 +98,8 @@ script/js/startup_modules.js
 - `startup_helpers.js` 新增 `safeModuleFeature(featureName, enabled, moduleName, functionName, args)`。
 - `startup_helpers.js` 新增 `isFeatureEnabled(config, featureName, defaultValue)`。
 - `startup_helpers.js` 新增 `resolveStartupFunction(functionName)`，依次尝试 `globalThis`、当前上下文和 `eval(functionName)`，降低 Frida 运行时作用域差异导致的函数误判缺失。
+- `startup_helpers.js` 新增 `g_startup_loaded_modules` 加载缓存，避免同一启动流程多次 `dp_load` 同一个模块导致重复执行模块文件。
+- `safeModuleFeature(...)` 现在会在模块加载失败时明确失败，不继续误调用缺失函数。
 - `startup_modules.js` 新增 `startMigratedModules(cfg)` 集中启动器。
 - `startup_modules.js` 已纳入 `patches` 调度：创建角色限制、强化刷新、黑武技能栏、成长契约。
 - `startup_modules.js` 已纳入 `account_cargo` 调度，但仍默认关闭。
@@ -106,6 +108,7 @@ script/js/startup_modules.js
 
 - 后续 `df_game_r.js` 入口瘦身时统一处理模块加载、函数缺失、启动异常。
 - 单个功能启动失败时只记录日志，不中断整个 Frida 启动。
+- 避免 `startup_modules.js` 反复启动同一个模块时重复 `dp_load`。
 - `df_game_r.js` 后续只需加载 `startup_helpers.js` / `startup_modules.js` 并调用 `startMigratedModules(cfg)`，即可集中启动已拆分模块。
 
 状态：`[~] 辅助模块已新增，入口待接入`
