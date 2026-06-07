@@ -23,17 +23,17 @@
 | 随机属性继承 | `df_game_r.js` | `enable_random_option_inherit=false` | `[~]` | 已有 `change_random_option_inherit()`，默认关闭，需实测。 |
 | 自动解封魔法封印 | `df_game_r.js` | `enable_auto_unseal=false` | `[~]` | 已有 `auto_unseal_random_option_equipment()`，默认关闭，需实测。 |
 | 幸运点影响掉落 | `df_game_r.js` | `enable_luck_point_drop=true` | `[!]` | 已有 `enable_drop_use_luck_point()`，会替换爆率计算函数，高风险，需实测。 |
-| 账号仓库扩展 | `script/js/account_cargo.js` | `enable_account_cargo=false` | `[!]` | 已拆模块，默认关闭。功能极高风险，需专项验证。 |
+| 账号仓库扩展 | `script/js/account_cargo.js` | `enable_account_cargo=false` | `[!]` | 已拆模块，默认关闭。功能极高风险；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
 | 创建角色数量限制 | `script/js/patches.js` | `enable_create_character_unlimit=true` | `[~]` | 已迁移并加重复 hook 保护。 |
 | +13 强化券刷新 | `script/js/patches.js` | `enable_strengthen_refresh=true` | `[~]` | 已修复参数口径，恢复旧实现的 user/slot 更新方式。 |
 | 黑暗武士技能栏修复 | `script/js/patches.js` | `enable_dark_knight_skill_fix=true` | `[~]` | 已迁移并加重复 hook 保护。 |
 | 取消新账号成长契约 | `script/js/patches.js` | `enable_mobile_auth=false` | `[~]` | 已迁移并加重复 replace 保护，默认关闭。 |
-| 幸运在线玩家 | `df_game_r.js` | `enable_lucky_online=false` | `[!]` | 旧逻辑会随机抽在线玩家并发道具/点券，默认关闭，需专项确认。 |
+| 幸运在线玩家 | `df_game_r.js` | `enable_lucky_online=false` | `[!]` | 旧逻辑会随机抽在线玩家并发道具/点券，默认关闭；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
 | 战力排行榜 | `script/js/ranking.js` | `enable_ranking=true` | `[~]` | 已拆模块；已修复 DB 初始化时序和 guild name 兜底。 |
 | 时装潜能 | `script/js/hidden_option.js` | `enable_hidden_option=true` | `[~]` | 已拆模块；已补重复 hook 保护和旧入口 `start_hidden_option()` 兼容。 |
 | 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块；已补参数校验、重复应用保护和旧入口 `set_return_user()` 兼容。 |
 | VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名、旧大小写函数名兼容和重复 hook 保护。 |
-| 怪物攻城 | `df_game_r.js` | `enable_village_attack=true` | `[!]` | 大型系统已存在于 `df_game_r.js`，但依赖 DB、timer、UI 包、奖励邮件，需专项测试。 |
+| 怪物攻城 | `df_game_r.js` | `enable_village_attack=true` | `[!]` | 大型系统已存在于 `df_game_r.js`，但依赖 DB、timer、UI 包、奖励邮件；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
 | 批量物品 UI 通知 | `df_game_r.js` | `enable_batch_item_add=true` | `[~]` | 基础函数存在，Lua 回调发物品侧已加固；UI 通知仍需实测。 |
 
 ## 2. 当前缺口 / 未完成项
@@ -80,6 +80,10 @@
 - `docs/FRIDA_STARTUP_AUDIT.md`
   - 新增 `df_game_r.js` 启动调度审计。
   - 记录当前入口结构风险、已缓解项和后续重构优先级。
+
+- `docs/FRIDA_HIGH_RISK_TODO.md`
+  - 新增高风险 Frida 功能拆分待办。
+  - 将账号仓库、怪物攻城、幸运点掉落、在线奖励/幸运在线玩家、掉落公告拆开跟踪。
 
 ## 4. 后续迁移建议
 
