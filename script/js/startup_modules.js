@@ -131,8 +131,8 @@ function startMigratedModules(cfg) {
   startModuleFeature('return_user', getFeatureFlag(cfg, 'enable_return_user', true), 'return_user', 'setReturnUser', [15]);
   startModuleFeature('vip_login', getFeatureFlag(cfg, 'enable_vip_login', true), 'vip_login', 'startVipLogin');
 
-  // 怪物攻城目前只通过适配模块做启动保护，核心实现仍在 df_game_r.js。
-  loadModuleOnly('village_attack', getFeatureFlag(cfg, 'enable_village_attack', true), 'village_attack');
+  // 怪物攻城目前通过适配模块统一启动，核心实现仍在 df_game_r.js。
+  startModuleFeature('village_attack', getFeatureFlag(cfg, 'enable_village_attack', true), 'village_attack', 'startVillageAttack');
 
   startupModulesLog('migrated module startup finished');
 }
