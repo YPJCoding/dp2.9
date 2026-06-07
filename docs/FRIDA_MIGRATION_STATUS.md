@@ -32,7 +32,7 @@
 | 战力排行榜 | `script/js/ranking.js` | `enable_ranking=true` | `[~]` | 已拆模块；已修复 DB 初始化时序和 guild name 兜底。 |
 | 时装潜能 | `script/js/hidden_option.js` | `enable_hidden_option=true` | `[~]` | 已拆模块；已补重复 hook 保护和旧入口 `start_hidden_option()` 兼容。 |
 | 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块；已补参数校验、重复应用保护和旧入口 `set_return_user()` 兼容。 |
-| VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名和重复 hook 保护。 |
+| VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名、旧大小写函数名兼容和重复 hook 保护。 |
 | 怪物攻城 | `df_game_r.js` | `enable_village_attack=true` | `[!]` | 大型系统已存在于 `df_game_r.js`，但依赖 DB、timer、UI 包、奖励邮件，需专项测试。 |
 | 批量物品 UI 通知 | `df_game_r.js` | `enable_batch_item_add=true` | `[~]` | 基础函数存在，Lua 回调发物品侧已加固；UI 通知仍需实测。 |
 
@@ -43,8 +43,8 @@
 | 掉落公告 / 掉落奖励 | `[ ]` | 当前仓库未找到 `drop_announce`、`startDropAnnounce` 或明确等价实现；`enable_drop_announce` 已改为默认 `false`，找到真实来源后再迁移。 |
 | frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
 | `df_game_r.js` 入口瘦身 | `[~]` | 当前 `df_game_r.js` 内仍混有大段旧功能和部分拆分模块的重复代码。后续应继续拆分成 `script/js/*.js`，避免入口文件过大。 |
-| `start()` 调度一致性 | `[~]` | 已修复部分模块断点，但仍需整体实测所有 `js_features` 开关组合，确认不会重复 hook 或函数不存在。 |
-| 高风险 JS 默认开关策略 | `[!]` | 当前部分高风险功能默认为 true，如怪物攻城、幸运点掉落、排行榜、时装潜能、VIP 登录。上线前需按测试结果决定是否改为 false。 |
+| `start()` 调度一致性 | `[~]` | 已新增 `docs/FRIDA_STARTUP_AUDIT.md` 记录调度风险和后续方案；当前已先做单点缓解，尚未全量重构入口。 |
+| 高风险 JS 默认开关策略 | `[!]` | 当前部分高风险功能默认为 true，如怪物攻城、幸运点掉落、排行榜、时装潜能、VIP 登录。上线前需按测试结果决定是否保持开启。 |
 
 ## 3. 本轮已修复的迁移断点
 
@@ -57,6 +57,7 @@
   - 修正广播函数名为 `api_GameWorld_SendNotiPacketMessage`。
   - 增加重复 hook 保护。
   - 增加 `vip_Login()` 兼容别名。
+  - 增加旧内联实现使用过的 `api_gameWorld_SendNotiPacketMessage` 小写兼容别名。
 
 - `script/js/patches.js`
   - 创建角色限制、强化券刷新、黑暗武士技能栏、成长契约补重复启动保护。
@@ -75,6 +76,10 @@
 - `script/config.lua`
   - `enable_drop_announce` 改为默认 `false`。
   - 注释标记该功能源实现未找到，待补齐后再开启。
+
+- `docs/FRIDA_STARTUP_AUDIT.md`
+  - 新增 `df_game_r.js` 启动调度审计。
+  - 记录当前入口结构风险、已缓解项和后续重构优先级。
 
 ## 4. 后续迁移建议
 
