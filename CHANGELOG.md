@@ -51,6 +51,7 @@
 - Added history log JS module: `script/js/history_log.js`.
 - Added batch item notify JS module: `script/js/batch_item_notify.js`.
 - Added user use item event JS module: `script/js/user_use_item_event.js`.
+- Added user inout compatibility JS module: `script/js/user_inout.js`.
 - Added P3 refactor plan.
 - Added `df_game_r.js` audit notes.
 - Added `df_game_r.js` index draft.
@@ -116,6 +117,7 @@
   - `script/js/history_log.js` was extracted from the old `hook_history_log()` implementation and adds duplicate hook protection while preserving the old alias.
   - `script/js/batch_item_notify.js` was extracted from the old batch item add UI notification helpers while preserving old compatibility aliases.
   - `script/js/user_use_item_event.js` was extracted from the old `UserUseItemEvent()` implementation and keeps only the previously active mount-transformer return-mail branch.
+  - `script/js/user_inout.js` was added as a compatibility stub for the missing `hook_user_inout_game_world()` implementation; it does not implement ranking, village-attack UI, or luck-point business logic.
   - `js_features.enable_drop_announce` is now default-disabled.
 - Synced Frida high-risk tracking:
   - `docs/FRIDA_HIGH_RISK_TODO.md` now tracks account cargo, village attack, luck-point drop, online rewards, lucky online users, and drop announce separately.
