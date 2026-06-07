@@ -106,7 +106,7 @@
   - `//viewname <id>` and `//viewname<id>` both query item names.
 - Hardened Frida `additem` callback to check `js_features.enable_batch_item_add`, validate account and item IDs, and require the target user to be online before adding items.
 - Continued Frida migration hardening:
-  - `script/js/startup_modules.js` now provides `startMigratedModules(cfg)` to centralize startup for already split JS modules.
+  - `script/js/startup_modules.js` now provides `startMigratedModules(cfg)` to centralize startup for already split JS modules, including `patches` and default-disabled `account_cargo`.
   - `script/js/ranking.js` now waits/retries when DB handles are not ready and falls back when guild-name helpers are unavailable.
   - `script/js/vip_login.js` now uses the correct broadcast helper name, adds duplicate hook protection, keeps the old `vip_Login()` alias, and adds compatibility for the old lowercase broadcast helper name.
   - `script/js/patches.js` now guards duplicate patch startup and restores the old strengthen-refresh user/slot argument behavior.
