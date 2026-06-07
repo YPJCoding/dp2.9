@@ -4,7 +4,7 @@
 // - 用于承接 df_game_r.js 入口瘦身。
 // - df_game_r.js 后续只需加载 startup_helpers.js 和 startup_modules.js，调用 startMigratedModules(cfg)。
 // - 本文件只调度已经拆分到 script/js/*.js 的模块。
-// - 不处理仍留在 df_game_r.js 的怪物攻城、TOD 等大型旧逻辑。
+// - 怪物攻城当前只接入启动适配层，核心实现仍留在 df_game_r.js，后续小步拆分。
 
 function startupModulesLog(message) {
   try {
@@ -130,6 +130,9 @@ function startMigratedModules(cfg) {
   startModuleFeature('hidden_option', getFeatureFlag(cfg, 'enable_hidden_option', true), 'hidden_option', 'startHiddenOption');
   startModuleFeature('return_user', getFeatureFlag(cfg, 'enable_return_user', true), 'return_user', 'setReturnUser', [15]);
   startModuleFeature('vip_login', getFeatureFlag(cfg, 'enable_vip_login', true), 'vip_login', 'startVipLogin');
+
+  // 怪物攻城目前只通过适配模块做启动保护，核心实现仍在 df_game_r.js。
+  loadModuleOnly('village_attack', getFeatureFlag(cfg, 'enable_village_attack', true), 'village_attack');
 
   startupModulesLog('migrated module startup finished');
 }
