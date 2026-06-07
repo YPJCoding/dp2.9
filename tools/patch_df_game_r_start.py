@@ -14,14 +14,20 @@ What this script does:
 5. Does not delete any legacy feature function definitions.
 
 Usage from repo root:
+    python3 tools/patch_df_game_r_start.py --check
     python3 tools/patch_df_game_r_start.py
+
+The default mode writes df_game_r.js and also creates df_game_r.js.bak before writing.
 """
 
 from __future__ import annotations
 
+import argparse
+import shutil
 from pathlib import Path
 
 TARGET = Path("df_game_r.js")
+BACKUP = Path("df_game_r.js.bak")
 
 OLD_START_BLOCK = """//加载主功能
 function start() {
@@ -148,23 +154,44 @@ NEW_BRIDGE_PREFIX = """// Bridge: Frida Integration
 """
 
 
+def build_patched_text(text: str) -> str:
+    if OLD_START_BLOCK not in text:
+        raise SystemExit("old start() block not found; abort to avoid unsafe patch")
+    if OLD_BRIDGE_PREFIX not in text:
+        raise SystemExit("old bridge prefix with stray brace not found; abort to avoid unsafe patch")
+
+    text = text.replace(OLD_START_BLOCK, NEW_START_BLOCK, 1)
+    text = text.replace(OLD_BRIDGE_PREFIX, NEW_BRIDGE_PREFIX, 1)
+    return text
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Patch df_game_r.js start() safely.")
+    parser.add_argument("--check", action="store_true", help="Only verify that the patch can be applied; do not write files.")
+    parser.add_argument("--no-backup", action="store_true", help="Do not create df_game_r.js.bak before writing.")
+    args = parser.parse_args()
+
     path = TARGET
     if not path.exists():
         raise SystemExit(f"missing target file: {path}")
 
     text = path.read_text(encoding="utf-8")
+    patched = build_patched_text(text)
 
-    if OLD_START_BLOCK not in text:
-        raise SystemExit("old start() block not found; abort to avoid unsafe patch")
-    text = text.replace(OLD_START_BLOCK, NEW_START_BLOCK, 1)
+    if patched == text:
+        raise SystemExit("patch produced no changes; abort")
 
-    if OLD_BRIDGE_PREFIX not in text:
-        raise SystemExit("old bridge prefix with stray brace not found; abort to avoid unsafe patch")
-    text = text.replace(OLD_BRIDGE_PREFIX, NEW_BRIDGE_PREFIX, 1)
+    if args.check:
+        print("check passed: df_game_r.js start() patch can be applied")
+        return
 
-    path.write_text(text, encoding="utf-8")
+    if not args.no_backup:
+        shutil.copyfile(path, BACKUP)
+        print(f"backup written: {BACKUP}")
+
+    path.write_text(patched, encoding="utf-8")
     print("patched df_game_r.js start() successfully")
+    print("next: inspect git diff, then restart/test Frida startup")
 
 
 if __name__ == "__main__":
