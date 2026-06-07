@@ -13,7 +13,7 @@
 
 | 功能 | dp2.9 文件 | 配置开关 | 状态 | 说明 |
 |---|---|---|---|---|
-| Frida 基础入口 | `df_game_r.js` | N/A | `[x]` | 已保留 `rpc.exports.init`、`setup()`、Lua/JS 桥接。 |
+| Frida 基础入口 | `df_game_r.js` | N/A | `[~]` | 已保留 `rpc.exports.init`、`setup()`、Lua/JS 桥接；远端 `start()` 仍是旧调度，尚未提交集中启动补丁。 |
 | Frida 回调发物品 | `df_game_r.lua` | `js_features.enable_batch_item_add` | `[x]` | Lua 侧已加开关、账号、物品、在线用户校验。 |
 | Frida 启动调度辅助 | `script/js/startup_helpers.js` | N/A | `[~]` | 已新增 `safeLoadModule` / `safeFeature` / `safeModuleFeature` / `resolveStartupFunction`，并加入模块加载缓存；入口待接入。 |
 | 已迁移模块集中启动器 | `script/js/startup_modules.js` | `js_features.*` | `[~]` | 已新增 `startMigratedModules(cfg)`，用于集中启动已拆分模块；已补齐 patches 和 account_cargo 调度，入口待接入。 |
@@ -43,6 +43,7 @@
 
 | 功能 | 状态 | 说明 |
 |---|---|---|
+| `df_game_r.js start()` 远端补丁提交 | `[!]` | 已确认 `refactor/dp2-9-base` 上 `df_game_r.js` 仍是旧 `start()`：未加载 `startup_helpers` / `startup_modules`，未调用 `startMigratedModules(cfg)`，且 Bridge 前仍有旧孤立 `}`。 |
 | 启动辅助接入 | `[~]` | `startup_helpers.js` 和 `startup_modules.js` 已新增，但 `df_game_r.js` 入口尚未调用 `startMigratedModules(cfg)`。 |
 | 时装镶嵌入口切换 | `[~]` | `emblem_fix.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
 | 历史日志入口切换 | `[~]` | `history_log.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
@@ -76,15 +77,20 @@
   - 已纳入 `account_cargo` 调度，但仍默认关闭。
   - 不处理仍留在 `df_game_r.js` 的怪物攻城、TOD 等大型旧逻辑。
 
+- `tools/check_df_game_r_start.py`
+  - 新增只读检查器，用于区分 `pending`、`patched`、`broken/mixed` 三种入口状态。
+  - 当前远端状态应为 `pending`，需要本地执行 `tools/patch_df_game_r_start.py` 后再复查。
+
 - 其他已拆模块状态详见上表。
 
 ## 4. 后续迁移建议
 
 优先级建议：
 
-1. 接入 `startup_helpers.js` 和 `startup_modules.js` 到 `df_game_r.js`。
-2. 修复 `df_game_r.js` 的 `start()` 大括号结构。
-3. 继续拆分 `df_game_r.js` 中剩余的大功能到 `script/js/*.js`。
-4. 对 `start()` 做统一安全调度封装，避免函数不存在、重复 hook、DB 未初始化导致启动失败。
-5. 将高风险默认 true 的 JS 功能逐项确认是否应保持开启。
-6. 最后再做测试服验证和 Bug 修复。
+1. 在本地拉取最新 `refactor/dp2-9-base` 后运行 `python3 tools/check_df_game_r_start.py`，确认当前仍为 `pending`。
+2. 执行 `python3 tools/patch_df_game_r_start.py`，再运行 `python3 tools/check_df_game_r_start.py`，预期变为 `patched`。
+3. 提交 `df_game_r.js` 的实际入口补丁。
+4. 重启 Frida 并检查启动日志：`startup_helpers`、`startup_modules`、`migrated module startup finished`、`set function success`。
+5. 继续拆分 `df_game_r.js` 中剩余的大功能到 `script/js/*.js`，优先做怪物攻城的小步只读/状态模块化，不凭空实现缺失业务。
+6. 对高风险默认 true 的 JS 功能逐项确认是否应保持开启。
+7. 最后再做测试服验证和 Bug 修复。
