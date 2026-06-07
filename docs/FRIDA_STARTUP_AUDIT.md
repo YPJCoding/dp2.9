@@ -97,6 +97,7 @@ script/js/startup_modules.js
 - `startup_helpers.js` 新增 `safeFeature(featureName, enabled, runner)`。
 - `startup_helpers.js` 新增 `safeModuleFeature(featureName, enabled, moduleName, functionName, args)`。
 - `startup_helpers.js` 新增 `isFeatureEnabled(config, featureName, defaultValue)`。
+- `startup_helpers.js` 新增 `resolveStartupFunction(functionName)`，依次尝试 `globalThis`、当前上下文和 `eval(functionName)`，降低 Frida 运行时作用域差异导致的函数误判缺失。
 - `startup_modules.js` 新增 `startMigratedModules(cfg)` 集中启动器。
 - `startup_modules.js` 已纳入 `patches` 调度：创建角色限制、强化刷新、黑武技能栏、成长契约。
 - `startup_modules.js` 已纳入 `account_cargo` 调度，但仍默认关闭。
