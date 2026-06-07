@@ -23,7 +23,7 @@
 | 在线奖励 | `df_game_r.js` | `enable_online_reward=false` | `[!]` | 旧逻辑会发点券，默认关闭；需专项确认。 |
 | 随机属性继承 | `df_game_r.js` | `enable_random_option_inherit=false` | `[~]` | 已有 `change_random_option_inherit()`，默认关闭，需实测。 |
 | 自动解封魔法封印 | `df_game_r.js` | `enable_auto_unseal=false` | `[~]` | 已有 `auto_unseal_random_option_equipment()`，默认关闭，需实测。 |
-| 幸运点影响掉落 | `df_game_r.js` | `enable_luck_point_drop=true` | `[!]` | 已有 `enable_drop_use_luck_point()`，会替换爆率计算函数，高风险，需实测。 |
+| 幸运点影响掉落 | `script/js/luck_point_drop.js` | `enable_luck_point_drop=true` | `[!]` | 已从旧 `enable_drop_use_luck_point()` 拆出独立模块，增加重复启动保护；会替换爆率计算函数，高风险，入口仍待切换。 |
 | 账号仓库扩展 | `script/js/account_cargo.js` | `enable_account_cargo=false` | `[!]` | 已拆模块，默认关闭。功能极高风险；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
 | 创建角色数量限制 | `script/js/patches.js` | `enable_create_character_unlimit=true` | `[~]` | 已迁移并加重复 hook 保护。 |
 | +13 强化券刷新 | `script/js/patches.js` | `enable_strengthen_refresh=true` | `[~]` | 已修复参数口径，恢复旧实现的 user/slot 更新方式。 |
@@ -44,6 +44,7 @@
 |---|---|---|
 | 启动辅助接入 | `[~]` | `startup_helpers.js` 已新增，但 `df_game_r.js` 入口尚未使用 `safeModuleFeature(...)`。 |
 | 时装镶嵌入口切换 | `[~]` | `emblem_fix.js` 已新增，但入口调度仍需从旧内联 `fix_use_emblem()` 切换为 `dp_load('emblem_fix'); startEmblemFix()`。 |
+| 幸运点掉落入口切换 | `[~]` | `luck_point_drop.js` 已新增，但入口调度仍需从旧内联 `enable_drop_use_luck_point()` 切换为 `dp_load('luck_point_drop'); startLuckPointDrop()`。 |
 | 掉落公告入口接入 | `[~]` | `drop_announce.js` 已新增，但入口调度仍需接入 `js_features.enable_drop_announce`，默认保持关闭。 |
 | frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
 | `df_game_r.js` 入口瘦身 | `[~]` | 当前 `df_game_r.js` 内仍混有大段旧功能和部分拆分模块的重复代码。后续应继续拆分成 `script/js/*.js`，避免入口文件过大。 |
@@ -92,6 +93,11 @@
   - 增加重复 hook 保护。
   - 保留旧入口 `fix_use_emblem()` 兼容。
 
+- `script/js/luck_point_drop.js`
+  - 从旧 `enable_drop_use_luck_point()` 逻辑拆出独立模块。
+  - 增加重复 attach/replace 保护。
+  - 保留旧入口 `enable_drop_use_luck_point()` 和 `use_ftcoin_change_luck_point()` 兼容。
+
 - `script/config.lua`
   - `enable_drop_announce` 改为默认 `false`。
   - 注释标记该功能源实现未找到，待补齐后再开启。
@@ -110,7 +116,7 @@
 
 1. 接入 `startup_helpers.js` 到 `df_game_r.js`。
 2. 继续拆分 `df_game_r.js` 中剩余的大功能到 `script/js/*.js`。
-3. 接入 `emblem_fix.js` 和 `drop_announce.js` 到 `df_game_r.js` 启动调度。
+3. 接入 `emblem_fix.js`、`luck_point_drop.js` 和 `drop_announce.js` 到 `df_game_r.js` 启动调度。
 4. 对 `start()` 做统一安全调度封装，避免函数不存在、重复 hook、DB 未初始化导致启动失败。
 5. 将高风险默认 true 的 JS 功能逐项确认是否应保持开启。
 6. 最后再做测试服验证和 Bug 修复。
