@@ -37,13 +37,14 @@ js_features.enable_account_cargo = false
 
 ## 2. 怪物攻城 `village_attack`
 
-状态：`[!] 已接入 startup_modules 启动适配，核心实现仍在 df_game_r.js，默认开启但未专项验证`
+状态：`[!] 已接入 startup_modules 启动适配并建立状态承接模块，核心实现仍在 df_game_r.js，默认开启但未专项验证`
 
 相关文件：
 
 ```text
 df_game_r.js
 script/js/village_attack.js
+script/js/village_attack_state.js
 script/js/startup_modules.js
 script/config.lua
 ```
@@ -60,31 +61,33 @@ js_features.enable_village_attack = true
 - [x] `village_attack.js` 增加启动请求保护，避免适配入口被重复调用。
 - [x] `village_attack.js` 会对旧 `start_event_villageattack` 安装 guard，避免过渡期双路径重复启动。
 - [x] `startup_modules.js` 已按 `enable_village_attack` 调用 `startVillageAttack()`。
+- [x] 新增 `script/js/village_attack_state.js`，承接状态常量、默认状态对象和低风险状态 helper。
+- [x] `village_attack.js` 启动时会加载 `village_attack_state.js`。
 - [x] 暂不迁移奖励、刷怪、UI 包、DB 结算等核心逻辑，避免一次性高风险变更。
 
 过渡期说明：
 
-- `df_game_r.js` 内仍保留旧的 `api_scheduleOnMainThread(start_event_villageattack, null)` 调度。
-- `startup_modules.js` 已经调用 `startVillageAttack()`。
-- 为避免双启动，`village_attack.js` 会在模块加载时包装旧 `start_event_villageattack`，后续重复请求只记录 skip 日志。
-- 下一步确认启动日志稳定后，再删除 `df_game_r.js` 中的旧直接调度。
+- `df_game_r.js` 内的旧直接 `start_event_villageattack` 调度已由本地提交删除后，应只通过 `startup_modules.js -> startVillageAttack()` 启动。
+- `df_game_r.js` 内仍保留怪物攻城状态常量、`villageAttackEventInfo` 和旧状态函数定义。
+- `village_attack_state.js` 当前只在缺失时补齐全局定义，不强制覆盖旧状态，避免热加载或重复加载时重置活动进度。
+- 下一步确认启动日志稳定后，再从 `df_game_r.js` 删除重复状态定义和纯状态函数。
 
 风险点：
 
 - 依赖 MySQL / `frida.game_event`。
 - 涉及定时器、刷怪、UI 包、攻城状态、PT、邮件奖励。
 - 核心实现当前仍混在 `df_game_r.js` 中，尚未完成独立模块迁移。
-- `start()` 调度中 DB 初始化时序仍需确认。
+- `start()` 调度中 DB 初始化时序已通过 `village_attack.js` retry 做缓解，但仍需测试服日志确认。
 
 后续迁移要求：
 
 - [x] 建立 `script/js/village_attack.js` 迁移承接文件。
 - [x] 增加启动适配层的重复启动保护。
 - [x] 将 `startup_modules.js` 接入 `startVillageAttack()`。
-- [ ] 删除 `df_game_r.js` 中旧的 `api_scheduleOnMainThread(start_event_villageattack, null)` 直接调度。
+- [x] 删除 `df_game_r.js` 中旧的 `api_scheduleOnMainThread(start_event_villageattack, null)` 直接调度。
 - [x] 增加 DB 未就绪保护：`village_attack.js` 会等待 `mysql_taiwan_cain` / `mysql_frida` 初始化后再调用旧 `start_event_villageattack`。
-- [ ] 小步拆出状态与常量：`villageAttackEventInfo`、`VILLAGEATTACK_STATE_*`、`EVENT_VILLAGEATTACK_*`。
-- [ ] 小步拆出纯状态函数：状态重置、剩余时间、难度设置、进度广播。
+- [x] 小步拆出状态与常量承接模块：`village_attack_state.js`。
+- [~] 小步拆出纯状态函数：已在 `village_attack_state.js` 提供状态重置、剩余时间、难度设置、进度广播 helper；旧函数体仍保留在 `df_game_r.js`，待启动稳定后删除/切换。
 - [ ] 小步拆出定时器与启动流程。
 - [ ] 最后拆出高风险 hook、刷怪、PT、结算、奖励邮件。
 - [ ] 拆分测试：状态初始化 -> 活动开始 -> UI -> 刷怪 -> PT -> 结算 -> 奖励邮件。
