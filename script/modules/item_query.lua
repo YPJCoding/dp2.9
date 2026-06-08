@@ -9,6 +9,7 @@ local M = {}
 local logger = nil
 local dpx = nil
 local game = nil
+local is_hook_registered = false
 
 local function handle_view_help(user)
     user:SendNotiPacketMessage("——————————查询代码——————————", 14)
@@ -61,6 +62,7 @@ end
 
 -- GmInput hook 回调。
 -- 参数签名参考 dp2: function(fnext, _user, input)
+-- 命中本模块指令后返回 0，不再继续透传，避免后续 GM 指令系统重复处理。
 local function on_gm_input(fnext, _user, input)
     if not input or type(input) ~= "string" then
         return fnext()
@@ -74,7 +76,7 @@ local function on_gm_input(fnext, _user, input)
     -- //view 查询帮助
     if input == "//view" then
         handle_view_help(user)
-        return fnext()
+        return 0
     end
 
     -- //viewid <名称>，同时兼容旧写法 //viewid名称
@@ -84,7 +86,7 @@ local function on_gm_input(fnext, _user, input)
     end
     if name and #name > 0 then
         handle_viewid(user, name)
-        return fnext()
+        return 0
     end
 
     -- //viewname <ID>，同时兼容旧写法 //viewnameID
@@ -94,19 +96,19 @@ local function on_gm_input(fnext, _user, input)
     end
     if id_str then
         handle_viewname(user, tonumber(id_str))
-        return fnext()
+        return 0
     end
 
     -- //viewname 非数字参数，提示用法
     if string.match(input, "^//viewname") then
         user:SendNotiPacketMessage("用法错误：//viewname <数字ID>", 14)
-        return fnext()
+        return 0
     end
 
     -- //viewid 空参数，提示用法
     if input == "//viewid" then
         user:SendNotiPacketMessage("用法错误：//viewid <物品名称>", 14)
-        return fnext()
+        return 0
     end
 
     -- 未匹配，传递到下一个 handler
@@ -119,10 +121,14 @@ function M.setup(ctx, deps)
     game = ctx.game
 
     -- 注册 GmInput hook
-    dpx.hook(game.HookType.GmInput, on_gm_input)
-
-    if logger then
-        logger.info("[item_query] registered GmInput hook")
+    if not is_hook_registered then
+        dpx.hook(game.HookType.GmInput, on_gm_input)
+        is_hook_registered = true
+        if logger then
+            logger.info("[item_query] registered GmInput hook")
+        end
+    elseif logger then
+        logger.info("[item_query] setup skipped hook registration")
     end
 
     return M
