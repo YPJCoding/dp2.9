@@ -1311,47 +1311,11 @@ function api_scheduleOnMainThread_delay(f, args, delay) {
 
 
 
-//计算活动剩余时间
+// 怪物攻城 UI/进度通知函数已迁移到 script/js/village_attack_notify.js。
+// 保留旧函数名兼容：gameworld_update_villageattack_score / notify_villageattack_score。
 
-//更新怪物攻城当前进度(广播给频道内在线玩家)
-function gameworld_update_villageattack_score() {
-	//计算活动剩余时间
-	const remain_time = event_villageattack_get_remain_time();
-	if ((remain_time <= 0) || (villageAttackEventInfo.state == VILLAGEATTACK_STATE_END))
-		return;
-	const packet_guard = api_PacketGuard_PacketGuard();
-	InterfacePacketBuf_put_header(packet_guard, 0, 247); //协议: ENUM_NOTIPACKET_UPDATE_VILLAGE_ATTACKED
-	InterfacePacketBuf_put_int(packet_guard, remain_time); //活动剩余时间
-	InterfacePacketBuf_put_int(packet_guard, villageAttackEventInfo.score); //当前频道PT点数
-	InterfacePacketBuf_put_int(packet_guard, EVENT_VILLAGEATTACK_TARGET_SCORE[2]); //成功防守所需点数
-	InterfacePacketBuf_finalize(packet_guard, 1);
-	GameWorld_send_all(G_GameWorld(), packet_guard);
-	Destroy_PacketGuard_PacketGuard(packet_guard);
-}
 
 //通知玩家怪物攻城进度
-function notify_villageattack_score(user) {
-	//玩家当前PT点
-	const charac_no = CUserCharacInfo_getCurCharacNo(user).toString();
-	var villageattack_pt = 0;
-	if (charac_no in villageAttackEventInfo.user_pt_info)
-		villageattack_pt = villageAttackEventInfo.user_pt_info[charac_no][1];
-	//计算活动剩余时间
-	const remain_time = event_villageattack_get_remain_time();
-	//log("remain_time=" + remain_time);
-	if ((remain_time <= 0) || (villageAttackEventInfo.state == VILLAGEATTACK_STATE_END))
-		return;
-	//发包通知角色打开怪物攻城UI并更新当前进度
-	const packet_guard = api_PacketGuard_PacketGuard();
-	InterfacePacketBuf_put_header(packet_guard, 0, 248); //协议: ENUM_NOTIPACKET_STARTED_VILLAGE_ATTACKED
-	InterfacePacketBuf_put_int(packet_guard, remain_time); //活动剩余时间
-	InterfacePacketBuf_put_int(packet_guard, villageAttackEventInfo.score); //当前频道PT点数
-	InterfacePacketBuf_put_int(packet_guard, EVENT_VILLAGEATTACK_TARGET_SCORE[2]); //成功防守所需点数
-	InterfacePacketBuf_put_int(packet_guard, villageattack_pt); //个人PT点数
-	InterfacePacketBuf_finalize(packet_guard, 1);
-	CUser_Send(user, packet_guard);
-	Destroy_PacketGuard_PacketGuard(packet_guard);
-}
 
 //怪物攻城活动相关patch
 function hook_VillageAttack() {
