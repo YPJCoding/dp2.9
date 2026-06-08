@@ -13,6 +13,7 @@
 -- - 默认关闭，需 features.enable_gm_send_item = true
 -- - 仅 GM 可用
 -- - 数量上限受 gm_send_item.max_count 限制
+-- - 强化等级上限受 gm_send_item.max_upgrade_level 限制
 -- - 不执行 SQL / shell / delete
 -- - 不修改点券/代币/SP/TP/QP
 -- - 不向其他玩家发送
@@ -33,6 +34,7 @@ local function normalize_config(input)
     return {
         command = tostring(input.command or "//send"),
         max_count = tonumber(input.max_count) or 100,
+        max_upgrade_level = tonumber(input.max_upgrade_level) or 31,
         server_group = tonumber(input.server_group) or 3,
         mail_title = tostring(input.mail_title or "GM物品发放"),
         mail_content = tostring(input.mail_content or "请查收GM发放的物品。"),
@@ -57,6 +59,58 @@ local function log_op(user, item_id, count, upgrade_level, result, detail)
     )
 end
 
+-- 使用严格 pattern match 解析 //send 的后缀部分
+-- 返回 { id, upgrade, count } 或 nil
+local function parse_send_args(suffix)
+    if not suffix or suffix == "" then
+        return nil
+    end
+
+    local id_str, upgrade_str, count_str
+
+    -- //send<id>+<level>x<count>
+    id_str, upgrade_str, count_str = string.match(suffix, "^(%d+)%+(%d+)x(%d+)$")
+    if id_str then
+        return {
+            id = tonumber(id_str),
+            upgrade = tonumber(upgrade_str),
+            count = tonumber(count_str),
+        }
+    end
+
+    -- //send<id>+<level>
+    id_str, upgrade_str = string.match(suffix, "^(%d+)%+(%d+)$")
+    if id_str then
+        return {
+            id = tonumber(id_str),
+            upgrade = tonumber(upgrade_str),
+            count = 1,
+        }
+    end
+
+    -- //send<id>x<count>
+    id_str, count_str = string.match(suffix, "^(%d+)x(%d+)$")
+    if id_str then
+        return {
+            id = tonumber(id_str),
+            upgrade = 0,
+            count = tonumber(count_str),
+        }
+    end
+
+    -- //send<id>
+    id_str = string.match(suffix, "^(%d+)$")
+    if id_str then
+        return {
+            id = tonumber(id_str),
+            upgrade = 0,
+            count = 1,
+        }
+    end
+
+    return nil
+end
+
 -- 处理 //send 帮助提示
 local function handle_send_help(user)
     user:SendNotiPacketMessage("——————————发放物品——————————", 14)
@@ -64,7 +118,7 @@ local function handle_send_help(user)
     user:SendNotiPacketMessage("//send<物品ID>x<数量>       发放物品,数量N个", 14)
     user:SendNotiPacketMessage("//send<物品ID>+<强化等级>   发放物品,强化等级N,数量1个", 14)
     user:SendNotiPacketMessage("//send<物品ID>+<强化等级>x<数量> 发放物品,强化等级N,数量N个", 14)
-    user:SendNotiPacketMessage(string.format("注意：单次最多发放 %d 个", cfg.max_count), 14)
+    user:SendNotiPacketMessage(string.format("注意：单次最多发放 %d 个，强化等级 0~%d", cfg.max_count, cfg.max_upgrade_level), 14)
 
     if logger then
         logger.info("[gm_send_item][help] acc=%d chr=%d", user:GetAccId(), user:GetCharacNo())
@@ -102,48 +156,40 @@ end
 
 -- 处理 //send <params> 实际发放逻辑
 local function handle_send(user, input)
-    local parsed = nil
+    local suffix = string.sub(input, #cfg.command + 1)
+    local parsed = parse_send_args(suffix)
 
-    -- 格式：//send<id>+<level>x<count>
-    if string.find(input, "+") and string.find(input, "x") then
-        local a = string.find(input, "+")
-        local b = string.find(input, "x")
-        local id = tonumber(string.sub(input, 7, a - 1))
-        local up = tonumber(string.sub(input, a + 1, b - 1))
-        local cnt = tonumber(string.sub(input, b + 1))
-        parsed = { id = id, count = cnt, upgrade = up }
-
-    -- 格式：//send<id>+<level>
-    elseif string.find(input, "+") then
-        local i = string.find(input, "+")
-        local up = tonumber(string.sub(input, i + 1))
-        local id = tonumber(string.sub(input, 7, i - 1))
-        parsed = { id = id, count = 1, upgrade = up }
-
-    -- 格式：//send<id>x<count>
-    elseif string.find(input, "x") then
-        local i = string.find(input, "x")
-        local cnt = tonumber(string.sub(input, i + 1))
-        local id = tonumber(string.sub(input, 7, i - 1))
-        parsed = { id = id, count = cnt, upgrade = 0 }
-
-    -- 格式：//send<id>
-    else
-        local id = tonumber(string.sub(input, 7))
-        parsed = { id = id, count = 1, upgrade = 0 }
+    -- 格式无效
+    if not parsed then
+        user:SendNotiPacketMessage("——————————发放失败——————————\n指令格式错误，请输入 //send 查看帮助。", 14)
+        log_op(user, 0, 0, 0, "invalid_format", "input=" .. tostring(input))
+        return
     end
 
     -- 校验物品 ID
-    if not parsed.id then
+    if not parsed.id or parsed.id <= 0 then
         user:SendNotiPacketMessage("——————————发放失败——————————\n物品代码无效，请检查格式。", 14)
-        log_op(user, 0, 0, 0, "invalid_id", "input=" .. tostring(input))
+        log_op(user, parsed.id or 0, parsed.count, parsed.upgrade, "invalid_id", "input=" .. tostring(input))
+        return
+    end
+
+    -- 校验强化等级
+    if parsed.upgrade < 0 then
+        user:SendNotiPacketMessage("——————————发放失败——————————\n强化等级不能为负数。", 14)
+        log_op(user, parsed.id, parsed.count, parsed.upgrade, "invalid_upgrade", "input=" .. tostring(input))
+        return
+    end
+    if parsed.upgrade > cfg.max_upgrade_level then
+        user:SendNotiPacketMessage(
+            string.format("——————————发放失败——————————\n强化等级超过上限（最大 %d）。", cfg.max_upgrade_level), 14)
+        log_op(user, parsed.id, parsed.count, parsed.upgrade, "upgrade_exceeded", "max=" .. tostring(cfg.max_upgrade_level))
         return
     end
 
     -- 校验数量
     if not parsed.count or parsed.count < 1 then
         user:SendNotiPacketMessage("——————————发放失败——————————\n数量无效，需大于 0。", 14)
-        log_op(user, parsed.id, parsed.count or 0, parsed.upgrade or 0, "invalid_count", "input=" .. tostring(input))
+        log_op(user, parsed.id, parsed.count or 0, parsed.upgrade, "invalid_count", "input=" .. tostring(input))
         return
     end
 
@@ -151,21 +197,21 @@ local function handle_send(user, input)
     if parsed.count > cfg.max_count then
         user:SendNotiPacketMessage(
             string.format("——————————发放失败——————————\n数量超过上限（最多 %d 个）。", cfg.max_count), 14)
-        log_op(user, parsed.id, parsed.count, parsed.upgrade or 0, "count_exceeded", "max=" .. tostring(cfg.max_count))
+        log_op(user, parsed.id, parsed.count, parsed.upgrade, "count_exceeded", "max=" .. tostring(cfg.max_count))
         return
     end
 
-    -- 执行发放
+    -- 执行发放（dpx.item.add 无可靠返回值，仅用 pcall 捕获异常）
     local ok, err = pcall(function()
         give_item(user, parsed.id, parsed.count, parsed.upgrade)
     end)
 
     if ok then
         notify_result(user, parsed.id, parsed.count, parsed.upgrade, true)
-        log_op(user, parsed.id, parsed.count, parsed.upgrade or 0, "success", "input=" .. tostring(input))
+        log_op(user, parsed.id, parsed.count, parsed.upgrade, "success", "input=" .. tostring(input))
     else
         notify_result(user, parsed.id, parsed.count, parsed.upgrade, false)
-        log_op(user, parsed.id, parsed.count, parsed.upgrade or 0, "error", "err=" .. tostring(err or "unknown"))
+        log_op(user, parsed.id, parsed.count, parsed.upgrade, "error", "err=" .. tostring(err or "unknown"))
     end
 end
 
@@ -202,13 +248,7 @@ local function on_gm_input(fnext, _user, input)
     end
 
     -- 解析并发放
-    local suffix = string.sub(input, #cfg.command + 1)
-    if suffix and #suffix > 0 then
-        handle_send(user, input)
-    else
-        handle_send_help(user)
-    end
-
+    handle_send(user, input)
     return 0
 end
 
@@ -225,8 +265,8 @@ function M.setup(ctx, deps)
         dpx.hook(game.HookType.GmInput, on_gm_input)
         is_hook_registered = true
         if logger then
-            logger.info("[gm_send_item] registered GmInput hook command=%s max_count=%d",
-                tostring(cfg.command), cfg.max_count)
+            logger.info("[gm_send_item] registered GmInput hook command=%s max_count=%d max_upgrade=%d",
+                tostring(cfg.command), cfg.max_count, cfg.max_upgrade_level)
         end
     elseif logger then
         logger.info("[gm_send_item] setup skipped hook registration command=%s",

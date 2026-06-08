@@ -241,6 +241,9 @@ local config = {
         -- 单次发放数量上限。
         max_count = 100,
 
+        -- 强化等级上限。
+        max_upgrade_level = 31,
+
         -- 邮件服务器组（暂未使用邮件，预留）。
         server_group = 3,
 
