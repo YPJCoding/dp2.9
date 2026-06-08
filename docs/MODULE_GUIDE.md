@@ -2,17 +2,19 @@
 
 本文档是模块开发总览。Lua 细节见 [LUA_MODULE_GUIDE.md](LUA_MODULE_GUIDE.md)，Frida/JS 细节见 [FRIDA_MODULE_GUIDE.md](FRIDA_MODULE_GUIDE.md)。
 
-## 模块拆分原则
+## 模块拆分建议
 
-- 一个功能一个模块。
-- 入口文件只做启动。
-- 配置集中放在 `script/config.lua`。
-- 模块注册集中放在 `script/bootstrap.lua` 或 JS 启动调度文件中。
+- 一个相对独立的功能可以放在一个模块中。
+- 入口文件建议只做启动。
+- 公共配置可以集中放在 `script/config.lua`。
+- 模块注册可以集中放在 `script/bootstrap.lua` 或 JS 启动调度文件中。
+
+这些建议只用于保持模板结构清晰，不限制真实项目的业务实现方式。
 
 ## 新增 Lua 模块
 
 1. 在 `script/modules/` 新建模块。
-2. 在 `script/config.lua` 中新增配置开关。
+2. 按项目需要读取配置。
 3. 在 `script/bootstrap.lua` 中注册模块。
 
 示例：
@@ -33,9 +35,9 @@ return M
 
 ## 新增 Lua handler
 
-handler 用于运行时事件接入。
+handler 可用于运行时事件接入。
 
-要求：
+模板建议：
 
 - 不绑定真实 item_id 作为模板默认值。
 - 只展示注册结构。
@@ -44,9 +46,9 @@ handler 用于运行时事件接入。
 
 1. 在 `script/js/` 新建模块。
 2. 提供 `startXxx()`。
-3. 在 JS 入口或 loader 中按配置加载。
-4. 涉及 hook 时使用防重复 attach。
-5. 真实地址集中放入地址文件，不要散落在业务模块。
+3. 按项目需要从 JS 入口或 loader 中加载。
+4. 涉及 hook 时建议使用防重复 attach。
+5. 运行时地址建议集中管理，不要散落在多个模块中。
 
 示例：
 
@@ -60,7 +62,7 @@ function startExampleFeature(cfg, addresses) {
     }
 
     if (!cfg || cfg.enabled !== true) {
-        console.log('[example] disabled');
+        console.log('[example] config not enabled');
         return;
     }
 
@@ -73,15 +75,19 @@ if (typeof globalThis !== 'undefined') {
 }
 ```
 
-## 配置要求
+上面的 `cfg.enabled` 只是配置读取示例，不代表真实项目必须使用相同启用方式。
 
-功能通过配置开关启用：
+## 配置读取示例
+
+模板提供一个配置结构示例：
 
 ```lua
 features = {
     enable_example_module = false,
 }
 ```
+
+真实项目可以按自身需要设计配置结构。
 
 ## 命名规范
 
