@@ -4,6 +4,8 @@
 -- 删除类能力受 config.risk.enable_delete_handlers 控制，默认关闭。
 -- 其中宠物/时装清理还会执行 SQL 删除记录，也必须同时开启 enable_sql_handlers。
 
+local handler_utils = require("script.handler_utils")
+
 local M = {}
 
 local function is_delete_handler_enabled(ctx)
@@ -16,19 +18,6 @@ local function is_sql_handler_enabled(ctx)
     local config = ctx.config or {}
     local risk = config.risk or {}
     return risk.enable_sql_handlers == true
-end
-
-local function log_item_return(ctx, user, item_id, reason)
-    local logger = ctx.logger
-    if logger then
-        logger.info(
-            "[useitem][return] module=item_cleanup acc=%d chr=%d item_id=%d reason=%s",
-            user:GetAccId(),
-            user:GetCharacNo(),
-            item_id,
-            tostring(reason or "unknown")
-        )
-    end
 end
 
 local function log_success(ctx, user, item_id, action, count)
@@ -45,27 +34,6 @@ local function log_success(ctx, user, item_id, action, count)
     end
 end
 
-local function reject_when_disabled(user, item_id, ctx, message, reason, risk)
-    local dpx = ctx.dpx
-    local logger = ctx.logger
-    local log_reason = reason or "delete_disabled"
-
-    if logger then
-        logger.info(
-            "[useitem][reject] module=item_cleanup risk=%s acc=%d chr=%d item_id=%d reason=%s",
-            tostring(risk or "delete"),
-            user:GetAccId(),
-            user:GetCharacNo(),
-            item_id,
-            tostring(log_reason)
-        )
-    end
-
-    user:SendNotiPacketMessage(message or "注意： 当前功能未开启！")
-    dpx.item.add(user.cptr, item_id)
-    log_item_return(ctx, user, item_id, log_reason)
-end
-
 function M.register(item_handler, ctx)
     local dpx = ctx.dpx
     local game = ctx.game
@@ -73,10 +41,10 @@ function M.register(item_handler, ctx)
     -- [RISK:HIGH][DELETE][SQL] 宠物删除券：删除宠物栏前 14 格并清理 creature_items
     item_handler[2021458806] = function(user, item_id)
         if not is_delete_handler_enabled(ctx) then
-            return reject_when_disabled(user, item_id, ctx, "注意： 宠物清理功能未开启！", "pet_cleanup_delete_disabled", "delete")
+            return handler_utils.reject_and_return(ctx, user, item_id, "item_cleanup", "delete", "注意： 宠物清理功能未开启！", "pet_cleanup_delete_disabled")
         end
         if not is_sql_handler_enabled(ctx) then
-            return reject_when_disabled(user, item_id, ctx, "注意： 宠物清理依赖 SQL 功能，当前未开启！", "pet_cleanup_sql_disabled", "sql")
+            return handler_utils.reject_and_return(ctx, user, item_id, "item_cleanup", "sql", "注意： 宠物清理依赖 SQL 功能，当前未开启！", "pet_cleanup_sql_disabled")
         end
 
         local q = 0
@@ -95,18 +63,17 @@ function M.register(item_handler, ctx)
             log_success(ctx, user, item_id, "pet_cleanup", q)
         else
             user:SendNotiPacketMessage("注意： 宠物清理 失败！")
-            dpx.item.add(user.cptr, item_id)
-            log_item_return(ctx, user, item_id, "no_pet_to_cleanup")
+            handler_utils.return_item(ctx, user, item_id, "item_cleanup", "no_pet_to_cleanup")
         end
     end
 
     -- [RISK:HIGH][DELETE][SQL] 时装删除券：删除时装栏前 14 格并清理 user_items
     item_handler[2022110503] = function(user, item_id)
         if not is_delete_handler_enabled(ctx) then
-            return reject_when_disabled(user, item_id, ctx, "注意： 时装清理功能未开启！", "avatar_cleanup_delete_disabled", "delete")
+            return handler_utils.reject_and_return(ctx, user, item_id, "item_cleanup", "delete", "注意： 时装清理功能未开启！", "avatar_cleanup_delete_disabled")
         end
         if not is_sql_handler_enabled(ctx) then
-            return reject_when_disabled(user, item_id, ctx, "注意： 时装清理依赖 SQL 功能，当前未开启！", "avatar_cleanup_sql_disabled", "sql")
+            return handler_utils.reject_and_return(ctx, user, item_id, "item_cleanup", "sql", "注意： 时装清理依赖 SQL 功能，当前未开启！", "avatar_cleanup_sql_disabled")
         end
 
         local q = 0
@@ -125,15 +92,14 @@ function M.register(item_handler, ctx)
             log_success(ctx, user, item_id, "avatar_cleanup", q)
         else
             user:SendNotiPacketMessage("注意： 时装清理 失败！")
-            dpx.item.add(user.cptr, item_id)
-            log_item_return(ctx, user, item_id, "no_avatar_to_cleanup")
+            handler_utils.return_item(ctx, user, item_id, "item_cleanup", "no_avatar_to_cleanup")
         end
     end
 
     -- [RISK:HIGH][DELETE] 副职业一键分解券：分解装备背包前 16 格
     item_handler[2022110504] = function(user, item_id)
         if not is_delete_handler_enabled(ctx) then
-            return reject_when_disabled(user, item_id, ctx, "注意： 装备分解功能未开启！", "equipment_disjoint_delete_disabled", "delete")
+            return handler_utils.reject_and_return(ctx, user, item_id, "item_cleanup", "delete", "注意： 装备分解功能未开启！", "equipment_disjoint_delete_disabled")
         end
 
         local q = 0
@@ -153,8 +119,7 @@ function M.register(item_handler, ctx)
             log_success(ctx, user, item_id, "equipment_disjoint", q)
         else
             user:SendNotiPacketMessage("注意： 装备分解 失败！")
-            dpx.item.add(user.cptr, item_id)
-            log_item_return(ctx, user, item_id, "no_equipment_to_disjoint")
+            handler_utils.return_item(ctx, user, item_id, "item_cleanup", "no_equipment_to_disjoint")
         end
     end
 end

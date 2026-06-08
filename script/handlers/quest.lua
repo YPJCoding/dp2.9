@@ -2,20 +2,9 @@
 --
 -- 当前模块迁移自 df_game_r.lua，已接入 bootstrap 加载链路。
 
-local M = {}
+local handler_utils = require("script.handler_utils")
 
-local function log_item_return(ctx, user, item_id, reason)
-    local logger = ctx.logger
-    if logger then
-        logger.info(
-            "[useitem][return] module=quest acc=%d chr=%d item_id=%d reason=%s",
-            user:GetAccId(),
-            user:GetCharacNo(),
-            item_id,
-            tostring(reason or "unknown")
-        )
-    end
-end
+local M = {}
 
 local function log_success(ctx, user, item_id, quest_type, count)
     local logger = ctx.logger
@@ -54,8 +43,7 @@ local function clear_quest_by_type(user, item_id, ctx, quest_type, success_label
         log_success(ctx, user, item_id, quest_type, q)
     else
         user:SendNotiPacketMessage(string.format("注意： %s 失败！", fail_label))
-        dpx.item.add(user.cptr, item_id)
-        log_item_return(ctx, user, item_id, "no_matching_quest")
+        handler_utils.return_item(ctx, user, item_id, "quest", "no_matching_quest")
     end
 end
 
