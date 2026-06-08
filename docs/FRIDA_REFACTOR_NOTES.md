@@ -93,7 +93,13 @@
 3. 数据库连接信息硬编码 localhost:3306，生产环境需改为从配置文件读取
 4. `setTimeout` 依赖 Frida 运行环境提供，不是所有环境都支持
 
-## 第三轮修复 (fix: harden frida runtime db and bundle build)
+## 第四轮修复 (fix: add startup fallback for failed early hook)
+
+修复了以下问题：
+
+1. **hook_guard 返回 boolean**：`attachOnce()` 和 `replaceOnce()` 现在返回 `true`（成功/已注册）或 `false`（失败），调用方可感知 hook 注册结果。
+2. **df_game_r.js early hook 失败兜底**：`attachOnce('runtime_check_argv', ...)` 返回 `false` 时兜底调用 `start()`，避免 runtime 静默不启动。
+3. **误部署检测**：`start()` 中 `startRuntimeModules` 不存在时输出 `请确认部署的是 dist/df_game_r.bundle.js`，不再误打印 `frida started`。
 
 修复了以下问题：
 

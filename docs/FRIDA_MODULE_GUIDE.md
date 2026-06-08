@@ -85,8 +85,10 @@ script/js/
 
 所有 Interceptor.attach 和 Interceptor.replace 都必须通过：
 
-- `attachOnce(key, address, callbacks)` - 防重复 attach
-- `replaceOnce(key, address, callback, retType, argTypes)` - 防重复 replace
+- `attachOnce(key, address, callbacks)` — 返回 `true`（已注册或注册成功）/ `false`（注册失败，已输出日志）
+- `replaceOnce(key, address, callback, retType, argTypes)` — 同上
+
+调用方应在 `attachOnce` 返回 `false` 时做兜底处理（如 `df_game_r.js` 的 early hook 失败时直接启动）。
 
 为什么要必须使用：
 1. Frida 热重载时原有 hook 不会被自动清除

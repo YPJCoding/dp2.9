@@ -11,6 +11,9 @@
 //
 // 所有 hook（包括本文件的 early hook）都通过 attachOnce 注册，
 // 防止热重载时重复 attach。
+//
+// 推荐部署产物：dist/df_game_r.bundle.js
+// 如果单独部署 df_game_r.js，script/js/ 下的模块不会被自动加载。
 
 rpc.exports = {
   init: function (stage, parameters) {
@@ -53,23 +56,34 @@ function awake() {
   }
 
   // 使用 attachOnce 防重复注册
-  globalThis.attachOnce('runtime_check_argv', addr.check_argv, {
+  // attachOnce 返回 false 表示注册失败（地址异常、函数不可 hook 等），
+  // 此时必须兜底直接启动，否则整个 runtime 静默不启动
+  var attached = globalThis.attachOnce('runtime_check_argv', addr.check_argv, {
     onEnter: function (args) {},
     onLeave: function (retval) {
       // check_argv 执行完毕=服务器初始化完成，开始加载
       start();
     }
   });
+
+  if (!attached) {
+    console.log('[entry] check_argv hook 注册失败，直接启动');
+    start();
+  }
 }
 
 // 启动函数
 function start() {
   console.log('++++++++++++++++++++ frida init ++++++++++++++++++++');
 
-  // 启动所有 JS 模块（统一的启动调度中心负责加载所有子模块）
-  if (typeof globalThis.startRuntimeModules === 'function') {
-    globalThis.startRuntimeModules();
+  // startRuntimeModules 只在 bundle 中存在
+  // 如果单独部署了 df_game_r.js，此函数不存在，必须明确提示
+  if (typeof globalThis.startRuntimeModules !== 'function') {
+    console.log('[entry] startRuntimeModules 不存在，请确认部署的是 dist/df_game_r.bundle.js，而不是单独的 df_game_r.js');
+    return;
   }
+
+  globalThis.startRuntimeModules();
 
   console.log('++++++++++++++++++++ frida started ++++++++++++++++++++');
 }

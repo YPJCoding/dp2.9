@@ -15,17 +15,23 @@ var g_hook_replaced = {};
 // key: 唯一标识，同一 key 多次调用只执行一次
 // address: hook 的目标地址 (NativePointer)
 // callbacks: { onEnter: function(args) {}, onLeave: function(retval) {} }
+//
+// 返回值语义：
+//   true  = 已注册过（幂等）或本次注册成功
+//   false = 注册失败（已输出日志），调用方应判断并做兜底处理
 function attachOnce(key, address, callbacks) {
   if (g_hook_attached[key]) {
-    // 已经 attach 过，跳过
-    return;
+    // 已经 attach 过，跳过（视为成功）
+    return true;
   }
 
   try {
     Interceptor.attach(address, callbacks);
     g_hook_attached[key] = true;
+    return true;
   } catch (err) {
     console.log('[hook_guard] attach failed, key=' + key + ', error=' + err);
+    return false;
   }
 }
 
@@ -35,17 +41,23 @@ function attachOnce(key, address, callbacks) {
 // callback: 替换后的实现
 // retType: 返回值类型
 // argTypes: 参数类型数组
+//
+// 返回值语义：
+//   true  = 已替换过（幂等）或本次替换成功
+//   false = 替换失败（已输出日志）
 function replaceOnce(key, address, callback, retType, argTypes) {
   if (g_hook_replaced[key]) {
-    // 已经 replace 过，跳过
-    return;
+    // 已经 replace 过，跳过（视为成功）
+    return true;
   }
 
   try {
     Interceptor.replace(address, new NativeCallback(callback, retType, argTypes));
     g_hook_replaced[key] = true;
+    return true;
   } catch (err) {
     console.log('[hook_guard] replace failed, key=' + key + ', error=' + err);
+    return false;
   }
 }
 
