@@ -162,6 +162,7 @@
 
 ### Removed
 
+- Removed migrated batch item notification helper bodies from `df_game_r.js`; `script/js/batch_item_notify.js` keeps the old compatibility function names.
 - Removed `script/Work_Reload.lua`; config hot reload is now handled directly through `script/config.lua`.
 
 ### Notes
