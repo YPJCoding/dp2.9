@@ -31,7 +31,7 @@ FUNCTION_NAMES = (
     "event_villageattack_load_from_db",
 )
 REPLACEMENT_HEADER = """// 怪物攻城 DB 存档函数已迁移到 script/js/village_attack_db.js。
-// 保留旧函数名兼容：event_villageattack_save_to_db / event_villageattack_load_from_db。
+// 旧函数名由迁移模块提供，df_game_r.js 不再保留实现。
 
 """
 
@@ -43,7 +43,7 @@ def find_function_block(text: str, name: str) -> tuple[int, int] | None:
         return None
 
     block_start = start
-    prev_line_start = text.rfind("\n", 0, start - 1)
+    prev_line_start = text.rfind("\n", 0, start)
     if prev_line_start >= 0:
         prev_prev_line_start = text.rfind("\n", 0, prev_line_start - 1)
         candidate_start = prev_prev_line_start + 1 if prev_prev_line_start >= 0 else 0
