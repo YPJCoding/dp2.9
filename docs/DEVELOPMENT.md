@@ -29,7 +29,7 @@ template/clean-runtime-skeleton
 - 创建或接收 `ctx`。
 - 调用 `script.bootstrap`。
 - 不写真实业务逻辑。
-- 不绑定真实 item_id。
+- 不绑定真实项目标识。
 
 ### `df_game_r.js`
 
@@ -70,7 +70,7 @@ return M
 
 ```js
 function startExampleModule() {
-    console.log('started');
+  console.log('started');
 }
 ```
 
@@ -88,5 +88,5 @@ bash tools/check_lua_syntax.sh
 - 不在入口文件写真实业务逻辑。
 - 不在模板分支保留具体业务模块。
 - 不在模板分支保留真实运行时地址。
-- 不在模板分支保留真实 item_id。
+- 不在模板分支保留真实项目标识。
 - 不在模板文档中规定具体业务功能的启用方式。
