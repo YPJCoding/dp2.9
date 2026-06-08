@@ -6,14 +6,22 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
-count=0
+files=()
+if [ -f df_game_r.js ]; then
+  files+=("df_game_r.js")
+fi
 
-for file in df_game_r.js script/js/*.js; do
-  if [ -f "$file" ]; then
-    echo "checking $file"
-    node --check "$file"
-    count=$((count + 1))
-  fi
+if [ -d script/js ]; then
+  while IFS= read -r file; do
+    files+=("$file")
+  done < <(find script/js -name "*.js" -type f | sort)
+fi
+
+count=0
+for file in "${files[@]}"; do
+  echo "checking $file"
+  node --check "$file"
+  count=$((count + 1))
 done
 
 echo "checked $count JS files"
