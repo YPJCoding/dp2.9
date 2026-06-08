@@ -146,6 +146,10 @@ local config = {
         -- 注册 GmInput hook，提供 //qd 指令；默认关闭，开启后通过邮件发放奖励。
         enable_signin = false,
 
+        -- GM 发物品模块。
+        -- 注册 GmInput hook，提供旧 dp2 的 //send 指令；默认关闭，仅 GM 可用。
+        enable_gm_send_item = false,
+
         -- 经验副本/泡点模块。
         -- 定时检查在线玩家是否在指定副本，满足条件时发经验和代币。
         enable_exp_dungeon = true,
@@ -227,6 +231,25 @@ local config = {
         -- 玩家提示文案。
         success_message = "——————————每日签到——————————  签到奖励发送至邮箱，若空邮件请小退一下!",
         duplicate_message = "——————————每日签到——————————  您今天已经签到完毕，请勿重复签到！",
+    },
+
+    gm_send_item = {
+        -- GM 发物品指令。
+        -- 仅 features.enable_gm_send_item=true 后生效。
+        command = "//send",
+
+        -- 单次发放数量上限。
+        max_count = 100,
+
+        -- 强化等级上限。
+        max_upgrade_level = 31,
+
+        -- 邮件服务器组（暂未使用邮件，预留）。
+        server_group = 3,
+
+        -- 发放邮件标题与内容（暂未使用邮件，预留）。
+        mail_title = "GM物品发放",
+        mail_content = "请查收GM发放的物品。",
     },
 
     exp_dungeon = {
