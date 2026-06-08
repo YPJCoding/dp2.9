@@ -4,7 +4,7 @@
 // - 用于承接 df_game_r.js 入口瘦身。
 // - df_game_r.js 后续只需加载 startup_helpers.js 和 startup_modules.js，调用 startMigratedModules(cfg)。
 // - 本文件只调度已经拆分到 script/js/*.js 的模块。
-// - 怪物攻城当前只接入启动适配层，核心实现仍留在 df_game_r.js，后续小步拆分。
+// - 怪物攻城当前已拆出状态、DB、通知、hook、结算和启动适配，native 声明仍留在 df_game_r.js。
 
 function startupModulesLog(message) {
   try {
@@ -97,9 +97,10 @@ function anyPatchFeatureEnabled(cfg) {
 function startMigratedModules(cfg) {
   cfg = cfg || {};
 
-  // 怪物攻城状态会被 init_db()/uninit_db() 的存档逻辑使用。
-  // 即使 enable_village_attack=false，也必须先加载状态模块，避免后续清理 df_game_r.js 默认状态对象后出现缺失。
+  // 怪物攻城状态/DB 会被 init_db()/uninit_db() 使用。
+  // 即使 enable_village_attack=false，也必须先加载，避免清理 df_game_r.js 后出现缺失。
   loadModuleOnly('village_attack_state', true, 'village_attack_state');
+  loadModuleOnly('village_attack_db', true, 'village_attack_db');
 
   // 纯 helper / callback 模块：先加载，供后续 history_log 或 Lua/JS 回调复用。
   loadModuleOnly('batch_item_notify', getFeatureFlag(cfg, 'enable_batch_item_add', true), 'batch_item_notify');
@@ -135,7 +136,7 @@ function startMigratedModules(cfg) {
   startModuleFeature('return_user', getFeatureFlag(cfg, 'enable_return_user', true), 'return_user', 'setReturnUser', [15]);
   startModuleFeature('vip_login', getFeatureFlag(cfg, 'enable_vip_login', true), 'vip_login', 'startVipLogin');
 
-  // 怪物攻城目前通过适配模块统一启动，核心实现仍在 df_game_r.js。
+  // 怪物攻城目前通过适配模块统一启动，native 声明仍留在 df_game_r.js。
   startModuleFeature('village_attack', getFeatureFlag(cfg, 'enable_village_attack', true), 'village_attack', 'startVillageAttack');
 
   startupModulesLog('migrated module startup finished');
