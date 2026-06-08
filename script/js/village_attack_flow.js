@@ -10,11 +10,13 @@
 // 说明：
 // - 核心 hook、刷怪、PT 结算、奖励邮件仍保留在 df_game_r.js。
 // - UI/进度通知已拆到 village_attack_notify.js。
+// - hook 重复安装保护已拆到 village_attack_hook.js。
 // - 本模块目前保持旧流程语义，用于承接下一步 df_game_r.js 瘦身。
 // - 先加载 village_attack_state，确保状态对象、常量和纯状态函数可用。
 
 var g_village_attack_flow_loaded = true;
 var g_village_attack_notify_loaded = false;
+var g_village_attack_hook_loaded = false;
 
 function villageAttackFlowLog(message) {
   try {
@@ -60,6 +62,29 @@ function ensureVillageAttackNotifyModule() {
     villageAttackFlowLog('loaded village_attack_notify');
   }
   return g_village_attack_notify_loaded;
+}
+
+function ensureVillageAttackHookModule() {
+  if (g_village_attack_hook_loaded) {
+    return true;
+  }
+
+  try {
+    if (typeof safeLoadModule === 'function') {
+      g_village_attack_hook_loaded = safeLoadModule('village_attack_hook');
+    } else {
+      dp_load('village_attack_hook');
+      g_village_attack_hook_loaded = true;
+    }
+  } catch (e) {
+    villageAttackFlowLog('load village_attack_hook failed: ' + e.message);
+    g_village_attack_hook_loaded = false;
+  }
+
+  if (g_village_attack_hook_loaded) {
+    villageAttackFlowLog('loaded village_attack_hook');
+  }
+  return g_village_attack_hook_loaded;
 }
 
 // 怪物攻城活动计时器(每5秒触发一次)
@@ -148,6 +173,7 @@ function start_event_villageattack_timer() {
 function start_event_villageattack() {
   ensureVillageAttackEventInfo();
   ensureVillageAttackNotifyModule();
+  ensureVillageAttackHookModule();
 
   // patch 相关函数，修复活动流程。hook 实现仍保留在 df_game_r.js。
   hook_VillageAttack();
@@ -162,4 +188,5 @@ function start_event_villageattack() {
 
 ensureVillageAttackFlowStateModule();
 ensureVillageAttackNotifyModule();
+ensureVillageAttackHookModule();
 villageAttackFlowLog('flow helpers loaded');
