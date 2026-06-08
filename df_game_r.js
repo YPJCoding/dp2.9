@@ -1225,21 +1225,10 @@ function uninit_db() {
 	}
 }
 
-//怪物攻城活动数据存档
-function event_villageattack_save_to_db() {
-	api_MySQL_exec(mysql_frida, "replace into game_event (event_id, event_info) values ('villageattack', '" + JSON.stringify(villageAttackEventInfo) + "');");
-}
+// 怪物攻城 DB 存档函数已迁移到 script/js/village_attack_db.js。
+// 旧函数名由迁移模块提供，df_game_r.js 不再保留实现。
 
-//从数据库载入怪物攻城活动数据
-function event_villageattack_load_from_db() {
-	if (api_MySQL_exec(mysql_frida, "select event_info from game_event where event_id = 'villageattack';")) {
-		if (MySQL_get_n_rows(mysql_frida) == 1) {
-			MySQL_fetch(mysql_frida);
-			const info = api_MySQL_get_str(mysql_frida, 0);
-			villageAttackEventInfo = JSON.parse(info);
-		}
-	}
-}
+
 
 //处理到期的自定义定时器
 function do_timer_dispatch() {
