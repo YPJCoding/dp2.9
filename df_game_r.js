@@ -1650,69 +1650,9 @@ function use_ftcoin_change_luck_point(user) {
 	api_CUser_SendNotiPacketMessage(user, '命运已被改变, 当前幸运点数: ' + new_luck_point, 0);
 }
 
-//使用角色幸运值加成装备爆率
-function enable_drop_use_luck_point() {
-	//由于roll点爆装函数拿不到user, 在杀怪和翻牌函数入口保存当前正在处理的user
-	var cur_luck_user = null;
-	//DisPatcher_DieMob::dispatch_sig
-	Interceptor.attach(ptr(0x81EB0C4),
-		{
-			onEnter: function (args) {
-				cur_luck_user = args[1];
-			},
-			onLeave: function (retval) {
-				cur_luck_user = null;
-			}
-		});
-
-	//CParty::SetPlayResult
-	Interceptor.attach(ptr(0x85B2412),
-		{
-			onEnter: function (args) {
-				cur_luck_user = args[1];
-			},
-			onLeave: function (retval) {
-				cur_luck_user = null;
-			}
-		});
-
-	//修改决定出货品质(rarity)的函数 使出货率享受角色幸运值加成
-	//CLuckPoint::GetItemRarity
-	const CLuckPoint_GetItemRarity_ptr = ptr(0x8550BE4);
-	const CLuckPoint_GetItemRarity = new NativeFunction(CLuckPoint_GetItemRarity_ptr, 'int', ['pointer', 'pointer', 'int', 'int'], { "abi": "sysv" });
-	Interceptor.replace(CLuckPoint_GetItemRarity_ptr, new NativeCallback(function (a1, a2, roll, a4) {
-		//使用角色幸运值roll点代替纯随机roll点
-		if (cur_luck_user) {
-			//获取当前角色幸运值
-			const luck_point = CUserCharacInfo_GetCurCharacLuckPoint(cur_luck_user);
-
-			//roll点范围1-100W, roll点越大, 出货率越高
-			//角色幸运值范围1-10W
-			//使用角色 [当前幸运值*10] 作为roll点下限, 幸运值越高, roll点越大
-			roll = get_random_int(luck_point * 10, 1000000);
-		}
-		//执行原始计算爆装品质函数
-		const rarity = CLuckPoint_GetItemRarity(a1, a2, roll, a4);
-		//调整角色幸运值
-		if (cur_luck_user) {
-			var rate = 1.0;
-
-			//出货粉装以上, 降低角色幸运值
-			if (rarity >= 3) {
-				//出货品质越高, 幸运值下降约快
-				rate = 1 - (rarity * 0.01);
-			}
-			else {
-				//未出货时, 提升幸运值
-				rate = 1.01;
-			}
-			//设置新的幸运值
-			const new_luck_point = Math.floor(CUserCharacInfo_GetCurCharacLuckPoint(cur_luck_user) * rate);
-			api_CUserCharacInfo_SetCurCharacLuckPoint(cur_luck_user, new_luck_point);
-		}
-		return rarity;
-	}, 'int', ['pointer', 'pointer', 'int', 'int']));
-}
+// 幸运点影响掉落品质函数已迁移到 script/js/luck_point_drop.js。
+// 迁移模块提供 startLuckPointDrop() 替代旧 enable_drop_use_luck_point() 入口。
+// df_game_r.js 保留使用中的幸运点辅助函数（use_ftcoin_change_luck_point、API 等）供 hook_user_inout_game_world 复用。
 
 //取消新账号送成长契约
 

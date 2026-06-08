@@ -202,6 +202,7 @@ startModuleFeature('luck_point_drop', cfg.enable_luck_point_drop === true, 'luck
 - 时装镶嵌修复旧实现已从 `df_game_r.js` 移出，旧函数名由 `script/js/emblem_fix.js` 提供。
 - 掉落公告/奖励旧实现已从 `df_game_r.js` 移出，由默认关闭的 `script/js/drop_announce.js` 提供 `processDropAnnounce(...)`。
 - 历史日志追踪旧实现已从 `df_game_r.js` 移出，旧函数名由 `script/js/history_log.js` 提供。
+- 幸运点影响掉落旧实现已从 `df_game_r.js` 移出，旧函数名保留在 `script/js/luck_point_drop.js` 中。
 - 随机属性旧实现已从 `df_game_r.js` 移出，旧函数名由 `script/js/random_option.js` 提供。
 - `UserUseItemEvent()` 旧实现已从 `df_game_r.js` 移出，旧函数名由 `script/js/user_use_item_event.js` 提供。
 - 批量物品 UI 通知旧实现已从 `df_game_r.js` 移出，旧函数名由 `script/js/batch_item_notify.js` 提供。

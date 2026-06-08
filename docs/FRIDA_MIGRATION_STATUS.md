@@ -25,7 +25,7 @@
 | 在线奖励 | `script/js/online_reward.js` | `enable_online_reward=false` | `[!]` | 已从旧 `enable_online_reward()` 拆出独立模块，增加重复 hook 保护；会发点券，默认关闭，入口仍待切换。 |
 | 幸运在线玩家 | `script/js/lucky_online.js` | `enable_lucky_online=false` | `[!]` | 当前仓库和旧仓库未找到真实 `start_event_lucky_online_user()` 实现；已补兼容桩避免 ReferenceError，不凭空实现抽奖/发奖逻辑。 |
 | 随机属性继承 / 自动解封 | `script/js/random_option.js` | `enable_random_option_inherit=false` / `enable_auto_unseal=false` | `[~]` | 已从旧 `change_random_option_inherit()` 和 `auto_unseal_random_option_equipment()` 拆出独立模块，增加重复 hook 保护，并清理 `df_game_r.js` 旧实现；待实测。 |
-| 幸运点影响掉落 | `script/js/luck_point_drop.js` | `enable_luck_point_drop=true` | `[!]` | 已从旧 `enable_drop_use_luck_point()` 拆出独立模块，增加重复启动保护；会替换爆率计算函数，高风险，入口仍待切换。 |
+| 幸运点影响掉落 | `script/js/luck_point_drop.js` | `enable_luck_point_drop=true` | `[!]` | 已从旧 `enable_drop_use_luck_point()` 拆出独立模块，并清理 `df_game_r.js` 旧实现；会替换爆率计算函数，高风险，待实测。 |
 | 账号仓库扩展 | `script/js/account_cargo.js` | `enable_account_cargo=false` | `[!]` | 已拆模块，默认关闭；`startup_modules.js` 已纳入调度但仍默认关闭。功能极高风险；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
 | 创建角色数量限制 | `script/js/patches.js` | `enable_create_character_unlimit=true` | `[~]` | 已迁移并加重复 hook 保护；`startup_modules.js` 已纳入调度。 |
 | +13 强化券刷新 | `script/js/patches.js` | `enable_strengthen_refresh=true` | `[~]` | 已修复参数口径并纳入 `startup_modules.js` 调度。 |
@@ -52,7 +52,7 @@
 | 在线奖励入口切换 | `[~]` | `online_reward.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
 | 幸运在线玩家真实实现 | `[ ]` | `lucky_online.js` 当前只是兼容桩；真实 `start_event_lucky_online_user()` 未在当前仓库或旧仓库中找到。 |
 | 随机属性旧实现清理 | `[x]` | `random_option.js` 已保留旧函数名兼容，`startup_modules.js` 已调度，`df_game_r.js` 旧函数已删除。 |
-| 幸运点掉落入口切换 | `[~]` | `luck_point_drop.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
+| 幸运点掉落旧实现清理 | `[x]` | `luck_point_drop.js` 已保留旧函数名兼容，`startup_modules.js` 已调度，`df_game_r.js` 旧函数已删除。 |
 | 掉落公告旧实现清理 | `[x]` | `drop_announce.js` 已提供 `processDropAnnounce(...)`，`df_game_r.js` 旧 `processing_data(...)` 已删除；功能默认保持关闭。 |
 | 批量物品 UI 通知旧实现清理 | `[x]` | `batch_item_notify.js` 已保留旧函数名兼容，`df_game_r.js` 旧内联函数已删除。 |
 | frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
