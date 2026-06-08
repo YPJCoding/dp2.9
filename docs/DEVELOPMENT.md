@@ -1,92 +1,96 @@
 # 开发说明
 
-## 目标
+## 模块重构后的启动流程
 
-本模板用于快速开始新的 DP runtime 项目。
-
-核心原则：
-
-- 入口文件只负责启动。
-- 示例模块只展示结构。
-- 模板分支不包含真实业务逻辑。
-- 模板分支不规定具体业务实现方式。
-
-## 分支使用方式
+### JS/Frida 侧
 
 ```text
-template/clean-runtime-skeleton
-  -> your-project/business-branch
+rpc.exports.init(stage='early')
+  -> Interceptor.attach(check_argv) -- 等待服务器初始化完成
+  -> start()
+    -> startRuntimeModules()
+      -> createLogger() + createTimeModule()
+      -> createPacketBinding(), createMysqlBinding(), ... (全部 binding)
+      -> attachOnce('timer_dispatcher') -- 线程安全调度
+      -> 数据库初始化（建库建表）
+      -> startTodFixFeature(ctx)
+      -> startEmblemFixFeature(ctx)
+      -> startHiddenOptionFeature(ctx)
+      -> startReturnUserFeature(ctx)
+      -> startRankingFeature(ctx)
+      -> startUserInoutFeature(ctx)
+      -> startVillageAttackFeature(ctx)
+      -> startOnlineRewardFeature(ctx) -- 默认关闭
+
+rpc.exports.dispose()
+  -> disposeRuntimeModules()
+    -> 保存排行榜/活动数据
+    -> 关闭数据库连接
 ```
 
-不要把模板分支合并回业务主线。模板分支只用于拉新项目底板。
+### Lua 侧
 
-## 入口文件职责
+保持不变。`df_game_r.lua` 负责 Lua 模块加载，与 JS 侧解耦。
 
-### `df_game_r.lua`
+## 地址管理
 
-建议只负责 Lua 侧启动：
+所有运行时地址集中在：
 
-- 创建或接收 `ctx`。
-- 调用 `script.bootstrap`。
-- 不写真实业务逻辑。
-- 不绑定真实项目标识。
-
-### `df_game_r.js`
-
-建议只负责 JS/Frida 侧启动：
-
-- 调用 JS 启动函数。
-- 加载 JS 模块。
-- 不直接堆真实业务逻辑。
-- 不直接散落真实地址。
-
-## 配置示例
-
-模板提供一个最小配置示例，用于展示模块读取配置的方式。
-
-```lua
-features = {
-    enable_example_module = false,
-}
+```text
+script/js/runtime_addresses.js
 ```
 
-该配置仅用于示例，不代表真实项目必须使用相同配置结构或启用方式。
+新增地址时请同时添加中文注释。
 
-## Lua 模块结构
+## 配置管理
 
-```lua
-local M = {}
+所有功能开关和参数集中在：
 
-function M.setup(ctx)
-    return M
-end
-
-return M
+```text
+script/js/runtime_config.js
 ```
 
-模块可以通过 `ctx` 获取运行时对象。
+通过 `ctx.config` 读取配置，不要在业务模块中硬编码。
 
-## JS/Frida 模块结构
+## Hook 管理
 
-```js
-function startExampleModule() {
-  console.log('started');
-}
-```
+所有 hook 必须通过 `attachOnce()` / `replaceOnce()` 注册：
 
-JS 模块可以通过启动函数接入。
+- 防止热重载时重复 hook
+- 提供统一的错误日志
+
+位置：`script/js/core/hook_guard.js`
 
 ## 本地检查
 
 ```bash
+# JS 语法检查 (Frida 兼容语法)
 bash tools/check_js_syntax.sh
+
+# Lua 语法检查
 bash tools/check_lua_syntax.sh
 ```
 
-## 模板分支边界
+## 目录结构
 
-- 不在入口文件写真实业务逻辑。
-- 不在模板分支保留具体业务模块。
-- 不在模板分支保留真实运行时地址。
-- 不在模板分支保留真实项目标识。
-- 不在模板文档中规定具体业务功能的启用方式。
+```text
+script/js/
+  core/          # 基础工具模块
+  bindings/      # 游戏 API 封装
+  features/      # 业务功能模块
+    village_attack/  # 大型活动模块（子目录）
+```
+
+## 模块加载顺序
+
+1. Logger / Config
+2. Runtime Addresses
+3. Native Bindings（packet, mysql, user, inventory, item, mail, game_world, timer_dispatcher, quest）
+4. Timer Dispatcher（线程安全调度，必须最先启动）
+5. Database（排行榜和怪物攻城依赖）
+6. 基础修复类（tod_fix, emblem_fix, hidden_option, return_user）
+7. 事件类（user_inout, ranking）
+8. 大型活动（village_attack）
+9. 可选模块（online_reward）
+
+顺序不能随意调整，因为存在模块间依赖。

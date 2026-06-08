@@ -1,215 +1,192 @@
 # Frida/JS 模块开发指南
 
-## 目标
-
-Frida/JS 侧用于编写运行时 JS 模块。模板只提供入口结构、模块组织方式和编码风格示例，不包含真实地址或真实业务实现。
-
-本文档只说明模板结构和编码规范，不规定真实项目的业务逻辑。
-
-## 当前模板结构
-
-当前模板只提供最小 JS 入口和一个示例模块：
+## 目录结构
 
 ```text
-df_game_r.js
-script/js/example_module.js
+script/js/
+  startup_helpers.js          # 启动辅助（日志、环境检测）
+  startup_modules.js          # 模块启动调度中心
+  runtime_config.js           # 配置中心（功能开关、参数）
+  runtime_addresses.js        # 所有 ptr 地址集中管理
+
+  core/
+    logger.js                 # 日志模块（控制台+文件）
+    time.js                   # 时间模块（系统UTC时间）
+    file.js                   # 文件操作模块
+    random.js                 # 随机数模块
+    hook_guard.js             # Hook 防重复模块
+    memory.js                 # 内存操作模块
+
+  bindings/
+    native_functions.js       # NativeFunction 工厂
+    packet.js                 # 封包读写 binding
+    mysql.js                  # MySQL 操作 binding
+    user.js                   # 角色操作 binding
+    inventory.js              # 背包道具 binding
+    item.js                   # 道具数据 binding
+    mail.js                   # 邮件系统 binding
+    game_world.js             # 游戏世界 binding
+    timer_dispatcher.js       # 定时器调度 binding
+    quest.js                  # 任务系统 binding
+
+  features/
+    tod_fix.js                # 绝望之塔修复
+    emblem_fix.js             # 时装徽章镶嵌修复
+    hidden_option.js          # 时装潜能
+    return_user.js            # 勇士归来
+    user_inout.js             # 玩家上下线处理
+    ranking.js                # 战力排行
+    online_reward.js          # 在线奖励
+
+    village_attack/
+      index.js                # 入口
+      constants.js            # 常量
+      state.js                # 状态管理
+      db.js                   # 数据库操作
+      flow.js                 # 流程控制
+      hooks.js                # Hook 集合
+      notify.js               # 通知/广播
+      reward.js               # 奖励发放
+      settlement.js           # 结算
 ```
-
-## 可选拆分结构
-
-项目变复杂后，可以按需要拆分为以下结构：
-
-```text
-df_game_r.js
-  -> startProjectJs()
-    -> script/js/startup_helpers.js
-    -> script/js/startup_modules.js
-      -> script/js/runtime_addresses.js
-      -> script/js/<feature>.js
-```
-
-上面的拆分方式只是结构建议，不要求当前模板必须包含这些文件。
 
 ## 文件职责
 
-### `df_game_r.js`
+### df_game_r.js
 
-建议只做入口：
+只负责 Frida 脚本生命周期入口：
 
-- 启动 JS 侧流程。
-- 加载启动辅助模块。
-- 不直接堆真实业务逻辑。
-- 不直接写大量地址。
+- early 阶段延迟启动（等待服务器初始化）
+- 非 early 阶段直接启动（支持热重载）
+- dispose 阶段调用统一清理函数
 
-### `script/js/startup_helpers.js`
+不包含任何业务逻辑、真实地址、NativeFunction 定义。
 
-可选辅助文件，可以负责：
+### startup_modules.js
 
-- 日志函数。
-- 模块加载辅助。
-- 启动函数调用辅助。
-- 配置读取辅助。
-- 异常保护。
+模块启动调度中心，负责：
 
-### `script/js/startup_modules.js`
+- 按依赖顺序创建 bindings 和 ctx
+- 按配置启动各功能模块
+- 捕获启动异常，不影响后续模块
+- 输出中文启动日志
 
-可选调度文件，可以负责：
+### runtime_addresses.js
 
-- 按项目配置或项目约定启动模块。
-- 控制启动顺序。
-- 统一输出启动日志。
-- 不写具体业务逻辑。
+**所有** ptr(0x...) 地址都放在这里，不散落在业务模块中。
 
-### `script/js/runtime_addresses.js`
+每个地址必须包含：
+- 中文注释说明作用
+- 对应原函数或 hook 点
+- 来源：从旧 frida.js 迁移
+- 风险点或适用场景
 
-可选地址文件，可以集中管理当前项目需要的运行时地址。
+### hook_guard.js
 
-建议：
+所有 Interceptor.attach 和 Interceptor.replace 都必须通过：
 
-- 每个地址有中文注释。
-- 写清楚来源。
-- 写清楚适用版本。
-- 写清楚用途。
-- 避免在多个业务模块中散落裸地址。
+- `attachOnce(key, address, callbacks)` - 防重复 attach
+- `replaceOnce(key, address, callback, retType, argTypes)` - 防重复 replace
 
-示例地址应使用占位值：
+为什么要必须使用：
+1. Frida 热重载时原有 hook 不会被自动清除
+2. 重复 attach 会导致同一个函数被多次 hook，造成逻辑叠加
+3. 统一管理能确保同一个 key 只 hook 一次
 
-```js
-var PROJECT_ADDRESSES = {
-  // 示例函数地址
-  // 来源：待确认
-  // 版本：当前项目版本
-  // 用途：示例占位，不能直接使用
-  example_function: ptr('0x00000000'),
-};
-```
+### native_functions.js
 
-### `script/js/<feature>.js`
-
-一个相对独立的 JS 功能可以放在一个文件中。
-
-建议：
-
-- 提供 `startXxx()`。
-- 有重复 hook 防护。
-- 通过参数接收配置和地址。
-- 不散落裸地址。
-- 不直接读取不属于自己的配置区。
-
-## 示例模块
+提供统一的 `nf()` 工厂函数创建 NativeFunction：
 
 ```js
-var g_example_started = false;
-
-function startExampleFeature(cfg, addresses) {
-  if (g_example_started) {
-    console.log('[example] already started');
-    return;
-  }
-
-  g_example_started = true;
-
-  if (!addresses || !addresses.example_function) {
-    console.log('[example] missing address: example_function');
-    return;
-  }
-
-  try {
-    // Interceptor.attach(addresses.example_function, {
-    //   onEnter: function (args) {},
-    //   onLeave: function (retval) {},
-    // });
-    console.log('[example] started');
-  } catch (err) {
-    console.log('[example] failed: ' + err);
-  }
-}
-
-if (typeof globalThis !== 'undefined') {
-  globalThis.startExampleFeature = startExampleFeature;
+function nf(address, retType, argTypes) {
+  return new NativeFunction(address, retType, argTypes, { abi: 'sysv' });
 }
 ```
 
-## 配置读取示例
+业务模块不直接创建 NativeFunction，通过 binding 或 ctx 调用。
 
-JS 配置可以集中管理：
+### runtime_config.js
+
+配置中心，使用 feature flag 控制各模块是否启用：
 
 ```js
 var PROJECT_JS_CONFIG = {
   features: {
-    enable_example_feature: false,
+    timer_dispatcher: true,
+    tod_fix: true,
+    emblem_fix: true,
+    // ...
+    online_reward: false, // 高风险，默认关闭
   },
 };
 ```
 
-以上内容只是配置读取示例。真实项目可以按自身需要设计配置结构和模块接入方式。
+## 如何新增一个 Frida Feature
 
-## Hook 编码建议
+1. 在 `script/js/features/` 新建 `<feature>.js`
+2. 实现 `startXxxFeature(ctx)` 函数
+3. 使用 `attachOnce` / `replaceOnce` 注册 hook
+4. 新地址添加到 `runtime_addresses.js`
+5. 新配置项添加到 `runtime_config.js`
+6. 在 `startup_modules.js` 中注册启动
+7. 加中文注释
+8. 运行 `bash tools/check_js_syntax.sh` 检查语法
 
-每个 hook 建议：
+## 编码规范
 
-- 防重复 attach。
-- Hook 前检查地址是否存在。
-- Hook 内使用 try/catch。
-- Hook 内不要抛异常影响主流程。
-- Hook 内避免耗时操作。
-- Hook 热路径中避免大量循环。
+- 不使用 ES6+ 语法（let、箭头函数、class等）
+- 使用 2 空格缩进
+- 文件名使用 snake_case
+- 启动函数使用 `startXxxFeature(ctx)`
+- 防重复变量使用 `g_xxx_started`
+- 每个 hook 加中文注释说明：原函数、作用、风险
+- 每个内存 patch 加中文注释
+- 每个会修改角色数据的操作加中文注释
 
-## JS 语法与代码风格
+## 模块间通信
 
-Frida JS 模块应使用当前运行环境兼容的语法：
-
-- 不使用 ES6+ 语法。
-- 不使用 `let`。
-- 变量声明优先使用 `const`。
-- 只有需要重新赋值时才使用 `var`。
-- 使用 2 空格缩进。
-- 函数体内保持早返回，减少嵌套层级。
-
-## 命名规范
-
-JS 文件名使用 snake_case：
-
-```text
-example_feature.js
-runtime_addresses.js
-startup_modules.js
-```
-
-启动函数使用 `start` + PascalCase：
+通过 ctx 对象传递依赖：
 
 ```js
-startExampleFeature()
-startRuntimeModules()
+var ctx = {
+  addresses: addr,  // 地址集
+  config: cfg,      // 配置
+  log: logger.log,  // 日志函数
+  time: timeMod,    // 时间模块
+  packet: packetBind, // 封包 binding
+  msql: mysqlBind,  // MySQL binding
+  user: userBind,   // 角色 binding
+  inventory: inventoryBind, // 背包 binding
+  item: itemBind,   // 道具 binding
+  mail: mailBind,   // 邮件 binding
+  gw: gwBind,       // GameWorld binding
+  timer: timerBind, // 定时器 binding
+  quest: questBind, // 任务 binding
+};
 ```
 
-防重复变量使用：
+## 本次迁移保留的功能
 
-```js
-g_example_feature_started
-g_runtime_modules_started
-```
-
-## 新增 JS 模块流程
-
-```text
-1. 在 script/js/ 新建 <feature>.js
-2. 按项目需要增加地址占位或地址文件
-3. 按项目需要增加配置项
-4. 按项目需要注册模块
-5. 在模块中实现 startXxx(cfg, addresses)
-6. 增加防重复 hook
-7. 增加中文注释
-8. 本地运行 node --check
-9. 按项目需要补充测试说明
-```
+从旧 frida.js 完整迁移的功能：
+- 绝望之塔门票/金币/每10层跳过修复
+- 时装徽章镶嵌修复
+- 时装潜能属性下发
+- 勇士归来时间设置
+- 战力排行榜（站街前三名）
+- 玩家上下线处理
+- 怪物攻城活动（完整：P1/P2/P3阶段、难度、奖励、结算）
+- 在线奖励（默认关闭）
+- 线程安全调度（TimerDispatcher）
+- 数据库持久化
 
 ## Review 检查清单
 
-- 是否有裸地址散落在多个模块中。
-- 是否有重复 hook 防护。
-- 是否有 try/catch。
-- 是否在 hook 热路径中做了重操作。
-- 是否误用了示例地址占位。
-- 是否修改了入口文件中的真实业务逻辑。
-- 是否影响其他模块启动顺序。
+- [ ] 是否有裸地址散落在多个模块中
+- [ ] 是否所有 hook 都使用 attachOnce/replaceOnce
+- [ ] 是否有 try/catch
+- [ ] 是否在 hook 热路径中做了重操作
+- [ ] 是否误用了示例地址占位
+- [ ] 是否修改了入口文件中的真实业务逻辑
+- [ ] 每个会修改角色数据的函数是否有中文注释
+- [ ] 模块是否通过配置控制启用/禁用
+- [ ] 启动顺序是否正确
