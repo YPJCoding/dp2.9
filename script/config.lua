@@ -1,8 +1,7 @@
 -- clean runtime template config
 --
 -- 模板配置文件。
--- 所有业务功能必须默认关闭。
--- 新功能必须先加 features 开关，再接入 bootstrap。
+-- 这里仅展示一种配置组织方式，真实项目可以按需要调整。
 
 local config = {
     debug = {
