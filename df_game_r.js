@@ -1303,102 +1303,12 @@ function api_scheduleOnMainThread_delay(f, args, delay) {
 
 //重置活动数据
 // 怪物攻城纯状态函数已迁移到 script/js/village_attack_state.js。
-// 保留旧函数名兼容：reset_villageattack_info / set_villageattack_dungeon_difficult /
+// 怪物攻城启动流程和活动计时器已迁移到 script/js/village_attack_flow.js。
+// 保留旧函数名兼容：event_villageattack_timer / start_villageattack /
+// on_start_event_villageattack / start_event_villageattack_timer / start_event_villageattack。
 
-//怪物攻城活动计时器(每5秒触发一次)
-function event_villageattack_timer() {
-	if (villageAttackEventInfo.state == VILLAGEATTACK_STATE_END)
-		return;
-	//活动结束检测
-	const remain_time = event_villageattack_get_remain_time();
-	if (remain_time <= 0) {
-		//活动结束
-		on_end_event_villageattack();
-		return;
-	}
-	//当前应扣除的PT
-	var damage = 0;
-	//P2/P3阶段GBL主教扣PT
-	if ((villageAttackEventInfo.state == VILLAGEATTACK_STATE_P2) || (villageAttackEventInfo.state == VILLAGEATTACK_STATE_P3)) {
-		for (var i = 0; i < villageAttackEventInfo.gbl_cnt; ++i) {
-			if (get_random_int(0, 100) < (4 + villageAttackEventInfo.difficult)) {
-				damage += 1;
-			}
-		}
-	}
-	//P3阶段世界BOSS自身回血
-	if (villageAttackEventInfo.state == VILLAGEATTACK_STATE_P3) {
-		if (get_random_int(0, 100) < (6 + villageAttackEventInfo.difficult)) {
-			damage += 1;
-		}
-	}
-	//扣除PT
-	if (damage > 0) {
-		villageAttackEventInfo.score -= damage;
-		if (villageAttackEventInfo.score < EVENT_VILLAGEATTACK_TARGET_SCORE[villageAttackEventInfo.state - 1]) {
-			villageAttackEventInfo.score = EVENT_VILLAGEATTACK_TARGET_SCORE[villageAttackEventInfo.state - 1]
-		}
-		//更新PT
-		gameworld_update_villageattack_score();
-	}
-	//重复触发计时器
-	if (villageAttackEventInfo.state != VILLAGEATTACK_STATE_END) {
-		api_scheduleOnMainThread_delay(event_villageattack_timer, null, 5000);
-	}
-}
 
-//开启怪物攻城活动
-function start_villageattack() {
-	console.log('start_villageattack-------------');
-	const a3 = Memory.alloc(100);
-	a3.add(10).writeInt(EVENT_VILLAGEATTACK_TOTAL_TIME); //活动剩余时间
-	a3.add(14).writeInt(villageAttackEventInfo.score); //当前频道PT点数
-	a3.add(18).writeInt(EVENT_VILLAGEATTACK_TARGET_SCORE[2]); //成功防守所需点数
-	Inter_VillageAttackedStart_dispatch_sig(ptr(0), ptr(0), a3);
-}
 
-//开始怪物攻城活动
-function on_start_event_villageattack() {
-	//重置活动数据
-	reset_villageattack_info();
-	//通知全服玩家活动开始 并刷新城镇怪物
-	start_villageattack();
-	//开启活动计时器
-	api_scheduleOnMainThread_delay(event_villageattack_timer, null, 5000);
-	//公告通知当前活动进度
-	event_villageattack_broadcast_difficulty();
-}
-
-//开启怪物攻城活动定时器
-function start_event_villageattack_timer() {
-	//获取当前系统时间
-	const cur_time = api_CSystemTime_getCurSec();
-	//计算距离下次开启怪物攻城活动的时间
-	var delay_time = (3600 * EVENT_VILLAGEATTACK_START_HOUR) - (cur_time % (3600 * 24));
-	if (delay_time <= 0)
-		delay_time += 3600 * 24;
-	//delay_time = 10;
-	console.log('<>:' + delay_time);
-	//log('距离下次开启<怪物攻城活动>还有:' + delay_time / 3600 + '小时');
-	//log('距离下次开启<怪物攻城活动>还有:' + delay_time * 1000);
-	//定时开启活动
-	api_scheduleOnMainThread_delay(on_start_event_villageattack, null, delay_time * 1000);
-}
-
-//开启怪物攻城活动
-function start_event_villageattack() {
-	//patch相关函数, 修复活动流程
-	hook_VillageAttack();
-	console.log('-------------------- start_event_villageattack-----------------');
-	if (villageAttackEventInfo.state == VILLAGEATTACK_STATE_END) {
-		//开启怪物攻城活动定时器
-		start_event_villageattack_timer();
-	}
-	else {
-		//开启活动计时器
-		api_scheduleOnMainThread_delay(event_villageattack_timer, null, 5000);
-	}
-}
 
 
 //计算活动剩余时间
