@@ -150,6 +150,10 @@ local config = {
         -- 注册 GmInput hook，提供旧 dp2 的 //send 指令；默认关闭，仅 GM 可用。
         enable_gm_send_item = false,
 
+        -- GM 经济命令模块。
+        -- 注册 GmInput hook，提供旧 dp2 的 //czdq / //czdb / //czsd 指令；默认关闭，仅 GM 可用。
+        enable_gm_economy = false,
+
         -- 经验副本/泡点模块。
         -- 定时检查在线玩家是否在指定副本，满足条件时发经验和代币。
         enable_exp_dungeon = true,
@@ -250,6 +254,20 @@ local config = {
         -- 发放邮件标题与内容（暂未使用邮件，预留）。
         mail_title = "GM物品发放",
         mail_content = "请查收GM发放的物品。",
+    },
+
+    gm_economy = {
+        -- GM 经济指令。
+        -- 仅 features.enable_gm_economy=true 后生效。
+
+        -- 点券充值上限 (//czdq)。
+        max_cera = 100000,
+
+        -- 代币充值上限 (//czdb)。
+        max_point = 100000,
+
+        -- 胜点充值上限 (//czsd)。
+        max_win_point = 10000,
     },
 
     exp_dungeon = {

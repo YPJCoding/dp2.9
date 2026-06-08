@@ -209,7 +209,8 @@
 当前 `dp2.9` 状态：
 
 - `//send` 已迁移至 `script/modules/gm_send_item.lua`，默认关闭，仅 GM 可用，待测试服验证。
-- `//cz*`（充值点券/代币/胜点/SP/TP/QP）尚未迁移，高风险暂缓。
+- `//czdq`（点券）/ `//czdb`（代币）/ `//czsd`（胜点）已迁移至 `script/modules/gm_economy.lua`，默认关闭，仅 GM 可用，待测试服验证。
+- `//czsp`（SP）/ `//cztp`（TP）/ `//czqp`（QP）尚未迁移——旧实现依赖 `dpx.sqlexec` 直接写库，需评估安全方案后再处理。
 - `//set*`（修改数据库表）尚未迁移，高风险暂缓。
 - `//clearp*`（清理背包）尚未迁移，高风险暂缓。
 
@@ -218,9 +219,10 @@
 - 必须先实现 GM 权限。
 - 必须写操作日志。
 - 必须默认保守。
-- `//cz*`、`//set*`、`//clearp*` 不建议进入安全可部署版。
+- SP/TP/QP 因依赖 SQL 暂缓，不建议直接暴露 `dpx.sqlexec`。
+- `//set*`、`//clearp*` 不建议进入安全可部署版。
 
-状态：`[~] //send 已迁移；//cz* / //set* / //clearp* 仍暂缓`
+状态：`[~] //send + //czdq/db/sd 已迁移；SP/TP/QP + //set* + //clearp* 仍暂缓`
 
 ---
 
