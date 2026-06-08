@@ -65,15 +65,16 @@ var g_ranklist = {
 // ---- 查询角色战力值 ----
 // 来源：从旧 frida.js GetRankNumber 迁移
 // characNo: 角色 charac_no
+// fridaDb: 绑定 frida 句柄的便捷 DB 对象（ctx.fridaDb）
 // 返回: 战力值，查询失败返回 undefined
-function getRankNumber(msql, characNo) {
+function getRankNumber(fridaDb, characNo) {
   // SQL 拼接未做转义，characNo 为数字类型是安全的
   // TODO: 后续如有字符串类型输入需要增加转义
   var sql = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
-  if (msql.exec(sql)) {
-    if (msql.getNRows() == 1) {
-      msql.fetch();
-      return parseInt(msql.getStr(0));
+  if (fridaDb.exec(sql)) {
+    if (fridaDb.getNRows() == 1) {
+      fridaDb.fetch();
+      return parseInt(fridaDb.getStr(0));
     }
   }
 }
@@ -95,7 +96,7 @@ function getMyEquInfo(ctx, curUser) {
   };
 
   var characNo = ctx.user.getCurCharacNo(curUser);
-  MyRanklist.rank = getRankNumber(ctx.msql, characNo) || 0;
+  MyRanklist.rank = getRankNumber(ctx.fridaDb, characNo) || 0;
   // 名字后加空格用于屏蔽客户端自定义显示字符串
   MyRanklist.characname = ctx.user.getCurCharacName(curUser) + ' ';
   MyRanklist.job = ctx.user.getCharacJob(curUser);
@@ -221,11 +222,11 @@ function sendRankLits(ctx, curUser, all) {
 
 // ---- 从数据库加载排行榜 ----
 // 来源：从旧 frida.js event_rankinfo_load_from_db 迁移
-function loadRankInfoFromDb(msql) {
-  if (msql.exec("select event_info from game_event where event_id = 'rankinfo';")) {
-    if (msql.getNRows() == 1) {
-      msql.fetch();
-      var info = msql.getStr(0);
+function loadRankInfoFromDb(fridaDb) {
+  if (fridaDb.exec("select event_info from game_event where event_id = 'rankinfo';")) {
+    if (fridaDb.getNRows() == 1) {
+      fridaDb.fetch();
+      var info = fridaDb.getStr(0);
       if (info) {
         try {
           g_ranklist = JSON.parse(info);
@@ -239,12 +240,12 @@ function loadRankInfoFromDb(msql) {
 
 // ---- 保存排行榜到数据库 ----
 // 来源：从旧 frida.js event_rankinfo_save_to_db 迁移
-function saveRankInfoToDb(msql) {
+function saveRankInfoToDb(fridaDb) {
   try {
     // SQL 拼接 JSON，排行榜数据不包含用户输入，相对安全
     // 风险：如果角色名中包含特殊字符可能导致 SQL 语法错误
     // TODO: 后续统一使用参数化查询
-    msql.exec("replace into game_event (event_id, event_info) values ('rankinfo', '" + JSON.stringify(g_ranklist) + "');");
+    fridaDb.exec("replace into game_event (event_id, event_info) values ('rankinfo', '" + JSON.stringify(g_ranklist) + "');");
   } catch (error) {
     console.log('[ranking] save failed: ' + error);
   }
@@ -260,9 +261,10 @@ function startRankingFeature(ctx) {
   }
 
   // 从 DB 加载持久化排行数据
-  if (ctx.msql) {
+  // 使用 ctx.fridaDb（绑定 frida 句柄的便捷 DB 对象）
+  if (ctx.fridaDb) {
     try {
-      loadRankInfoFromDb(ctx.msql);
+      loadRankInfoFromDb(ctx.fridaDb);
     } catch (e) {
       console.log('[ranking] load from db failed: ' + e);
     }
@@ -285,8 +287,8 @@ function onUserLeaveRanking(ctx, curUser) {
   if (!curUser.isNull()) {
     setRanking(ctx, curUser);
     // 存盘
-    if (ctx.msql) {
-      saveRankInfoToDb(ctx.msql);
+    if (ctx.fridaDb) {
+      saveRankInfoToDb(ctx.fridaDb);
     }
   }
 }

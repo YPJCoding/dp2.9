@@ -762,6 +762,18 @@ var PROJECT_ADDRESSES = {
   // 风险：修改代码段数据，版本更新后需确认地址
   return_user_time_patch: ptr('0x84C753D'),
 
+  // CIPGHelper 全局实例
+  // 来源：从旧 frida.js 点券充值逻辑迁移
+  // 用途：点券/代币充值 IPG 输入/查询帮助器
+  // 风险：点券/代币经济相关，高风险地址，禁止直接修改 billing 库表字段
+  cipghelper_global: ptr('0x941F734'),
+
+  // 空字符串/默认字符串指针
+  // 来源：从旧 frida.js 点券充值逻辑迁移
+  // 用途：CIPGHelper::IPGInput 参数占位
+  // 风险：必须确认该地址在目标版本仍然有效
+  ipg_empty_string: ptr('0x8C7FA20'),
+
   // ---- 字符串长度函数 ----
 
   // strlen (libc)

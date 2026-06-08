@@ -11,6 +11,7 @@ function createVillageAttackNotify(ctx) {
   // 风险：全局广播有一定频率，不应在高频路径上调用
   function broadcastPhase() {
     if (st.getState() != C.STATE_END) {
+      // 使用 gw binding 中封装的 sendNotiPacketMessage 进行世界广播
       ctx.gw.sendNotiPacketMessage(
         '<怪物攻城活动> 当前阶段:' + (st.getState() + 1) + ', 当前难度等级: ' + st.getDifficult(),
         14
@@ -19,6 +20,7 @@ function createVillageAttackNotify(ctx) {
   }
 
   // 世界广播任意消息
+  // 用途：活动开始/结束/世界BOSS刷新等需要通知全服玩家的事件
   function broadcastMessage(msg) {
     ctx.gw.sendNotiPacketMessage(msg, 14);
   }

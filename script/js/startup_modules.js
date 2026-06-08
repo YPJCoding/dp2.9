@@ -112,13 +112,27 @@ function startRuntimeModules() {
   } catch (err) { helpers.logModuleFailed('quest binding', err); questBind = null; }
 
   // ---- 构建 ctx 对象（模块之间通过 ctx 通信） ----
+  //
+  // 数据库上下文说明：
+  //   ctx.mysql    = MySQL binding 本身（用于 open/close 等操作）
+  //   ctx.db       = 原始数据库句柄集合 { taiwanCain, taiwanCain2nd, taiwanBilling, frida }
+  //   ctx.fridaDb  = 绑定 frida 句柄的便捷 DB 对象（用于 exec/fetch/getStr 等）
+  //
+  // 日志上下文说明：
+  //   ctx.logger   = logger 完整对象（有 .log() 和 .getTimestamp()）
+  //   ctx.log      = 便捷日志函数 logger.log(msg)
   var ctx = {
     addresses: addr,
     config: cfg,
-    log: logger.log,
+    logger: logger,
+    log: function (msg) {
+      logger.log(msg);
+    },
     time: timeMod,
     packet: packetBind,
-    msql: mysqlBind,
+    mysql: mysqlBind,     // MySQL binding（底层 API: exec(handle, sql), close(handle) 等）
+    db: null,             // 原始数据库句柄集合，数据库初始化后填充
+    fridaDb: null,        // 绑定 frida 句柄的便捷 DB 对象，数据库初始化后填充
     user: userBind,
     inventory: inventoryBind,
     item: itemBind,
@@ -151,47 +165,63 @@ function startRuntimeModules() {
 
   // ---- 第 6 步：Database 初始化 ----
   // 来源：从旧 frida.js init_db 迁移
+  var dbInitialized = false;
   if (cfg.features.database) {
     helpers.logModuleStart('database');
     try {
       // 加载本地配置文件（数据库连接信息）
       var fileMod = globalThis.createFileModule();
       var globalConfig = fileMod.loadConfig('frida_config.json');
-      var dbConfig = globalConfig['db_config'] || {};
 
-      // 初始化数据库连接
-      // 风险：数据库连接信息硬编码 localhost:3306，生产环境需从配置读取
-      if (mysqlBind) {
-        var mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'] || '', dbConfig['password'] || '');
-        var mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'] || '', dbConfig['password'] || '');
-        var mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'] || '', dbConfig['password'] || '');
+      if (!globalConfig) {
+        // 配置文件读取失败，无法获取数据库账号
+        console.log('[database] frida_config.json 读取失败，数据库账号为空，跳过数据库初始化');
+      } else {
+        var dbConfig = globalConfig['db_config'] || {};
 
-        // 建库 frida
-        if (mysqlTaiwanCain) {
-          mysqlBind.exec(mysqlTaiwanCain, 'create database if not exists frida default charset utf8;');
-        }
+        if (!dbConfig['account'] || !dbConfig['password']) {
+          console.log('[database] frida_config.json 中 db_config.account/password 为空，跳过数据库初始化');
+        } else if (mysqlBind) {
+          // 初始化数据库连接
+          // 风险：数据库连接信息使用 localhost:3306，生产环境需从配置读取
+          var mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          var mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          var mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
-        var mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'] || '', dbConfig['password'] || '');
+          // 建库 frida
+          if (mysqlTaiwanCain) {
+            mysqlBind.exec(mysqlTaiwanCain, 'create database if not exists frida default charset utf8;');
+          }
 
-        if (mysqlFrida) {
-          // 建表 game_event（存储活动数据和排行榜）
-          mysqlBind.exec(mysqlFrida,
-            'CREATE TABLE game_event (' +
-            'event_id varchar(30) NOT NULL, event_info mediumtext NULL,' +
-            'PRIMARY KEY (event_id)' +
-            ') ENGINE=InnoDB DEFAULT CHARSET=utf8;'
-          );
+          var mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
-          // 更新 ctx 中的 msql 为 frida 库
-          ctx.msql = mysqlFrida;
+          if (mysqlFrida) {
+            // 建表 game_event（存储活动数据和排行榜）
+            mysqlBind.exec(mysqlFrida,
+              'CREATE TABLE game_event (' +
+              'event_id varchar(30) NOT NULL, event_info mediumtext NULL,' +
+              'PRIMARY KEY (event_id)' +
+              ') ENGINE=InnoDB DEFAULT CHARSET=utf8;'
+            );
 
-          // 保存数据库句柄供后续使用
-          ctx._db = {
-            taiwanCain: mysqlTaiwanCain,
-            taiwanCain2nd: mysqlTaiwanCain2nd,
-            taiwanBilling: mysqlTaiwanBilling,
-            frida: mysqlFrida,
-          };
+            // 保存数据库句柄集合
+            ctx.db = {
+              taiwanCain: mysqlTaiwanCain,
+              taiwanCain2nd: mysqlTaiwanCain2nd,
+              taiwanBilling: mysqlTaiwanBilling,
+              frida: mysqlFrida,
+            };
+
+            // 创建绑定 frida 句柄的便捷 DB 对象
+            // 为什么需要这个东西：
+            //   mysqlBind 的 exec/getNRows/fetch/getStr 等函数第一个参数是 mysql 句柄
+            //   业务模块不直接操作 mysql 句柄，通过 fridaDb 简化调用
+            ctx.fridaDb = createBoundMysqlDb(mysqlBind, mysqlFrida);
+
+            dbInitialized = true;
+          } else {
+            console.log('[database] frida 数据库连接失败');
+          }
         }
       }
       helpers.logModuleDone('database');
@@ -234,11 +264,16 @@ function startRuntimeModules() {
   if (cfg.features.ranking) {
     helpers.logModuleStart('ranking');
     try {
+      // 如果数据库未初始化，排行榜无法持久化，但仍然可以启动
+      // 启动时输出中文日志说明
+      if (!dbInitialized) {
+        console.log('[ranking] 数据库未初始化，排行榜将无法持久化');
+      }
       globalThis.startRankingFeature(ctx);
       // 保存排行榜的 save 回调，供 dispose 时使用
       ctx._rankingSaveToDb = function () {
-        if (globalThis.ranking_saveToDb) {
-          globalThis.ranking_saveToDb(ctx.msql);
+        if (globalThis.ranking_saveToDb && ctx.fridaDb) {
+          globalThis.ranking_saveToDb(ctx.fridaDb);
         }
       };
       helpers.logModuleDone('ranking');
@@ -284,6 +319,9 @@ function startRuntimeModules() {
   if (cfg.features.village_attack) {
     helpers.logModuleStart('village_attack');
     try {
+      if (!dbInitialized) {
+        console.log('[village_attack] 数据库未初始化，活动数据将无法持久化');
+      }
       globalThis.startVillageAttackFeature(ctx);
       // 保存数据库保存回调供 dispose 使用
       ctx._villageAttackSaveToDb = function () {
@@ -311,6 +349,38 @@ function startRuntimeModules() {
   console.log('==================== frida runtime started ====================');
 }
 
+// ---- 辅助函数：创建绑定 MySQL 句柄的便捷 DB 对象 ----
+// mysqlBind: createMysqlBinding 返回的 binding 对象
+// mysqlHandle: MySQL 连接的原始指针（由 mysqlBind.open 返回）
+//
+// 为什么需要这个函数：
+//   mysqlBind 的 exec/getNRows/fetch/getStr 等函数第一个参数是 mysql 句柄
+//   业务模块不应该直接持有和传递句柄，通过此对象统一管理
+function createBoundMysqlDb(mysqlBind, mysqlHandle) {
+  return {
+    exec: function (sql) {
+      return mysqlBind.exec(mysqlHandle, sql);
+    },
+    getNRows: function () {
+      return mysqlBind.getNRows(mysqlHandle);
+    },
+    fetch: function () {
+      return mysqlBind.fetch(mysqlHandle);
+    },
+    getInt: function (index) {
+      return mysqlBind.getInt(mysqlHandle, index);
+    },
+    getStr: function (index) {
+      return mysqlBind.getStr(mysqlHandle, index);
+    },
+    getBinary: function (index) {
+      return mysqlBind.getBinary(mysqlHandle, index);
+    },
+    // 原始句柄引用（仅在需要创建第二个 bound db 时使用）
+    raw: mysqlHandle,
+  };
+}
+
 // 模块卸载清理
 function disposeRuntimeModules() {
   console.log('-------------------- frida dispose --------------------');
@@ -331,20 +401,20 @@ function disposeRuntimeModules() {
       ctx._villageAttackSaveToDb();
     }
 
-    // 关闭数据库连接
-    if (ctx._db) {
-      var db = ctx._db;
-      if (db.frida && ctx.msql) {
-        ctx.msql.close(db.frida);
+    // 关闭数据库连接（使用 ctx.mysql binding 的 close 函数）
+    if (ctx.db && ctx.mysql) {
+      var db = ctx.db;
+      if (db.frida) {
+        ctx.mysql.close(db.frida);
       }
-      if (db.taiwanCain && ctx.msql) {
-        ctx.msql.close(db.taiwanCain);
+      if (db.taiwanCain) {
+        ctx.mysql.close(db.taiwanCain);
       }
-      if (db.taiwanCain2nd && ctx.msql) {
-        ctx.msql.close(db.taiwanCain2nd);
+      if (db.taiwanCain2nd) {
+        ctx.mysql.close(db.taiwanCain2nd);
       }
-      if (db.taiwanBilling && ctx.msql) {
-        ctx.msql.close(db.taiwanBilling);
+      if (db.taiwanBilling) {
+        ctx.mysql.close(db.taiwanBilling);
       }
     }
   } catch (err) {
@@ -357,4 +427,5 @@ function disposeRuntimeModules() {
 if (typeof globalThis !== 'undefined') {
   globalThis.startRuntimeModules = startRuntimeModules;
   globalThis.disposeRuntimeModules = disposeRuntimeModules;
+  globalThis.createBoundMysqlDb = createBoundMysqlDb;
 }

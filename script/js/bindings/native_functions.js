@@ -11,8 +11,17 @@
 // address: ptr 地址
 // retType: 返回值类型字符串 (如 'int', 'pointer', 'void', 'bool')
 // argTypes: 参数类型数组 (如 ['pointer', 'int'])
+//
+// 为什么需要地址校验：
+// 能在启动阶段暴露地址缺失/为空的问题，避免 hook 时才崩溃
 function nf(address, retType, argTypes) {
-  return new NativeFunction(address, retType, argTypes, { abi: 'sysv' });
+  if (!address) {
+    throw new Error('NativeFunction address is missing (retType=' + retType + ')');
+  }
+  if (typeof address.isNull === 'function' && address.isNull()) {
+    throw new Error('NativeFunction address is null (retType=' + retType + ')');
+  }
+  return new NativeFunction(address, retType, argTypes || [], { abi: 'sysv' });
 }
 
 if (typeof globalThis !== 'undefined') {

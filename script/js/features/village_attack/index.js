@@ -31,14 +31,20 @@ function startVillageAttackFeature(ctx) {
     // 需要传递给 flow/reward 的配置通过 ctx 传递
     // state 和 constants 已经通过 globalThis 全局可用
 
-    // 初始化数据库模块
-    var vaDb = globalThis.createVillageAttackDb(ctx.msql);
+    // 初始化数据库模块（使用 ctx.fridaDb 而非 raw ctx.msql）
+    // ctx.fridaDb 是绑定 frida 句柄的便捷 DB 对象
+    var vaDb = null;
+    if (ctx.fridaDb) {
+      vaDb = globalThis.createVillageAttackDb(ctx.fridaDb);
+    }
     ctx.va_db = vaDb;
 
     // 从数据库加载活动状态
-    var savedInfo = vaDb.load();
-    if (savedInfo) {
-      globalThis.village_attack_state.setInfo(savedInfo);
+    if (vaDb) {
+      var savedInfo = vaDb.load();
+      if (savedInfo) {
+        globalThis.village_attack_state.setInfo(savedInfo);
+      }
     }
 
     // 初始化通知模块
@@ -56,14 +62,18 @@ function startVillageAttackFeature(ctx) {
     ctx.va_settlement = vaSettlement.settle;
 
     // 根据角色 charac_no 查询角色名（结算时广播用）
+    // 使用 ctx.fridaDb 进行查询
     ctx.va_getCharacNameByNo = function (characNo) {
       // 从数据库查询角色名
       // 风险：直接拼接 SQL，characNo 为数字类型是安全的
-      var msql = ctx.msql;
-      if (msql.exec("select charac_name from charac_info where charac_no=" + characNo + ";")) {
-        if (msql.getNRows() == 1) {
-          msql.fetch();
-          var name = msql.getStr(0);
+      var fridaDb = ctx.fridaDb;
+      if (!fridaDb) {
+        return characNo.toString();
+      }
+      if (fridaDb.exec("select charac_name from charac_info where charac_no=" + characNo + ";")) {
+        if (fridaDb.getNRows() == 1) {
+          fridaDb.fetch();
+          var name = fridaDb.getStr(0);
           if (name) {
             return name;
           }

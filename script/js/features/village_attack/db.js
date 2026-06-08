@@ -6,7 +6,8 @@
 // 1. SQL 拼接未做转义，JSON 中包含特殊字符可能导致 SQL 语法错误
 // 2. 后续如需转义，方便在此处集中修改
 
-function createVillageAttackDb(msql) {
+// fridaDb: 绑定 frida 句柄的便捷 DB 对象（ctx.fridaDb）
+function createVillageAttackDb(fridaDb) {
   // 保存活动数据到数据库
   // 来源：从旧 frida.js event_villageattack_save_to_db 迁移
   function save(info) {
@@ -15,7 +16,7 @@ function createVillageAttackDb(msql) {
       // 如果包含会导致 SQL 语法错误
       // TODO: 后续统一使用参数化查询
       var json = JSON.stringify(info);
-      msql.exec("replace into game_event (event_id, event_info) values ('villageattack', '" + json + "');");
+      fridaDb.exec("replace into game_event (event_id, event_info) values ('villageattack', '" + json + "');");
     } catch (error) {
       console.log('[village_attack_db] save failed: ' + error);
     }
@@ -25,10 +26,10 @@ function createVillageAttackDb(msql) {
   // 来源：从旧 frida.js event_villageattack_load_from_db 迁移
   function load() {
     try {
-      if (msql.exec("select event_info from game_event where event_id = 'villageattack';")) {
-        if (msql.getNRows() == 1) {
-          msql.fetch();
-          var info = msql.getStr(0);
+      if (fridaDb.exec("select event_info from game_event where event_id = 'villageattack';")) {
+        if (fridaDb.getNRows() == 1) {
+          fridaDb.fetch();
+          var info = fridaDb.getStr(0);
           if (info) {
             return JSON.parse(info);
           }

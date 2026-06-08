@@ -61,6 +61,15 @@ script/js/runtime_config.js
 
 位置：`script/js/core/hook_guard.js`
 
+## 构建 bundle
+
+部署时需要使用 bundle 而非单个源文件：
+
+```bash
+bash tools/build_frida_bundle.sh
+# 输出：dist/df_game_r.bundle.js
+```
+
 ## 本地检查
 
 ```bash

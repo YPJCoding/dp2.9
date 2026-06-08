@@ -95,6 +95,35 @@
 5. `lodash` / `setTimeout` 依赖 Frida 运行环境提供，不是所有环境都支持
 6. File 对象依赖 Frida 的 File API，部分环境可能不可用
 
+## 第二轮修复 (fix: stabilize modular frida runtime startup)
+
+修复了以下 review 问题：
+
+1. **JS 模块加载链路**：新增 `tools/build_frida_bundle.sh` 和 `tools/build_frida_bundle.js`，按固定依赖顺序拼接所有 JS 模块生成 `dist/df_game_r.bundle.js`。
+2. **MySQL binding 接口不一致**：新增 `createBoundMysqlDb()`，区分 `ctx.mysql`（binding）、`ctx.db`（原始句柄）、`ctx.fridaDb`（便捷 DB 对象）。
+3. **frida_config.json 读取**：`file.js` 改为自初始化 libc API，不依赖外部 `globalThis.fopen`。
+4. **ctx.gw.sendNotiPacketMessage 缺失**：在 `game_world.js` 中实现完整的世界广播消息函数。`settlement.js` 改用 `ctx.va_notify.broadcastMessage()`。
+5. **清理裸地址**：`0x941F734` 和 `0x8C7FA20` 迁移到 `runtime_addresses.js`（`cipghelper_global` 和 `ipg_empty_string`）。
+6. **ctx.logger / ctx.log**：统一为 `ctx.logger`（完整对象）和 `ctx.log`（便捷函数），`online_reward.js` 改用 `ctx.logger.getTimestamp()`。
+7. **forEachUser 迭代器前进**：修复 `it = mapNext(it)` 并增加 guardCount 防死循环。
+8. **怪物攻城 hook try/catch**：所有 7 个 hook 均加了 try/catch，replace hook 异常时兜底执行原函数。
+9. **nf() 健壮性**：增加地址校验（缺失/空/未定义）。
+10. **time.js 裸地址回退**：移除 `ptr('0x941F714')` 回退值。
+
+## 部署说明
+
+推荐使用构建产物：
+
+```bash
+bash tools/build_frida_bundle.sh
+# 输出：dist/df_game_r.bundle.js
+```
+
+部署时使用 `dist/df_game_r.bundle.js` 替代 `df_game_r.js`，因为 Frida 环境下不会自动加载 `script/js/` 下的拆分子模块。
+
 ## 检查结果
 
-运行 `bash tools/check_js_syntax.sh` 和 `bash tools/check_lua_syntax.sh` 确认语法通过。
+- JS 语法检查：39 个文件全部通过（含 bundle）
+- Lua 语法检查：`luac` 未安装，无法执行
+- 裸地址检查：feature/bindings/core/entry 中不再有真实地址
+- ctx.log.xxx 误用检查：无实际调用，仅注释

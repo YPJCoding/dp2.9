@@ -6,19 +6,24 @@
 // 1. 防守成功：全服发邮件、送装备强化、送点券 → 影响游戏经济
 // 2. 防守失败：随机删除装备、扣金币 → 可能导致玩家不满
 // 3. 点券充值调用 billing 库存储过程，务必确保操作正确
+// 4. 所有真实地址已迁移到 runtime_addresses.js
 
 function createVillageAttackSettlement(ctx) {
   var st = globalThis.village_attack_state;
   var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
 
-  // 点券充值
+  // 点券充值（来源：从旧 frida.js api_recharge_cash_cera 迁移）
+  // 风险：禁止直接修改 billing 库所有表字段，点券相关操作务必调用数据库存储过程
   var _IPGInput = globalThis.nf(ctx.addresses.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
   var _IPGQuery = globalThis.nf(ctx.addresses.cipghelper_ipg_query, 'int', ['pointer', 'pointer']);
 
   function rechargeCashCera(curUser, amount) {
-    var IPG_HELPER_ADDR = ptr('0x941F734');
-    _IPGInput(IPG_HELPER_ADDR.readPointer(), curUser, 5, amount, ptr('0x8C7FA20'), ptr('0x8C7FA20'), Memory.allocUtf8String('GM'), ptr(0), ptr(0), ptr(0));
-    _IPGQuery(IPG_HELPER_ADDR.readPointer(), curUser);
+    // 地址来源：runtime_addresses.js cipghelper_global
+    var ipgHelper = ctx.addresses.cipghelper_global.readPointer();
+    // 地址来源：runtime_addresses.js ipg_empty_string
+    var emptyString = ctx.addresses.ipg_empty_string;
+    _IPGInput(ipgHelper, curUser, 5, amount, emptyString, emptyString, Memory.allocUtf8String('GM'), ptr(0), ptr(0), ptr(0));
+    _IPGQuery(ipgHelper, curUser);
   }
 
   // 活动结束结算入口
@@ -59,7 +64,6 @@ function createVillageAttackSettlement(ctx) {
 
     // 2. 特殊奖励：绝望之塔推至 100 层 + 随机强化一件装备
     // 来源：从旧 frida.js 移植
-    // 设置绝望之塔层数的辅助函数
     var _TODLayerConstructor = globalThis.nf(ctx.addresses.tod_layer_constructor, 'pointer', ['pointer', 'int']);
     var _TODSetEnterLayer = globalThis.nf(ctx.addresses.tod_userstate_set_enter_layer, 'pointer', ['pointer', 'pointer']);
 
@@ -94,7 +98,6 @@ function createVillageAttackSettlement(ctx) {
     }, null);
 
     // 3. 个人 PT 排名奖励：点券
-    // 来源：从旧 frida.js 移植
     // 奖励规则：个人 PT * 10 = 点券
     var rankFirstCharacNo = 0;
     var rankFirstAccountId = 0;
@@ -116,8 +119,8 @@ function createVillageAttackSettlement(ctx) {
       }
     });
 
-    // 频道内公告活动结束
-    ctx.gw.sendNotiPacketMessage('<怪物攻城活动> 防守成功, 奖励已发送!', 14);
+    // 频道内公告活动结束（使用 notify 的 broadcastMessage）
+    ctx.va_notify.broadcastMessage('<怪物攻城活动> 防守成功, 奖励已发送!');
 
     // 4. 榜一大哥额外 10 倍点券
     if (rankFirstCharacNo) {
@@ -128,7 +131,7 @@ function createVillageAttackSettlement(ctx) {
 
       // 广播排行榜第一名
       var rankFirstName = ctx.va_getCharacNameByNo(rankFirstCharacNo);
-      ctx.gw.sendNotiPacketMessage('<怪物攻城活动> 恭喜勇士 【' + rankFirstName + '】 成为个人积分排行榜第一名(' + maxPt + 'pt)!', 14);
+      ctx.va_notify.broadcastMessage('<怪物攻城活动> 恭喜勇士 【' + rankFirstName + '】 成为个人积分排行榜第一名(' + maxPt + 'pt)!');
     }
   }
 
@@ -159,7 +162,8 @@ function createVillageAttackSettlement(ctx) {
       ctx.user.sendUpdateItemList(curUser, 1, 0, 0);
     }, null);
 
-    ctx.gw.sendNotiPacketMessage('<怪物攻城活动> 防守失败, 请勇士们再接再厉!', 14);
+    // 使用 notify 的 broadcastMessage 进行世界广播
+    ctx.va_notify.broadcastMessage('<怪物攻城活动> 防守失败, 请勇士们再接再厉!');
   }
 
   return {

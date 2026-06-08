@@ -165,6 +165,26 @@ var ctx = {
 };
 ```
 
+## 部署
+
+当前使用 bundle 运行方式。因 Frida 环境不会自动加载 `script/js/` 下的拆分子模块，部署时必须先构建 bundle：
+
+```bash
+bash tools/build_frida_bundle.sh
+```
+
+生成的 `dist/df_game_r.bundle.js` 包含所有模块，可直接部署。
+
+模块拼接顺序不可随意更改，每个模块间存在依赖关系。
+
+## 数据库上下文说明
+
+```js
+ctx.mysql    // MySQL binding 对象，用于 open/close 等操作
+ctx.db       // 原始数据库句柄集合 { taiwanCain, taiwanCain2nd, taiwanBilling, frida }
+ctx.fridaDb  // 绑定 frida 句柄的便捷 DB 对象（exec, getNRows, fetch, getStr 等）
+```
+
 ## 本次迁移保留的功能
 
 从旧 frida.js 完整迁移的功能：
