@@ -11,6 +11,10 @@ function runtimeHotfixLog(message) {
   }
 }
 
+function isValidPointer(value) {
+  return value && typeof value.isNull === 'function' && !value.isNull();
+}
+
 // 修复字符串压缩 helper：native strlen 参数必须是 pointer，不能直接传 JS string。
 function api_compress_zip(s) {
   const input = Memory.allocUtf8String(String(s || ''));
@@ -37,9 +41,7 @@ function api_gameworld_foreach(f, args) {
   while (gameworld_user_map_not_equal(it, end)) {
     const user = api_gameworld_user_map_get(it);
 
-    if (user && !user.isNull && CUser_get_state(user) >= 3) {
-      f(user, args);
-    } else if (user && user.isNull && !user.isNull() && CUser_get_state(user) >= 3) {
+    if (isValidPointer(user) && CUser_get_state(user) >= 3) {
       f(user, args);
     }
 
@@ -50,7 +52,7 @@ function api_gameworld_foreach(f, args) {
 // 修复单道具系统邮件 helper：邮件正文长度使用 UTF-8 指针长度，避免 toString(TxtValue).length 误算。
 function CMailBoxHelperReqDBSendNewSystemMail(User, item_id, item_count, mail_title, mail_contact) {
   const retitem = find_item(item_id);
-  if (!retitem || retitem.isNull()) {
+  if (!isValidPointer(retitem)) {
     return;
   }
 
