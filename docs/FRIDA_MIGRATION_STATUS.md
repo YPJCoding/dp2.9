@@ -13,15 +13,15 @@
 
 | 功能 | dp2.9 文件 | 配置开关 | 状态 | 说明 |
 |---|---|---|---|---|
-| Frida 基础入口 | `df_game_r.js` | N/A | `[~]` | 已保留 `rpc.exports.init`、`setup()`、Lua/JS 桥接；远端 `start()` 仍是旧调度，尚未提交集中启动补丁。 |
+| Frida 基础入口 | `df_game_r.js` | N/A | `[~]` | 已保留 `rpc.exports.init`、`setup()`、Lua/JS 桥接；`start()` 已加载 `startup_helpers` / `startup_modules` 并调用 `startMigratedModules(cfg)`，入口仍保留 native/common 基础设施。 |
 | Frida 回调发物品 | `df_game_r.lua` | `js_features.enable_batch_item_add` | `[x]` | Lua 侧已加开关、账号、物品、在线用户校验。 |
-| Frida 启动调度辅助 | `script/js/startup_helpers.js` | N/A | `[~]` | 已新增 `safeLoadModule` / `safeFeature` / `safeModuleFeature` / `resolveStartupFunction`，并加入模块加载缓存；入口待接入。 |
-| 已迁移模块集中启动器 | `script/js/startup_modules.js` | `js_features.*` | `[~]` | 已新增 `startMigratedModules(cfg)`，用于集中启动已拆分模块；已补齐 patches 和 account_cargo 调度，入口待接入。 |
+| Frida 启动调度辅助 | `script/js/startup_helpers.js` | N/A | `[~]` | 已新增 `safeLoadModule` / `safeFeature` / `safeModuleFeature` / `resolveStartupFunction` 和模块加载缓存；`df_game_r.js start()` 已接入。 |
+| 已迁移模块集中启动器 | `script/js/startup_modules.js` | `js_features.*` | `[~]` | 已通过 `startMigratedModules(cfg)` 集中启动已拆分模块，并纳入 patches、account_cargo、village_attack 等调度；仍需测试服验证启动日志。 |
 | 绝望之塔修复 | `df_game_r.js` / Lua `legacy_patches.lua` | `enable_tod_fix` / `legacy_patches.*` | `[~]` | 金币/门票类入口已迁移；跳过 UserAPC 等细节仍需实测确认。 |
 | 时装镶嵌修复 | `script/js/emblem_fix.js` | `enable_emblem_fix` | `[~]` | 已从旧 `fix_use_emblem()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
 | 历史日志追踪 | `script/js/history_log.js` | `enable_history_log` | `[~]` | 已从旧 `hook_history_log()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
 | 角色使用道具事件 | `script/js/user_use_item_event.js` | `enable_history_log` | `[~]` | 已从旧 `UserUseItemEvent()` 拆出独立模块，仅保留原本实际启用的坐骑变身器返还邮件逻辑；入口仍待切换。 |
-| 上下线处理 | `script/js/user_inout.js` | `enable_user_inout_hook=true` | `[~]` | 当前仓库和旧仓库未找到真实 `hook_user_inout_game_world()` 实现；已补兼容桩避免 ReferenceError，不凭空实现业务逻辑。 |
+| 上下线处理 | `script/js/user_inout.js` | `enable_user_inout_hook=true` | `[~]` | `user_inout.js` 当前保持兼容桩；`df_game_r.js` 仍有旧 `hook_user_inout_game_world()` 残留（含幸运点与怪物攻城 UI 通知），后续必须找到真实旧来源或专项拆分，不能凭空实现。 |
 | 在线奖励 | `script/js/online_reward.js` | `enable_online_reward=false` | `[!]` | 已从旧 `enable_online_reward()` 拆出独立模块，增加重复 hook 保护；会发点券，默认关闭，入口仍待切换。 |
 | 幸运在线玩家 | `script/js/lucky_online.js` | `enable_lucky_online=false` | `[!]` | 当前仓库和旧仓库未找到真实 `start_event_lucky_online_user()` 实现；已补兼容桩避免 ReferenceError，不凭空实现抽奖/发奖逻辑。 |
 | 随机属性继承 / 自动解封 | `script/js/random_option.js` | `enable_random_option_inherit=false` / `enable_auto_unseal=false` | `[~]` | 已从旧 `change_random_option_inherit()` 和 `auto_unseal_random_option_equipment()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
@@ -35,7 +35,7 @@
 | 时装潜能 | `script/js/hidden_option.js` | `enable_hidden_option=true` | `[~]` | 已拆模块；已补重复 hook 保护和旧入口 `start_hidden_option()` 兼容。 |
 | 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块；已补参数校验、重复应用保护和旧入口 `set_return_user()` 兼容。 |
 | VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名、旧大小写函数名兼容和重复 hook 保护。 |
-| 怪物攻城 | `df_game_r.js` | `enable_village_attack=true` | `[!]` | 大型系统已存在于 `df_game_r.js`，但依赖 DB、timer、UI 包、奖励邮件；详细拆分待办见 `docs/FRIDA_HIGH_RISK_TODO.md`。 |
+| 怪物攻城 | `script/js/village_attack*.js` / `df_game_r.js` native/common infra | `enable_village_attack=true` | `[!]` | 已拆出启动适配、state、DB、flow、notify、hook、settlement，并将副本回调奖励迁入 hook；`df_game_r.js` 仍保留 NativeFunction/API/MySQL/Packet/邮件 helper 和 user_inout 残留，需专项实测。 |
 | 掉落公告 / 掉落奖励 | `script/js/drop_announce.js` | `enable_drop_announce=false` | `[!]` | 已从 `df_game_r.js` 残留 `processing_data(...)` 拆出独立模块，默认关闭；会全服公告并发点券，需专项测试。 |
 | 批量物品 UI 通知 | `script/js/batch_item_notify.js` | `enable_batch_item_add=true` | `[~]` | 已从旧 `api_CUser_Add_Item_list()` / `SendItemWindowNotification()` 拆出独立模块；Lua 回调发物品侧已加固，入口仍待切换。 |
 
@@ -43,8 +43,8 @@
 
 | 功能 | 状态 | 说明 |
 |---|---|---|
-| `df_game_r.js start()` 远端补丁提交 | `[!]` | 已确认 `refactor/dp2-9-base` 上 `df_game_r.js` 仍是旧 `start()`：未加载 `startup_helpers` / `startup_modules`，未调用 `startMigratedModules(cfg)`，且 Bridge 前仍有旧孤立 `}`。 |
-| 启动辅助接入 | `[~]` | `startup_helpers.js` 和 `startup_modules.js` 已新增，但 `df_game_r.js` 入口尚未调用 `startMigratedModules(cfg)`。 |
+| `df_game_r.js start()` 集中启动接入 | `[x]` | `start()` 已加载 `startup_helpers` / `startup_modules`，并调用 `startMigratedModules(cfg)`；旧逐项启动调用已移出入口。 |
+| 启动日志实测 | `[~]` | 需在测试服确认 `startup_helpers`、`startup_modules`、`migrated module startup finished`、`set function success` 等日志完整出现。 |
 | 时装镶嵌入口切换 | `[~]` | `emblem_fix.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
 | 历史日志入口切换 | `[~]` | `history_log.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
 | 角色使用道具事件入口切换 | `[~]` | `user_use_item_event.js` 已新增，但入口调度仍需和 `history_log.js` 一起加载。 |
@@ -56,8 +56,8 @@
 | 掉落公告入口接入 | `[~]` | `drop_announce.js` 已新增，但入口调度仍需切换到 `startup_modules.js`，默认保持关闭。 |
 | 批量物品 UI 通知入口切换 | `[~]` | `batch_item_notify.js` 已新增，但入口调度仍需切换旧内联函数。 |
 | frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
-| `df_game_r.js` 入口瘦身 | `[~]` | 当前 `df_game_r.js` 内仍混有大段旧功能和部分拆分模块的重复代码。后续应继续拆分成 `script/js/*.js`，避免入口文件过大。 |
-| `start()` 调度一致性 | `[~]` | 已新增 `docs/FRIDA_STARTUP_AUDIT.md` 记录调度风险和后续方案；当前已先做单点缓解，尚未全量重构入口。 |
+| `df_game_r.js` 入口瘦身 | `[~]` | `start()` 已集中调度，但文件内仍保留 native/common 基础设施、通用 helper 和少量旧业务残留（如 user_inout 旧 hook）。后续应继续小步拆分。 |
+| `start()` 调度一致性 | `[~]` | 已切到 `startup_modules` 集中调度；仍需测试服验证 DB-ready retry、默认开关和启动日志。 |
 | 高风险 JS 默认开关策略 | `[!]` | 当前部分高风险功能默认为 true，如怪物攻城、幸运点掉落、排行榜、时装潜能、VIP 登录。上线前需按测试结果决定是否保持开启。 |
 
 ## 3. 本轮已修复的迁移断点
@@ -75,11 +75,16 @@
   - 避免在 `df_game_r.js` 中逐个手写模块加载和函数调用。
   - 已纳入 `patches` 的创建角色、强化刷新、黑武技能栏、成长契约调度。
   - 已纳入 `account_cargo` 调度，但仍默认关闭。
-  - 不处理仍留在 `df_game_r.js` 的怪物攻城、TOD 等大型旧逻辑。
+  - 已纳入 `village_attack` 适配启动；怪物攻城 NativeFunction/API 基础设施仍留在 `df_game_r.js`。
+
+- `script/js/village_attack*.js`
+  - 怪物攻城已拆出 state、DB、flow、notify、hook、settlement 和启动适配模块。
+  - `event_villageattack_save_to_db()` / `event_villageattack_load_from_db()` 已迁入 `village_attack_db.js`，并增加 DB-ready/JSON parse 日志保护。
+  - `VillageAttackedRewardSendReward(user)` 已迁入 `village_attack_hook.js`，保留旧奖励邮件映射。
 
 - `tools/check_df_game_r_start.py`
-  - 新增只读检查器，用于区分 `pending`、`patched`、`broken/mixed` 三种入口状态。
-  - 当前远端状态应为 `pending`，需要本地执行 `tools/patch_df_game_r_start.py` 后再复查。
+  - 只读检查器用于区分 `pending`、`patched`、`broken/mixed` 三种入口状态。
+  - 当前 `refactor/dp2-9-base` 应保持 `patched`：`df_game_r.js start()` 已接入 `startup_helpers` / `startup_modules`。
 
 - 其他已拆模块状态详见上表。
 
@@ -87,10 +92,8 @@
 
 优先级建议：
 
-1. 在本地拉取最新 `refactor/dp2-9-base` 后运行 `python3 tools/check_df_game_r_start.py`，确认当前仍为 `pending`。
-2. 执行 `python3 tools/patch_df_game_r_start.py`，再运行 `python3 tools/check_df_game_r_start.py`，预期变为 `patched`。
-3. 提交 `df_game_r.js` 的实际入口补丁。
-4. 重启 Frida 并检查启动日志：`startup_helpers`、`startup_modules`、`migrated module startup finished`、`set function success`。
-5. 继续拆分 `df_game_r.js` 中剩余的大功能到 `script/js/*.js`，优先做怪物攻城的小步只读/状态模块化，不凭空实现缺失业务。
-6. 对高风险默认 true 的 JS 功能逐项确认是否应保持开启。
-7. 最后再做测试服验证和 Bug 修复。
+1. 重启 Frida 并检查启动日志：`startup_helpers`、`startup_modules`、`migrated module startup finished`、`village_attack_state`、`village_attack_db`、`village_attack_flow`、DB-ready retry、`set function success`。
+2. 继续拆分 `df_game_r.js` 中剩余旧业务到 `script/js/*.js`；native declarations、MySQL/Packet/API/common mail helpers 需先搜索全仓引用，不能一次性删除。
+3. 对高风险默认 true 的 JS 功能逐项确认是否应保持开启，尤其 `enable_village_attack`、`enable_luck_point_drop`、`enable_ranking`、`enable_hidden_option`、`enable_vip_login`。
+4. `account_cargo`、`online_reward`、`lucky_online`、`drop_announce` 继续默认关闭，找到真实实现并专项测试前不要开启。
+5. 最后再做测试服验证和 Bug 修复。

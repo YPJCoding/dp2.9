@@ -37,7 +37,7 @@ js_features.enable_account_cargo = false
 
 ## 2. 怪物攻城 `village_attack`
 
-状态：`[!] 已接入 startup_modules 启动适配并建立状态承接模块，核心实现仍在 df_game_r.js，默认开启但未专项验证`
+状态：`[!] 已拆成多个 script/js 模块并接入 startup_modules，默认开启但未专项验证`
 
 相关文件：
 
@@ -45,10 +45,15 @@ js_features.enable_account_cargo = false
 df_game_r.js
 script/js/village_attack.js
 script/js/village_attack_state.js
+script/js/village_attack_db.js
+script/js/village_attack_flow.js
+script/js/village_attack_notify.js
+script/js/village_attack_hook.js
+script/js/village_attack_settlement.js
 script/js/startup_modules.js
 script/config.lua
-tools/patch_df_game_r_village_attack_state.py
-tools/check_df_game_r_village_attack_state.py
+tools/patch_df_game_r_village_attack_*.py
+tools/check_df_game_r_village_attack_*.py
 ```
 
 当前配置：
@@ -63,25 +68,27 @@ js_features.enable_village_attack = true
 - [x] `village_attack.js` 增加启动请求保护，避免适配入口被重复调用。
 - [x] `village_attack.js` 会对旧 `start_event_villageattack` 安装 guard，避免过渡期双路径重复启动。
 - [x] `startup_modules.js` 已按 `enable_village_attack` 调用 `startVillageAttack()`。
-- [x] `startup_modules.js` 已无条件加载 `village_attack_state.js`，供 DB 存档和关闭开关场景使用。
-- [x] 新增 `script/js/village_attack_state.js`，承接状态常量、默认状态对象和低风险状态 helper。
-- [x] `village_attack.js` 启动时会加载 `village_attack_state.js`。
-- [x] 新增 `tools/patch_df_game_r_village_attack_state.py`，用于安全删除 `df_game_r.js` 中已迁移的状态常量和默认状态对象。
-- [x] 新增 `tools/check_df_game_r_village_attack_state.py`，用于检查 `df_game_r.js` 状态定义是否已清理。
-- [x] 暂不迁移奖励、刷怪、UI 包、DB 结算等核心逻辑，避免一次性高风险变更。
+- [x] `startup_modules.js` 已无条件加载 `village_attack_state.js` 和 `village_attack_db.js`，供 DB 存档和关闭开关场景使用。
+- [x] `script/js/village_attack_state.js` 承接状态常量、默认状态对象和低风险状态 helper。
+- [x] `script/js/village_attack_flow.js` 承接活动 timer、启动流程和模块依赖加载。
+- [x] `script/js/village_attack_notify.js` 承接 UI/进度通知 helper。
+- [x] `script/js/village_attack_hook.js` 承接旧 hook、PT、刷怪、阶段转换、额外经验奖励和副本回调奖励 `VillageAttackedRewardSendReward(user)`。
+- [x] `script/js/village_attack_settlement.js` 承接结束结算、奖励、失败惩罚和活动重启调度。
+- [x] `script/js/village_attack_db.js` 承接 `event_villageattack_save_to_db()` / `event_villageattack_load_from_db()`，并增加 DB 未就绪保护和 JSON parse 日志。
+- [x] 已用 patch/check 脚本从 `df_game_r.js` 清理状态、状态 helper、启动流程、通知、hook、settlement、DB helper 和副本回调奖励函数体。
 
 过渡期说明：
 
-- `df_game_r.js` 内的旧直接 `start_event_villageattack` 调度已由本地提交删除后，应只通过 `startup_modules.js -> startVillageAttack()` 启动。
-- `df_game_r.js` 内仍保留怪物攻城状态常量、`villageAttackEventInfo` 和旧状态函数定义，需本地执行清理脚本后再提交实际瘦身 diff。
-- `village_attack_state.js` 当前只在缺失时补齐全局定义，不强制覆盖旧状态，避免热加载或重复加载时重置活动进度。
-- 下一步执行 `python3 tools/patch_df_game_r_village_attack_state.py`，再执行 `python3 tools/check_df_game_r_village_attack_state.py`，确认通过后提交 `df_game_r.js`。
+- `df_game_r.js` 内的旧直接 `start_event_villageattack` 调度已删除，应只通过 `startup_modules.js -> village_attack.js -> startVillageAttack()` 启动。
+- `df_game_r.js` 仍保留 NativeFunction declarations、MySQL/Packet/API/common mail helper 等通用基础设施；这些符号仍被迁移模块引用，不能贸然删除。
+- `df_game_r.js` 仍保留 `hook_user_inout_game_world()` 旧残留，其中包含怪物攻城 UI 通知联动；`user_inout.js` 当前只是兼容桩，不能凭空重写业务。
+- `village_attack_state.js` 只在缺失时补齐全局定义，不强制覆盖旧状态，避免热加载或重复加载时重置活动进度。
 
 风险点：
 
 - 依赖 MySQL / `frida.game_event`。
 - 涉及定时器、刷怪、UI 包、攻城状态、PT、邮件奖励。
-- 核心实现当前仍混在 `df_game_r.js` 中，尚未完成独立模块迁移。
+- `enable_village_attack` 当前默认 true，但尚未完成测试服端到端验证。
 - `start()` 调度中 DB 初始化时序已通过 `village_attack.js` retry 做缓解，但仍需测试服日志确认。
 
 后续迁移要求：
@@ -92,16 +99,15 @@ js_features.enable_village_attack = true
 - [x] 删除 `df_game_r.js` 中旧的 `api_scheduleOnMainThread(start_event_villageattack, null)` 直接调度。
 - [x] 增加 DB 未就绪保护：`village_attack.js` 会等待 `mysql_taiwan_cain` / `mysql_frida` 初始化后再调用旧 `start_event_villageattack`。
 - [x] 小步拆出状态与常量承接模块：`village_attack_state.js`。
-- [~] `df_game_r.js` 状态定义清理：已提供自动 patch/check 脚本，待执行脚本并提交实际 `df_game_r.js` diff。
-- [~] 小步拆出纯状态函数：已在 `village_attack_state.js` 提供状态重置、剩余时间、难度设置、进度广播 helper；旧函数体仍保留在 `df_game_r.js`，待启动稳定后删除/切换。
-- [ ] 小步拆出定时器与启动流程。
-- [ ] 最后拆出高风险 hook、刷怪、PT、结算、奖励邮件。
-- [ ] 拆分测试：状态初始化 -> 活动开始 -> UI -> 刷怪 -> PT -> 结算 -> 奖励邮件。
+- [x] 清理 `df_game_r.js` 状态定义、纯状态函数、启动流程、通知、hook、settlement、DB helper 和副本回调奖励函数体。
+- [~] 继续检查 `df_game_r.js` 中 native declarations、MySQL/Packet/API/common mail helper 的引用边界，后续如拆基础设施必须先搜索全仓引用。
+- [~] 处理 `hook_user_inout_game_world()` 残留：必须找到旧来源或做兼容桩，不凭空实现。
+- [ ] 拆分测试：状态初始化 -> DB load/save -> 活动开始 -> UI -> 刷怪 -> PT -> 结算 -> 奖励邮件。
 - [ ] 决定默认开关是否继续保持 true。
 
 ## 3. 幸运点掉落 `luck_point_drop`
 
-状态：`[~] 已拆模块，默认开启，高风险待入口切换/待测`
+状态：`[~] 已拆模块并集中调度，默认开启，高风险待测`
 
 相关文件：
 

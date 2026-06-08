@@ -4,15 +4,12 @@
 
 ## 1. 当前问题
 
-`df_game_r.js` 当前不是一个干净的入口文件：
+`df_game_r.js` 已不再是纯旧调度入口，但仍不是一个干净入口文件：
 
-- `start()` 内部负责读取 `/dp2/frida/frida_config.json` 并按 `features` 开关启动功能。
-- `start()` 后半段仍混入了旧功能定义，例如 `set_return_user`、`start_hidden_option`、`start_ranking`、`vip_Login` 等。
-- 部分功能已经拆到 `script/js/*.js`，但入口文件内还保留旧实现，存在重复实现和命名不一致风险。
-- 部分旧内联实现与拆分模块函数名不同，例如：
-  - 拆分模块：`startVipLogin()`。
-  - 旧内联入口：`vip_Login()`。
-- `init_db()` 当前在部分功能启动之后才调度，可能导致依赖 DB 的功能启动时 DB 句柄尚未准备好。
+- `start()` 已加载 `startup_helpers.js` / `startup_modules.js` 并调用 `startMigratedModules(cfg)` 集中启动已拆模块。
+- `df_game_r.js` 仍负责读取 `/dp2/frida/frida_config.json`、初始化 DB、保留 native declarations、MySQL/Packet/API/common mail helper 等通用基础设施。
+- 文件内仍有少量旧业务残留，例如 `hook_user_inout_game_world()`，其中仍包含幸运点和怪物攻城 UI 通知联动；`user_inout.js` 当前只是兼容桩，不能凭空替代。
+- 依赖 DB 的模块已有局部 retry 缓解，但仍需要测试服启动日志确认。
 
 ## 2. 已修复/已缓解问题
 
@@ -103,6 +100,7 @@ script/js/startup_modules.js
 - `startup_modules.js` 新增 `startMigratedModules(cfg)` 集中启动器。
 - `startup_modules.js` 已纳入 `patches` 调度：创建角色限制、强化刷新、黑武技能栏、成长契约。
 - `startup_modules.js` 已纳入 `account_cargo` 调度，但仍默认关闭。
+- `startup_modules.js` 已纳入 `village_attack` 适配启动，并由 `village_attack.js` 等待 DB ready 后再启动活动流程。
 
 用途：
 
@@ -111,41 +109,41 @@ script/js/startup_modules.js
 - 避免 `startup_modules.js` 反复启动同一个模块时重复 `dp_load`。
 - `df_game_r.js` 后续只需加载 `startup_helpers.js` / `startup_modules.js` 并调用 `startMigratedModules(cfg)`，即可集中启动已拆分模块。
 
-状态：`[~] 辅助模块已新增，入口待接入`
+状态：`[~] 辅助模块已接入入口，待测试服日志验证`
 
-### 2.7 已拆出但待入口切换的模块
+### 2.7 已拆出并纳入集中启动的模块
 
-这些模块已经从 `df_game_r.js` 或旧 `dp2/frida.js` 中拆出，保留旧入口兼容，但 `df_game_r.js` 入口仍待切换：
+这些模块已经从 `df_game_r.js` 或旧 `dp2/frida.js` 中拆出，保留旧入口兼容，并已由 `startup_modules.js` 按开关集中调度；仍需测试服验证：
 
 | 模块 | 旧入口/旧来源 | 新入口 | 状态 |
 |---|---|---|---|
-| `script/js/history_log.js` | `hook_history_log()` | `startHistoryLog()` | `[~] 待入口切换` |
+| `script/js/history_log.js` | `hook_history_log()` | `startHistoryLog()` | `[~] 已集中调度，待实测` |
 | `script/js/user_use_item_event.js` | `UserUseItemEvent()` | `UserUseItemEvent()` / `dispatchUserUseItemEvent()` | `[~] 待随 history_log 一起加载` |
 | `script/js/user_inout.js` | `hook_user_inout_game_world()` 入口残留 | `startUserInoutHook()` / `hook_user_inout_game_world()` | `[~] 兼容桩，真实实现待确认` |
 | `script/js/lucky_online.js` | `start_event_lucky_online_user()` 入口残留 | `startLuckyOnlineUserEvent()` / `start_event_lucky_online_user()` | `[~] 兼容桩，真实实现待确认` |
-| `script/js/batch_item_notify.js` | `api_CUser_Add_Item_list()` / `SendItemWindowNotification()` | 旧入口兼容 | `[~] 待入口切换` |
-| `script/js/emblem_fix.js` | `fix_use_emblem()` | `startEmblemFix()` | `[~] 待入口切换` |
-| `script/js/drop_announce.js` | `processing_data(...)` 残留逻辑 | `startDropAnnounce()` | `[~] 默认关闭，待入口接入` |
-| `script/js/luck_point_drop.js` | `enable_drop_use_luck_point()` | `startLuckPointDrop()` | `[~] 待入口切换` |
-| `script/js/random_option.js` | `change_random_option_inherit()` / `auto_unseal_random_option_equipment()` | `startRandomOptionInherit()` / `startAutoUnsealRandomOptionEquipment()` | `[~] 待入口切换` |
-| `script/js/online_reward.js` | `enable_online_reward()` | `startOnlineReward()` | `[~] 默认关闭，待入口切换` |
-| `script/js/patches.js` | patch 旧入口组 | `disableCreateCharLimit()` / `enableStrengthenRefresh()` / `enableComboSkillFix()` / `disableMobileAuth()` | `[~] 已纳入 startup_modules 调度，入口待切换` |
+| `script/js/batch_item_notify.js` | `api_CUser_Add_Item_list()` / `SendItemWindowNotification()` | 旧入口兼容 | `[~] 已集中调度，待实测` |
+| `script/js/emblem_fix.js` | `fix_use_emblem()` | `startEmblemFix()` | `[~] 已集中调度，待实测` |
+| `script/js/drop_announce.js` | `processing_data(...)` 残留逻辑 | `startDropAnnounce()` | `[~] 已集中调度，默认关闭，待实测` |
+| `script/js/luck_point_drop.js` | `enable_drop_use_luck_point()` | `startLuckPointDrop()` | `[~] 已集中调度，待实测` |
+| `script/js/random_option.js` | `change_random_option_inherit()` / `auto_unseal_random_option_equipment()` | `startRandomOptionInherit()` / `startAutoUnsealRandomOptionEquipment()` | `[~] 已集中调度，待实测` |
+| `script/js/online_reward.js` | `enable_online_reward()` | `startOnlineReward()` | `[~] 已集中调度，默认关闭，待实测` |
+| `script/js/patches.js` | patch 旧入口组 | `disableCreateCharLimit()` / `enableStrengthenRefresh()` / `enableComboSkillFix()` / `disableMobileAuth()` | `[~] 已纳入 startup_modules 调度，待实测` |
 | `script/js/account_cargo.js` | `setMaxCAccountCargoSolt(128)` | `setMaxCAccountCargoSolt(128)` | `[!] 已纳入 startup_modules 调度，默认关闭，待专项测试` |
 
-状态：`[~] 模块已拆分，入口待统一接入`
+状态：`[~] 模块已拆分并集中调度，待测试服验证`
 
 ## 3. 当前仍需处理的启动调度问题
 
-### 3.1 `start()` 需要统一安全调用层
+### 3.1 `start()` 集中安全调用层待实测
 
-辅助模块已新增：
+辅助模块已新增并接入：
 
 ```text
 script/js/startup_helpers.js
 script/js/startup_modules.js
 ```
 
-后续入口建议先替换为集中启动器：
+当前入口已使用集中启动器：
 
 ```js
 dp_load('startup_helpers');
@@ -174,61 +172,40 @@ startModuleFeature('luck_point_drop', cfg.enable_luck_point_drop === true, 'luck
 - 每个功能有明确启动日志。
 - 减少 `df_game_r.js` 中逐个手写模块加载和函数调用。
 
-状态：`[~] 辅助模块已实现，df_game_r.js 入口待接入`
+状态：`[~] df_game_r.js 入口已接入，待测试服启动日志验证`
 
 ### 3.2 `init_db()` 应早于 DB 依赖功能
 
-当前 `start()` 中存在 DB 依赖功能早于 `init_db()` 调度的问题。
+当前 `start()` 已集中调度，但 DB 依赖功能仍需按模块确认 DB-ready 行为。
 
 已缓解：
 
 - `ranking.js` 已做 DB 未就绪重试。
+- `village_attack.js` 已在 `mysql_taiwan_cain` / `mysql_frida` 未就绪时等待重试，再启动怪物攻城流程。
+- `village_attack_db.js` 已在 save/load helper 内增加 `mysql_frida` 未就绪保护。
 
 仍需确认：
 
-- 怪物攻城。
-- 幸运在线玩家。
-- 在线奖励。
+- 幸运在线玩家（当前为兼容桩，默认关闭）。
+- 在线奖励（默认关闭）。
 - 其他使用 `mysql_*` 句柄的旧内联功能。
 
-状态：`[~] 部分缓解，待继续梳理`
+状态：`[~] 已部分缓解，待测试服启动日志确认`
 
-### 3.3 VIP 登录存在旧内联实现残留
+### 3.3 已拆模块的旧实现残留
 
-当前 `df_game_r.js` 内仍能看到旧 `vip_Login()` 实现残留，并且旧实现内部曾使用小写广播函数名。
+已处理：
 
-已缓解：
-
-- 拆分模块增加小写广播函数别名。
-- 拆分模块自身有重复 hook 保护。
+- `vip_login.js` 已接入集中启动，并保留 `vip_Login()` 兼容入口、小写广播函数别名和重复 hook 保护。
+- `df_game_r.js start()` 大括号结构已修复，`set function success` 后入口作用域已闭合。
+- 怪物攻城 DB helper 和副本回调奖励函数体已移出 `df_game_r.js`。
 
 仍需后续处理：
 
-- 入口文件瘦身时删除旧内联 `vip_Login()` 实现，统一使用 `script/js/vip_login.js`。
+- `df_game_r.js` 仍有通用 native/API/MySQL/Packet/mail helper，后续拆基础设施必须先搜索全仓引用。
+- `hook_user_inout_game_world()` 仍保留旧残留，且 `user_inout.js` 当前只是兼容桩；不能凭空实现缺失业务。
 
-状态：`[~] 已缓解，待入口瘦身`
-
-### 3.4 `start()` 大括号结构需专项修复
-
-当前观察到：
-
-- `start()` 在 `set function success` 日志后未立即闭合。
-- 后续旧功能定义可能被包进 `start()` 内部。
-
-风险：
-
-- 旧函数定义作用域异常。
-- 新模块函数可能被旧同名函数覆盖。
-- 入口瘦身时容易误删或误包代码。
-
-最小修复方案：
-
-1. 在 `set function success` 日志后补 `}`。
-2. 删除文件后部原本用于闭合 `start()` 的孤立 `}`。
-3. 不删除任何业务函数，先只修作用域。
-4. 再逐步把入口调用切换到 `startMigratedModules(cfg)`。
-
-状态：`[!] 需专项小步修复，不建议整文件替换`
+状态：`[~] 入口作用域已修复，剩余残留待小步拆分`
 
 ## 4. 不建议现在直接大改的部分
 

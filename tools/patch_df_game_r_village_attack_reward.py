@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Remove migrated village-attack settlement helpers from df_game_r.js.
+"""Remove migrated village-attack reward callback from df_game_r.js.
 
-The settlement body is now provided by script/js/village_attack_settlement.js.
+The reward callback is now provided by script/js/village_attack_hook.js.
 
 This removes only:
 
-- end_villageattack
-- on_end_event_villageattack
+- VillageAttackedRewardSendReward
 
 It intentionally does not remove:
 
-- event_villageattack_save_to_db / load_from_db
-- native declarations
-- common reward/mail helper APIs used by other features
+- NativeFunction declarations used by village_attack modules
+- GetCurVAttackCount / mail helper APIs
+- hook_user_inout_game_world compatibility logic
 
 Usage from repo root:
-    python3 tools/patch_df_game_r_village_attack_settlement.py
-    python3 tools/check_df_game_r_village_attack_settlement.py
+    python3 tools/patch_df_game_r_village_attack_reward.py
+    python3 tools/check_df_game_r_village_attack_reward.py
 """
 
 from __future__ import annotations
@@ -27,10 +26,9 @@ from pathlib import Path
 
 TARGET = Path("df_game_r.js")
 FUNCTION_NAMES = (
-    "end_villageattack",
-    "on_end_event_villageattack",
+    "VillageAttackedRewardSendReward",
 )
-REPLACEMENT_HEADER = """// 怪物攻城结束与结算函数已迁移到 script/js/village_attack_settlement.js。
+REPLACEMENT_HEADER = """// 怪物攻城副本回调奖励函数已迁移到 script/js/village_attack_hook.js。
 // 旧函数名由迁移模块提供，df_game_r.js 不再保留实现。
 
 """
@@ -89,7 +87,7 @@ def find_function_block(text: str, name: str) -> tuple[int, int] | None:
 
 def main() -> int:
     if not TARGET.exists():
-        print(f"[village_attack_settlement_patch] missing {TARGET}", file=sys.stderr)
+        print(f"[village_attack_reward_patch] missing {TARGET}", file=sys.stderr)
         return 2
 
     text = TARGET.read_text(encoding="utf-8")
@@ -98,7 +96,7 @@ def main() -> int:
     if REPLACEMENT_HEADER not in text:
         first = find_function_block(text, FUNCTION_NAMES[0])
         if first is None:
-            print("[village_attack_settlement_patch] first settlement function not found", file=sys.stderr)
+            print("[village_attack_reward_patch] reward callback not found", file=sys.stderr)
             return 2
         text = text[:first[0]] + REPLACEMENT_HEADER + text[first[0]:]
 
@@ -110,11 +108,11 @@ def main() -> int:
         text = text[:start] + text[end:]
 
     if text == original:
-        print("[village_attack_settlement_patch] no changes")
+        print("[village_attack_reward_patch] no changes")
         return 0
 
     TARGET.write_text(text, encoding="utf-8")
-    print("[village_attack_settlement_patch] patched df_game_r.js")
+    print("[village_attack_reward_patch] patched df_game_r.js")
     return 0
 
 

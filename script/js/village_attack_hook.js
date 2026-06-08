@@ -2,11 +2,13 @@
 //
 // 迁移范围：
 // - hook_VillageAttack()
+// - VillageAttackedRewardSendReward(user)
 //
 // 说明：
 // - 本模块保留旧 hook 业务语义，只增加重复安装保护。
-// - PT 阶段转换、刷怪、结算触发、额外经验奖励仍保持旧逻辑。
-// - 结束结算、奖励邮件和 DB 存档仍保留在 df_game_r.js。
+// - PT 阶段转换、刷怪、结算触发、副本回调奖励、额外经验奖励仍保持旧逻辑。
+// - 结束结算和 DB 存档由 village_attack_settlement / village_attack_db 提供。
+// - NativeFunction 声明与通用邮件 helper 仍保留在 df_game_r.js。
 
 var g_village_attack_hook_attached = false;
 
@@ -31,6 +33,125 @@ function ensureVillageAttackHookDependencies() {
   } catch (e) {
     villageAttackHookLog('load dependencies failed: ' + e.message);
     return false;
+  }
+}
+
+// 怪物攻城副本回调奖励处理函数。
+function VillageAttackedRewardSendReward(user) {
+  const VAttackCount = GetCurVAttackCount(user);
+  const mail_title = "GM"
+  const mail_contact = "怪物攻城奖励："
+  switch (VAttackCount) {
+    case 1:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
+      break;
+    case 2:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
+      break;
+    case 3:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 10, mail_title, mail_contact);
+      break;
+    case 4:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
+      break;
+    case 5:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 5, mail_title, mail_contact);
+      break;
+    case 6:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
+      break;
+    case 7:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
+      break;
+    case 8:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 8, 5, mail_title, mail_contact);
+      break;
+    case 9:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
+      break;
+    case 10:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 36, 1, mail_title, mail_contact);
+      break;
+    case 11:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 36, 1, mail_title, mail_contact);
+      break;
+    case 12:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 15, 1, mail_title, mail_contact);
+      break;
+    case 13:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 15, 1, mail_title, mail_contact);
+      break;
+    case 14:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 1031, 1, mail_title, mail_contact);
+      break;
+    case 15:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3262, 2, mail_title, mail_contact);
+      break;
+    case 16:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3262, 3, mail_title, mail_contact);
+      break;
+    case 17:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 2600261, 1, mail_title, mail_contact);
+      break;
+    case 18:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 2600261, 1, mail_title, mail_contact);
+      break;
+    case 19:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
+      break;
+    case 20:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
+      break;
+    case 21:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
+      break;
+    case 22:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
+      break;
+    case 23:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 8, 5, mail_title, mail_contact);
+      break;
+    case 24:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 15, 1, mail_title, mail_contact);
+      break;
+    case 25:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 15, 2, mail_title, mail_contact);
+      break;
+    case 26:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3262, 5, mail_title, mail_contact);
+      break;
+    case 27:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3262, 2, mail_title, mail_contact);
+      break;
+    case 28:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 10000160, 1, mail_title, mail_contact);
+      break;
+    case 29:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
+      break;
+    case 30:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
+      break;
+    case 31:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
+      break;
+    case 32:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
+      break;
+    case 33:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
+      break;
+    case 34:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
+      break;
+    case 35:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 2600261, 1, mail_title, mail_contact);
+      break;
+    case 36:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 10000161, 1, mail_title, mail_contact);
+      break;
+    default:
+      CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
   }
 }
 

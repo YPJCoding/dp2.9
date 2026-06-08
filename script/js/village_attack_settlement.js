@@ -6,7 +6,7 @@
 //
 // 说明：
 // - 保留旧奖励、点券、装备强化、失败惩罚逻辑，不调整数值和规则。
-// - DB save/load 仍保留在 df_game_r.js；本模块继续调用 event_villageattack_save_to_db()。
+// - DB save/load 已迁移到 village_attack_db.js；本模块继续调用 event_villageattack_save_to_db() 兼容入口。
 // - NativeFunction 声明仍保留在 df_game_r.js。
 
 function villageAttackSettlementLog(message) {

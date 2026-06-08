@@ -1308,7 +1308,8 @@ function api_scheduleOnMainThread_delay(f, args, delay) {
 // 保留旧函数名兼容：hook_VillageAttack。
 
 
-//结束怪物攻城活动(立即销毁攻城怪物, 不开启逆袭之谷, 不发送活动奖励)
+// 怪物攻城结束与结算函数已迁移到 script/js/village_attack_settlement.js。
+// 旧函数名由迁移模块提供，df_game_r.js 不再保留实现。
 
 //无条件完成指定任务并领取奖励
 function api_force_clear_quest(user, quest_id) {
@@ -1783,124 +1784,9 @@ function hook_user_inout_game_world() {
 		});
 }
 
-//怪物攻城副本回调奖励处理函数
-function VillageAttackedRewardSendReward(user) {
-	const VAttackCount = GetCurVAttackCount(user);
-	const mail_title = "GM"
-	const mail_contact = "怪物攻城奖励："
-	switch (VAttackCount) {
-		case 1:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
-			break;
-		case 2:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
-			break;
-		case 3:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 10, mail_title, mail_contact);
-			break;
-		case 4:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
-			break;
-		case 5:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 5, mail_title, mail_contact);
-			break;
-		case 6:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
-			break;
-		case 7:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
-			break;
-		case 8:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 8, 5, mail_title, mail_contact);
-			break;
-		case 9:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
-			break;
-		case 10:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 36, 1, mail_title, mail_contact);
-			break;
-		case 11:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 36, 1, mail_title, mail_contact);
-			break;
-		case 12:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 15, 1, mail_title, mail_contact);
-			break;
-		case 13:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 15, 1, mail_title, mail_contact);
-			break;
-		case 14:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 1031, 1, mail_title, mail_contact);
-			break;
-		case 15:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3262, 2, mail_title, mail_contact);
-			break;
-		case 16:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3262, 3, mail_title, mail_contact);
-			break;
-		case 17:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 2600261, 1, mail_title, mail_contact);
-			break;
-		case 18:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 2600261, 1, mail_title, mail_contact);
-			break;
-		case 19:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
-			break;
-		case 20:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
-			break;
-		case 21:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
-			break;
-		case 22:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
-			break;
-		case 23:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 8, 5, mail_title, mail_contact);
-			break;
-		case 24:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 15, 1, mail_title, mail_contact);
-			break;
-		case 25:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 15, 2, mail_title, mail_contact);
-			break;
-		case 26:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3262, 5, mail_title, mail_contact);
-			break;
-		case 27:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3262, 2, mail_title, mail_contact);
-			break;
-		case 28:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 10000160, 1, mail_title, mail_contact);
-			break;
-		case 29:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
-			break;
-		case 30:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
-			break;
-		case 31:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
-			break;
-		case 32:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
-			break;
-		case 33:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 8, 2, mail_title, mail_contact);
-			break;
-		case 34:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 1085, 2, mail_title, mail_contact);
-			break;
-		case 35:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 2600261, 1, mail_title, mail_contact);
-			break;
-		case 36:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 10000161, 1, mail_title, mail_contact);
-			break;
-		default:
-			CMailBoxHelperReqDBSendNewSystemMail(user, 3037, 5, mail_title, mail_contact);
-	}
-}
+// 怪物攻城副本回调奖励函数已迁移到 script/js/village_attack_hook.js。
+// 旧函数名由迁移模块提供，df_game_r.js 不再保留实现。
+
 
 //增加魔法封印装备的魔法封印等级
 function _boost_random_option_equ(inven_item) {
