@@ -85,6 +85,7 @@ function resetVillageAttackInfoStateOnly() {
   villageAttackEventInfo.last_killed_monster_id = 0;
   villageAttackEventInfo.p2_kill_combo = 0;
   villageAttackEventInfo.user_pt_info = {};
+  setVillageAttackDungeonDifficult(villageAttackEventInfo.difficult);
   villageAttackEventInfo.start_time = api_CSystemTime_getCurSec();
   return villageAttackEventInfo;
 }
@@ -108,7 +109,24 @@ function broadcastVillageAttackDifficulty() {
   }
 }
 
-// 旧函数名兼容。df_game_r.js 旧定义仍存在时不会影响旧入口；后续删除旧定义后可直接复用这些别名。
+// 旧函数名兼容。后续删除 df_game_r.js 旧函数体后，旧调用点会继续工作。
+function reset_villageattack_info() {
+  return resetVillageAttackInfoStateOnly();
+}
+
+function event_villageattack_get_remain_time() {
+  return getVillageAttackRemainTime();
+}
+
+function set_villageattack_dungeon_difficult(difficult) {
+  return setVillageAttackDungeonDifficult(difficult);
+}
+
+function event_villageattack_broadcast_difficulty() {
+  return broadcastVillageAttackDifficulty();
+}
+
+// 显式保留 state_only 名称，便于迁移期对比和手动调试。
 function reset_villageattack_info_state_only() {
   return resetVillageAttackInfoStateOnly();
 }
