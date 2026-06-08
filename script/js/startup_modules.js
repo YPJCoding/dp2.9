@@ -97,6 +97,9 @@ function anyPatchFeatureEnabled(cfg) {
 function startMigratedModules(cfg) {
   cfg = cfg || {};
 
+  // 运行时兼容修复必须最早加载，用于覆盖 df_game_r.js 中的旧 helper 问题。
+  loadModuleOnly('runtime_hotfixes', true, 'runtime_hotfixes');
+
   // 怪物攻城状态/DB 会被 init_db()/uninit_db() 使用。
   // 即使 enable_village_attack=false，也必须先加载，避免清理 df_game_r.js 后出现缺失。
   loadModuleOnly('village_attack_state', true, 'village_attack_state');
