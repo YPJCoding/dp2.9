@@ -38,7 +38,7 @@ bash tools/check_lua_syntax.sh
 
 ## 新功能提交前检查
 
-提交前至少执行：
+提交前可以执行：
 
 ```bash
 bash tools/check_js_syntax.sh
@@ -59,7 +59,7 @@ git diff --stat
 - 没有误改入口文件。
 - 没有误改不相关模块。
 - 没有把真实业务逻辑加入模板分支。
-- 没有残留真实地址、真实 item_id、SQL、shell、发奖或删除逻辑。
+- 没有残留真实运行时地址、真实项目标识或真实业务配置。
 
 ## 模板分支检查重点
 
