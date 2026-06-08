@@ -12,13 +12,17 @@ function M.safe_call_logger(logger, level, fmt, ...)
     if not logger then
         return
     end
-    local success, err = pcall(function()
-        if level == "info" then
-            logger.info(fmt, ...)
-        elseif level == "warn" then
-            logger.warn(fmt, ...)
-        elseif level == "error" then
-            logger.error(fmt, ...)
+
+    local args = { ... }
+    local unpack_fn = table.unpack or unpack
+
+    local ok = pcall(function()
+        if level == "info" and logger.info then
+            logger.info(fmt, unpack_fn(args))
+        elseif level == "warn" and logger.warn then
+            logger.warn(fmt, unpack_fn(args))
+        elseif level == "error" and logger.error then
+            logger.error(fmt, unpack_fn(args))
         end
     end)
     -- 日志失败静默忽略，不影响业务
