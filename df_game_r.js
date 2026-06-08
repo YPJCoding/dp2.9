@@ -1623,21 +1623,10 @@ function hook_history_log() {
 		});
 }
 
-//角色获取道具发送全服通知
-function processing_data(item_id, user, award_item_id, award_item_count, count) {
-	const itemName = api_CItem_GetItemName(item_id);
-	//pvf中获取装备数据
-	const citem = CDataManager_find_item(G_CDataManager(), item_id);
-	const rarity = CItem_get_rarity(citem);
-	if( parseInt(rarity) >= 3){
-		api_GameWorld_SendNotiPacketMessage("恭喜玩家[" +
-		"" + api_CUserCharacInfo_getCurCharacName(user) + "" +
-		"]在地下城中获得了"+rarity+"[" + itemName + "], 随机奖励点券：" + count + "", 14);
-		api_recharge_cash_cera(user, count);
-	}
+// 掉落公告/奖励函数已迁移到 script/js/drop_announce.js。
+// 新模块提供 processDropAnnounce(...)，df_game_r.js 不再保留旧 processing_data(...) 实现。
 
 // ===== Hook: History Log / User In-Out =====
-}
 
 //角色登入登出处理
 function hook_user_inout_game_world() {

@@ -36,7 +36,7 @@
 | 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块；已补参数校验、重复应用保护和旧入口 `set_return_user()` 兼容。 |
 | VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名、旧大小写函数名兼容和重复 hook 保护。 |
 | 怪物攻城 | `script/js/village_attack*.js` / `df_game_r.js` native/common infra | `enable_village_attack=true` | `[!]` | 业务迁移基本完成：启动适配、state、DB、flow、notify、hook、settlement 和副本回调奖励均已拆出；`df_game_r.js` 仅保留迁移注释、NativeFunction/API/MySQL/Packet/邮件 helper 和 user_inout 残留，需专项实测。 |
-| 掉落公告 / 掉落奖励 | `script/js/drop_announce.js` | `enable_drop_announce=false` | `[!]` | 已从 `df_game_r.js` 残留 `processing_data(...)` 拆出独立模块，默认关闭；会全服公告并发点券，需专项测试。 |
+| 掉落公告 / 掉落奖励 | `script/js/drop_announce.js` | `enable_drop_announce=false` | `[!]` | 已从 `df_game_r.js` 残留 `processing_data(...)` 拆出独立模块，并清理旧实现；默认关闭，会全服公告并发点券，需专项测试。 |
 | 批量物品 UI 通知 | `script/js/batch_item_notify.js` | `enable_batch_item_add=true` | `[~]` | 已从旧 `api_CUser_Add_Item_list()` / `SendItemWindowNotification()` 拆出独立模块并清理 `df_game_r.js` 旧实现；Lua 回调发物品侧已加固，待实测。 |
 
 ## 2. 当前缺口 / 未完成项
@@ -53,7 +53,7 @@
 | 幸运在线玩家真实实现 | `[ ]` | `lucky_online.js` 当前只是兼容桩；真实 `start_event_lucky_online_user()` 未在当前仓库或旧仓库中找到。 |
 | 随机属性旧实现清理 | `[x]` | `random_option.js` 已保留旧函数名兼容，`startup_modules.js` 已调度，`df_game_r.js` 旧函数已删除。 |
 | 幸运点掉落入口切换 | `[~]` | `luck_point_drop.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
-| 掉落公告入口接入 | `[~]` | `drop_announce.js` 已新增，但入口调度仍需切换到 `startup_modules.js`，默认保持关闭。 |
+| 掉落公告旧实现清理 | `[x]` | `drop_announce.js` 已提供 `processDropAnnounce(...)`，`df_game_r.js` 旧 `processing_data(...)` 已删除；功能默认保持关闭。 |
 | 批量物品 UI 通知旧实现清理 | `[x]` | `batch_item_notify.js` 已保留旧函数名兼容，`df_game_r.js` 旧内联函数已删除。 |
 | frida 数据库结构完整性 | `[~]` | `init_db()` 会创建/使用 `frida.game_event`，但 `frida.battle` 等表依赖仍需确认。 |
 | `df_game_r.js` 入口瘦身 | `[~]` | `start()` 已集中调度，但文件内仍保留 native/common 基础设施、通用 helper 和少量旧业务残留（如 user_inout 旧 hook）。后续应继续小步拆分。 |
