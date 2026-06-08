@@ -10,7 +10,6 @@ local config = {
 
     features = {
         enable_example_module = false,
-        enable_example_handler = false,
     },
 
     example_module = {
