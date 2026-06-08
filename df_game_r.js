@@ -1750,41 +1750,14 @@ function start() {
 }
 
 // ===== Feature: Return User (回归勇士) =====
-
-// 回归勇士时间设置（来源：dp2/frida.js）
-function set_return_user(day) {
-	const time = day * 86400;
-	Memory.protect(ptr(0x84C753D), 32, 'rwx');
-	ptr(0x84C753D).writeU32(time);
-}
+//
+// 旧内联实现已迁移到 script/js/return_user.js。
+// 兼容入口 set_return_user(day) 由模块提供，避免主入口继续保留重复实现。
 
 // ===== Feature: Hidden Option (时装潜能) =====
-
-// 随机数辅助函数（来源：dp2/frida.js）
-function get_random_int(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
-
-// 覆盖系统分配属性并下发随机时装潜能（来源：dp2/frida.js）
-function hidden_option() {
-	Memory.protect(ptr(0x08509D49), 3, 'rwx');
-	ptr(0x08509D49).writeByteArray([0xEB]);
-
-	Memory.protect(ptr(0x08509D34), 3, 'rwx');
-	ptr(0x08509D34).writeUShort(get_random_int(1, 64));
-}
-
-// 挂接时装潜能激活钩子（来源：dp2/frida.js）
-function start_hidden_option() {
-	Interceptor.attach(ptr(0x08509B9E), {
-		onEnter: function (args) { hidden_option(); },
-		onLeave: function (retval) {}
-	});
-	Interceptor.attach(ptr(0x0817EDEC), {
-		onEnter: function (args) {},
-		onLeave: function (retval) { retval.replace(1); }
-	});
-}
+//
+// 旧内联实现已迁移到 script/js/hidden_option.js。
+// 兼容入口 start_hidden_option() 由模块提供，避免主入口继续保留重复 hook 实现。
 
 // ===== Feature: Ranking (战力排行榜) =====
 
