@@ -1302,17 +1302,8 @@ function api_scheduleOnMainThread_delay(f, args, delay) {
 }
 
 //重置活动数据
-function reset_villageattack_info() {
-	villageAttackEventInfo.state = VILLAGEATTACK_STATE_P1;
-	villageAttackEventInfo.score = 0;
-	villageAttackEventInfo.difficult = 0;
-	villageAttackEventInfo.next_village_monster_id = TAU_CAPTAIN_MONSTER_ID;
-	villageAttackEventInfo.last_killed_monster_id = 0;
-	villageAttackEventInfo.p2_kill_combo = 0;
-	villageAttackEventInfo.user_pt_info = {};
-	set_villageattack_dungeon_difficult(villageAttackEventInfo.difficult);
-	villageAttackEventInfo.start_time = api_CSystemTime_getCurSec();
-}
+// 怪物攻城纯状态函数已迁移到 script/js/village_attack_state.js。
+// 保留旧函数名兼容：reset_villageattack_info / set_villageattack_dungeon_difficult /
 
 //怪物攻城活动计时器(每5秒触发一次)
 function event_villageattack_timer() {
@@ -1409,26 +1400,8 @@ function start_event_villageattack() {
 	}
 }
 
-//设置怪物攻城副本难度(0-4: 普通-英雄)
-function set_villageattack_dungeon_difficult(difficult) {
-	Memory.protect(ptr(0x085B9605), 4, 'rwx'); //修改内存保护属性为可写
-	ptr(0x085B9605).writeInt(difficult);
-}
-
-//世界广播怪物攻城活动当前进度/难度
-function event_villageattack_broadcast_difficulty() {
-	if (villageAttackEventInfo.state != VILLAGEATTACK_STATE_END) {
-		api_GameWorld_SendNotiPacketMessage('<怪物攻城活动> 当前阶段:' + (villageAttackEventInfo.state + 1) + ', 当前难度等级: ' + villageAttackEventInfo.difficult, 14);
-	}
-}
 
 //计算活动剩余时间
-function event_villageattack_get_remain_time() {
-	const cur_time = api_CSystemTime_getCurSec();
-	const event_end_time = villageAttackEventInfo.start_time + EVENT_VILLAGEATTACK_TOTAL_TIME;
-	const remain_time = event_end_time - cur_time;
-	return remain_time;
-}
 
 //更新怪物攻城当前进度(广播给频道内在线玩家)
 function gameworld_update_villageattack_score() {
