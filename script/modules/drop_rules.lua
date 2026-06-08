@@ -10,11 +10,19 @@ local game = nil
 local level_gap = 20
 local bypass_item_id = 80207
 local message = "此副本等级过低，掉落物品已被系统收回！"
+local is_hook_registered = false
 
 -- CParty_DropItem hook 回调
 -- 签名: function(_party, monster_id) return boolean end
 local function on_drop_item(_party, monster_id)
     local party = game.fac.party(_party)
+    if not party then
+        if logger then
+            logger.warn("[drop_rules] game.fac.party returned nil monster=%s", tostring(monster_id))
+        end
+        return true
+    end
+
     local dungeon = party:GetDungeon()
     if not dungeon then
         return true
@@ -54,14 +62,19 @@ function M.setup(ctx, deps)
     local config = ctx.config or {}
     local drop_cfg = config.drop_rules or {}
 
-    level_gap = drop_cfg.level_gap or 20
-    bypass_item_id = drop_cfg.bypass_item_id or 80207
+    level_gap = tonumber(drop_cfg.level_gap) or 20
+    bypass_item_id = tonumber(drop_cfg.bypass_item_id) or 80207
     message = drop_cfg.message or "此副本等级过低，掉落物品已被系统收回！"
 
-    ctx.dpx.hook(game.HookType.CParty_DropItem, on_drop_item)
-
-    if logger then
-        logger.info("[drop_rules] registered CParty_DropItem hook gap=%d bypass_item=%d",
+    if not is_hook_registered then
+        ctx.dpx.hook(game.HookType.CParty_DropItem, on_drop_item)
+        is_hook_registered = true
+        if logger then
+            logger.info("[drop_rules] registered CParty_DropItem hook gap=%d bypass_item=%d",
+                level_gap, bypass_item_id)
+        end
+    elseif logger then
+        logger.info("[drop_rules] setup skipped hook registration gap=%d bypass_item=%d",
             level_gap, bypass_item_id)
     end
 
