@@ -2,23 +2,23 @@
 --
 -- 示例 handler：
 -- - 只展示注册结构
--- - 不绑定真实 item_id
--- - 不执行发奖、删物品、SQL、shell
+-- - 不绑定真实项目标识
+-- - 不包含真实业务逻辑
 
 local M = {}
 
-function M.register(item_handler, ctx)
+function M.register(handler_table, ctx)
     local logger = ctx and ctx.logger
 
-    if not item_handler then
+    if not handler_table then
         if logger then
-            logger.error("[example_handler] missing item_handler")
+            logger.error("[example_handler] missing handler_table")
         end
         return
     end
 
     if logger then
-        logger.info("[example_handler] register called, no real item id is bound")
+        logger.info("[example_handler] register called, no real handler is bound")
     end
 end
 
