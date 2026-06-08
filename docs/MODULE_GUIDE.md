@@ -39,7 +39,7 @@ handler 可用于运行时事件接入。
 
 模板建议：
 
-- 不绑定真实 item_id 作为模板默认值。
+- 不绑定真实项目标识作为模板默认值。
 - 只展示注册结构。
 
 ## 新增 JS/Frida 模块
@@ -56,22 +56,22 @@ handler 可用于运行时事件接入。
 var g_example_started = false;
 
 function startExampleFeature(cfg, addresses) {
-    if (g_example_started) {
-        console.log('[example] already started');
-        return;
-    }
+  if (g_example_started) {
+    console.log('[example] already started');
+    return;
+  }
 
-    if (!cfg || cfg.enabled !== true) {
-        console.log('[example] config not enabled');
-        return;
-    }
+  if (!cfg || cfg.enabled !== true) {
+    console.log('[example] config not enabled');
+    return;
+  }
 
-    g_example_started = true;
-    console.log('[example] started');
+  g_example_started = true;
+  console.log('[example] started');
 }
 
 if (typeof globalThis !== 'undefined') {
-    globalThis.startExampleFeature = startExampleFeature;
+  globalThis.startExampleFeature = startExampleFeature;
 }
 ```
 
@@ -103,3 +103,4 @@ JS：
 - 文件名使用 `snake_case.js`。
 - 启动函数使用 `startXxxFeature()`。
 - 防重复变量使用 `g_xxx_started`。
+- 使用 2 空格缩进。
