@@ -38,7 +38,6 @@ local function accept_quests(user, item_id, ctx, quest_ids, success_message)
         log_success(ctx, user, item_id, "accept_job_quests", "quest_count=" .. tostring(#quest_ids))
     else
         user:SendNotiPacketMessage("注意： 角色转职失败！")
-        dpx.item.add(user.cptr, item_id)
         handler_utils.return_item(ctx, user, item_id, "job", "level_not_enough")
     end
 end
@@ -64,7 +63,6 @@ function M.register(item_handler, ctx)
             end
         else
             user:SendNotiPacketMessage("注意： 女鬼剑职业转换 失败！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "job", "level_not_one")
         end
     end
@@ -78,7 +76,6 @@ function M.register(item_handler, ctx)
             log_success(ctx, user, item_id, "first_awaken", "old_grow_type=" .. tostring(grow_type))
         else
             user:SendNotiPacketMessage("注意： 角色不满足觉醒要求， 觉醒失败！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "job", "invalid_first_awaken_grow_type")
         end
     end
@@ -92,7 +89,6 @@ function M.register(item_handler, ctx)
             log_success(ctx, user, item_id, "second_awaken", "old_grow_type=" .. tostring(grow_type))
         else
             user:SendNotiPacketMessage("注意： 角色不满足觉醒要求， 觉醒失败！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "job", "invalid_second_awaken_grow_type")
         end
     end

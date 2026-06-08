@@ -63,7 +63,6 @@ function M.register(item_handler, ctx)
             log_success(ctx, user, item_id, "pet_cleanup", q)
         else
             user:SendNotiPacketMessage("注意： 宠物清理 失败！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "item_cleanup", "no_pet_to_cleanup")
         end
     end
@@ -93,7 +92,6 @@ function M.register(item_handler, ctx)
             log_success(ctx, user, item_id, "avatar_cleanup", q)
         else
             user:SendNotiPacketMessage("注意： 时装清理 失败！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "item_cleanup", "no_avatar_to_cleanup")
         end
     end
@@ -121,7 +119,6 @@ function M.register(item_handler, ctx)
             log_success(ctx, user, item_id, "equipment_disjoint", q)
         else
             user:SendNotiPacketMessage("注意： 装备分解 失败！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "item_cleanup", "no_equipment_to_disjoint")
         end
     end

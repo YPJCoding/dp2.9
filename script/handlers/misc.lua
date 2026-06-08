@@ -35,7 +35,6 @@ function M.register(item_handler, ctx)
     item_handler[2021458801] = function(user, item_id)
         if not user:MoveToAccCargo(game.ItemSpace.INVENTORY, 9) then
             user:SendNotiPacketMessage("注意： 装备栏第一格装备跨界 失败！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "misc", "move_to_account_cargo_failed")
         else
             user:SendNotiPacketMessage("恭喜： 装备栏第一格装备跨界 成功！")

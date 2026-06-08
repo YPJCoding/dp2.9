@@ -43,7 +43,6 @@ local function clear_quest_by_type(user, item_id, ctx, quest_type, success_label
         log_success(ctx, user, item_id, quest_type, q)
     else
         user:SendNotiPacketMessage(string.format("注意： %s 失败！", fail_label))
-        dpx.item.add(user.cptr, item_id)
         handler_utils.return_item(ctx, user, item_id, "quest", "no_matching_quest")
     end
 end

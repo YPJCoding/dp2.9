@@ -38,7 +38,6 @@ function M.register(item_handler, ctx)
         local charac_no = tonumber(user:GetCharacNo())
         if not charac_no then
             user:SendNotiPacketMessage("注意： 角色编号异常，PVP经验增加失败！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "pvp", "invalid_charac_no")
             if logger then
                 logger.error("[useitem][shell][pvp_exp] invalid charac_no acc=%d item_id=%d", user:GetAccId(), item_id)
@@ -49,7 +48,6 @@ function M.register(item_handler, ctx)
         local handle = io.popen("sh /dp2/script/pvp_exp_inc.sh " .. charac_no)
         if not handle then
             user:SendNotiPacketMessage("注意： PVP经验脚本执行失败！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "pvp", "pvp_exp_script_open_failed")
             if logger then
                 logger.error("[useitem][shell][pvp_exp] failed to open script acc=%d chr=%d item_id=%d", user:GetAccId(), user:GetCharacNo(), item_id)
@@ -62,7 +60,6 @@ function M.register(item_handler, ctx)
 
         if not sql or sql == "" then
             user:SendNotiPacketMessage("注意： PVP经验脚本没有返回有效 SQL！")
-            dpx.item.add(user.cptr, item_id)
             handler_utils.return_item(ctx, user, item_id, "pvp", "pvp_exp_empty_sql")
             if logger then
                 logger.error("[useitem][shell][pvp_exp] empty sql acc=%d chr=%d item_id=%d", user:GetAccId(), user:GetCharacNo(), item_id)
