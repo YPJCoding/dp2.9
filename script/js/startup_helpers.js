@@ -41,7 +41,13 @@ function safeLoadModule(moduleName) {
       startupLog('missing dp_load, skip module=' + moduleName);
       return false;
     }
-    dp_load(moduleName);
+
+    var loaded = dp_load(moduleName);
+    if (loaded !== true) {
+      startupLog('load module returned false module=' + moduleName);
+      return false;
+    }
+
     g_startup_loaded_modules[moduleName] = true;
     startupLog('loaded module=' + moduleName);
     return true;
