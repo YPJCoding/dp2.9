@@ -52,7 +52,9 @@ function createMysqlBinding(addr) {
   }
 
   // 执行 SQL 查询
-  // 注意：返回 0 表示成功，非 0 表示失败
+  // 注意：此处返回底层 MySQLExec 的原始返回值（由游戏引擎封装，非标准 libmysqlclient）。
+  // 根据旧 frida.js 实际使用经验，非零值表示成功，零值表示失败。
+  // 业务层请使用 ctx.fridaDb.exec(sql)（已封装为布尔语义），不要直接依赖本函数的 raw 返回码。
   function exec(mysql, sql) {
     var sqlPtr = Memory.allocUtf8String(sql);
     _MySQLSetQuery2(mysql, sqlPtr);

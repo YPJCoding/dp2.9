@@ -785,6 +785,7 @@ var PROJECT_ADDRESSES = {
 if (typeof globalThis !== 'undefined') {
   globalThis.PROJECT_ADDRESSES = PROJECT_ADDRESSES;
 }
+
 // JS Runtime 配置中心
 // 来源：从旧 frida.js 迁移并重构
 // 用途：集中管理所有功能开关和参数，不要在 df_game_r.js 或业务模块中硬编码
@@ -864,6 +865,7 @@ var PROJECT_JS_CONFIG = {
 if (typeof globalThis !== 'undefined') {
   globalThis.PROJECT_JS_CONFIG = PROJECT_JS_CONFIG;
 }
+
 // NativeFunction 工厂与统一管理
 // 来源：从旧 frida.js 重构
 // 用途：提供统一的 nf() 工厂函数，集中管理所有 NativeFunction 创建
@@ -893,6 +895,7 @@ function nf(address, retType, argTypes) {
 if (typeof globalThis !== 'undefined') {
   globalThis.nf = nf;
 }
+
 // 日志模块
 // 来源：从旧 frida.js 迁移
 // 用途：统一日志输出（控制台 + 文件）
@@ -984,6 +987,7 @@ function createLogger(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createLogger = createLogger;
 }
+
 // 时间模块
 // 来源：从旧 frida.js 迁移
 // 用途：提供系统时间、时间戳等相关工具函数
@@ -1014,6 +1018,7 @@ function createTimeModule(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createTimeModule = createTimeModule;
 }
+
 // 随机数模块
 // 来源：从旧 frida.js 迁移
 // 用途：提供统一的随机数生成函数，避免各模块重复定义 get_random_int
@@ -1025,6 +1030,7 @@ function getRandomInt(min, max) {
 if (typeof globalThis !== 'undefined') {
   globalThis.getRandomInt = getRandomInt;
 }
+
 // 内存操作模块
 // 来源：从旧 frida.js 迁移
 // 用途：封装 Memory.protect 和 patch 字节写入等内存操作
@@ -1079,6 +1085,7 @@ if (typeof globalThis !== 'undefined') {
   globalThis.bin2hex = bin2hex;
   globalThis.memoryProtectAndWrite = protectAndWrite;
 }
+
 // 文件操作模块
 // 来源：从旧 frida.js 迁移并重构
 // 用途：封装 Linux 文件读写操作
@@ -1161,6 +1168,7 @@ function createFileModule() {
 if (typeof globalThis !== 'undefined') {
   globalThis.createFileModule = createFileModule;
 }
+
 // Hook 防重复模块
 // 来源：新增模块，用于防止热重载时重复 hook 造成逻辑叠加
 // 用途：所有 Interceptor.attach 和 Interceptor.replace 都必须走这里
@@ -1223,6 +1231,7 @@ if (typeof globalThis !== 'undefined') {
   globalThis.replaceOnce = replaceOnce;
   globalThis.resetHookGuard = resetHookGuard;
 }
+
 // 封包操作 binding
 // 来源：从旧 frida.js PacketBuf_* 和 InterfacePacketBuf_* 系列迁移
 // 用途：客户端封包读取 + 服务器封包组包
@@ -1350,6 +1359,7 @@ function createPacketBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createPacketBinding = createPacketBinding;
 }
+
 // MySQL 数据库操作 binding
 // 来源：从旧 frida.js MySQL_* 系列函数迁移
 // 用途：封装 MySQL 连接、查询、结果读取
@@ -1404,7 +1414,9 @@ function createMysqlBinding(addr) {
   }
 
   // 执行 SQL 查询
-  // 注意：返回 0 表示成功，非 0 表示失败
+  // 注意：此处返回底层 MySQLExec 的原始返回值（由游戏引擎封装，非标准 libmysqlclient）。
+  // 根据旧 frida.js 实际使用经验，非零值表示成功，零值表示失败。
+  // 业务层请使用 ctx.fridaDb.exec(sql)（已封装为布尔语义），不要直接依赖本函数的 raw 返回码。
   function exec(mysql, sql) {
     var sqlPtr = Memory.allocUtf8String(sql);
     _MySQLSetQuery2(mysql, sqlPtr);
@@ -1496,6 +1508,7 @@ function createMysqlBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createMysqlBinding = createMysqlBinding;
 }
+
 // 角色操作 binding
 // 来源：从旧 frida.js CUser* 系列函数迁移
 // 用途：封装角色状态、属性、数据相关操作
@@ -1722,6 +1735,7 @@ function createUserBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createUserBinding = createUserBinding;
 }
+
 // 背包/道具 binding
 // 来源：从旧 frida.js CInventory*/Inven_Item* 系列函数迁移
 // 用途：封装背包操作、道具查询等
@@ -1826,6 +1840,7 @@ function createInventoryBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createInventoryBinding = createInventoryBinding;
 }
+
 // 道具/装备数据 binding
 // 来源：从旧 frida.js CItem* / CStackableItem* 系列函数迁移
 // 用途：封装道具属性查询、PVF 数据查询等
@@ -1906,6 +1921,7 @@ function createItemBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createItemBinding = createItemBinding;
 }
+
 // 邮件系统 binding
 // 来源：从旧 frida.js CMailBoxHelper*/ReqDBSendNewSystemMail* 系列函数迁移
 // 用途：封装系统邮件发送操作（多道具、时装、单道具）
@@ -1982,6 +1998,7 @@ function createMailBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createMailBinding = createMailBinding;
 }
+
 // GameWorld 操作 binding
 // 来源：从旧 frida.js G_GameWorld / GameWorld_* 系列函数迁移
 // 用途：封装游戏世界操作（全服广播、玩家遍历、查找玩家等）
@@ -2153,6 +2170,7 @@ function createGameWorldBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createGameWorldBinding = createGameWorldBinding;
 }
+
 // 定时器调度 binding
 // 来源：从旧 frida.js timer_dispatcher_list + do_timer_dispatch 迁移
 // 用途：在 dispatcher 线程安全地执行任务
@@ -2231,6 +2249,7 @@ function createTimerDispatcherBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createTimerDispatcherBinding = createTimerDispatcherBinding;
 }
+
 // 任务系统 binding
 // 来源：从旧 frida.js quest 相关函数迁移
 // 用途：封装任务完成、提交奖励等操作
@@ -2291,6 +2310,7 @@ function createQuestBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createQuestBinding = createQuestBinding;
 }
+
 // 绝望之塔修复模块
 // 来源：从旧 frida.js fix_TOD(skip_user_apc) 迁移
 // 用途：修复绝望之塔的门票、金币、每10层跳过用户APC
@@ -2390,6 +2410,7 @@ function startTodFixFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startTodFixFeature = startTodFixFeature;
 }
+
 // 时装徽章镶嵌修复模块
 // 来源：从旧 frida.js fix_use_emblem() 迁移
 // 用途：处理时装徽章镶嵌请求，替代游戏原有的（已失效的）镶嵌流程
@@ -2594,6 +2615,7 @@ function startEmblemFixFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startEmblemFixFeature = startEmblemFixFeature;
 }
+
 // 时装潜能（隐藏属性）模块
 // 来源：从旧 frida.js hidden_option() + start_hidden_option() 迁移
 // 用途：修改时装潜能属性下发逻辑
@@ -2668,6 +2690,7 @@ function startHiddenOptionFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startHiddenOptionFeature = startHiddenOptionFeature;
 }
+
 // 勇士归来（回归用户）模块
 // 来源：从旧 frida.js set_return_user(day) 迁移
 // 用途：修改游戏内存中的回归用户判定时间阈值
@@ -2716,6 +2739,7 @@ function startReturnUserFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startReturnUserFeature = startReturnUserFeature;
 }
+
 // 在线奖励模块
 // 来源：从旧 frida.js enable_online_reward() + api_recharge_cash_cera() + api_recharge_cash_cera_point() 迁移
 // 用途：在线每 5 分钟发放点券奖励
@@ -2821,6 +2845,7 @@ function startOnlineRewardFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startOnlineRewardFeature = startOnlineRewardFeature;
 }
+
 // 战力排行模块
 // 来源：从旧 frida.js ranklist / GetRankNumber / GetMyEquInfo / SetRanking / SendRankLits - 相关函数迁移
 // 用途：维护服务器战力排行榜前三名，在城镇显示雕像
@@ -2891,8 +2916,11 @@ var g_ranklist = {
 // fridaDb: 绑定 frida 句柄的便捷 DB 对象（ctx.fridaDb）
 // 返回: 战力值，查询失败返回 undefined
 function getRankNumber(fridaDb, characNo) {
+  // DB 未初始化时直接返回 0，不查询
+  if (!fridaDb) {
+    return 0;
+  }
   // SQL 拼接未做转义，characNo 为数字类型是安全的
-  // TODO: 后续如有字符串类型输入需要增加转义
   var sql = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
   if (fridaDb.exec(sql)) {
     if (fridaDb.getNRows() == 1) {
@@ -3107,13 +3135,22 @@ function onUserEnterRanking(ctx, curUser) {
 
 // 用户离开时：更新排名
 function onUserLeaveRanking(ctx, curUser) {
-  if (!curUser.isNull()) {
-    setRanking(ctx, curUser);
-    // 存盘
-    if (ctx.fridaDb) {
-      saveRankInfoToDb(ctx.fridaDb);
-    }
+  // 防御式检查：curUser 可能为空
+  if (!curUser || curUser.isNull()) {
+    return;
   }
+
+  // DB 不可用时跳过排名更新和持久化
+  if (!ctx.fridaDb) {
+    if (ctx.log) {
+      ctx.log('[ranking] fridaDb 不存在，跳过排行榜更新');
+    }
+    return;
+  }
+
+  setRanking(ctx, curUser);
+  // 存盘
+  saveRankInfoToDb(ctx.fridaDb);
 }
 
 if (typeof globalThis !== 'undefined') {
@@ -3122,6 +3159,7 @@ if (typeof globalThis !== 'undefined') {
   globalThis.ranking_onUserLeave = onUserLeaveRanking;
   globalThis.ranking_saveToDb = saveRankInfoToDb;
 }
+
 // 玩家上线/下线处理模块
 // 来源：从旧 frida.js hook_user_inout_game_world() 迁移
 // 用途：处理玩家进入和离开游戏世界的事件
@@ -3209,6 +3247,7 @@ function startUserInoutFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startUserInoutFeature = startUserInoutFeature;
 }
+
 // 怪物攻城活动常量
 // 来源：从旧 frida.js VILLAGEATTACK_STATE_* / EVENT_VILLAGEATTACK_* 常量迁移
 // 用途：定义怪物攻城活动的所有常量，供模块内各文件共享
@@ -3287,6 +3326,7 @@ var VILLAGE_ATTACK_CONSTANTS = {
 if (typeof globalThis !== 'undefined') {
   globalThis.VILLAGE_ATTACK_CONSTANTS = VILLAGE_ATTACK_CONSTANTS;
 }
+
 // 怪物攻城活动状态管理
 // 来源：从旧 frida.js villageAttackEventInfo 及其相关状态操作迁移
 // 用途：集中管理怪物攻城活动的所有状态数据
@@ -3519,6 +3559,7 @@ if (typeof globalThis !== 'undefined') {
     reset: reset,
   };
 }
+
 // 怪物攻城数据库操作
 // 来源：从旧 frida.js event_villageattack_save_to_db/load_from_db 迁移
 // 用途：持久化怪物攻城活动状态到 frida.game_event 表
@@ -3571,6 +3612,7 @@ function createVillageAttackDb(fridaDb) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackDb = createVillageAttackDb;
 }
+
 // 怪物攻城世界广播与通知
 // 来源：从旧 frida.js event_villageattack_broadcast_diffcult / gameworld_update_villageattack_score / notify_villageattack_score 迁移
 // 用途：向玩家发送怪物攻城活动进度和状态通知
@@ -3654,6 +3696,7 @@ function createVillageAttackNotify(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackNotify = createVillageAttackNotify;
 }
+
 // 怪物攻城挑战奖励模块
 // 来源：从旧 frida.js VillageAttackedRewardSendReward() 迁移
 // 用途：根据挑战次数发放对应的邮件奖励
@@ -3722,6 +3765,7 @@ function createVillageAttackReward(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackReward = createVillageAttackReward;
 }
+
 // 怪物攻城活动结算模块
 // 来源：从旧 frida.js on_end_event_villageattack 中的结算逻辑迁移
 // 用途：活动结束时进行结算（发奖/惩罚）
@@ -3898,6 +3942,7 @@ function createVillageAttackSettlement(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackSettlement = createVillageAttackSettlement;
 }
+
 // 怪物攻城活动流程控制
 // 来源：从旧 frida.js start_villageattack / on_start_event_villageattack / event_villageattack_timer / on_end_event_villageattack 等迁移
 // 用途：控制活动开启、计时、阶段流转、活动结束
@@ -4085,6 +4130,7 @@ function createVillageAttackFlow(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackFlow = createVillageAttackFlow;
 }
+
 // 怪物攻城活动 Hook 集合
 // 来源：从旧 frida.js hook_VillageAttack() 迁移（约 400 行 hook 代码）
 // 用途：包含所有怪物攻城相关的 Interceptor.attach/replace
@@ -4516,6 +4562,7 @@ function createVillageAttackHooks(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackHooks = createVillageAttackHooks;
 }
+
 // 怪物攻城活动入口模块
 // 来源：从旧 frida.js start_event_villageattack() 迁移
 // 用途：启动怪物攻城功能的所有子模块
@@ -4616,6 +4663,7 @@ function startVillageAttackFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startVillageAttackFeature = startVillageAttackFeature;
 }
+
 // 启动辅助模块
 // 来源：从旧 frida.js 工具函数迁移并重构
 // 用途：提供日志、环境检测、通道名获取等辅助函数
@@ -4664,6 +4712,7 @@ function createStartupHelpers(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createStartupHelpers = createStartupHelpers;
 }
+
 // 模块启动调度中心
 // 来源：从旧 frida.js start() 迁移并重构
 // 用途：按配置和顺序启动所有 JS 模块
@@ -5023,8 +5072,19 @@ function startRuntimeModules() {
 //   mysqlBind 的 exec/getNRows/fetch/getStr 等函数第一个参数是 mysql 句柄
 //   业务模块不应该直接持有和传递句柄，通过此对象统一管理
 function createBoundMysqlDb(mysqlBind, mysqlHandle) {
+  // 为什么需要这里统一 exec() 的布尔语义：
+  //   底层 MySQLExec 在游戏引擎中的返回值约定为「非零成功，零失败」，
+  //   业务模块不应直接依赖底层 raw 返回码。
+  //   exec() 返回布尔值：true=执行成功，false=执行失败。
+  //   execRaw() 返回底层原始值，供需要检查底层返回码时使用。
   return {
+    // 业务层通用接口：返回布尔值，true 表示 SQL 执行成功
     exec: function (sql) {
+      // 底层非零=成功，零=失败
+      return mysqlBind.exec(mysqlHandle, sql) != 0;
+    },
+    // 底层原始接口：返回游戏引擎的原始返回码（非零=成功，零=失败）
+    execRaw: function (sql) {
       return mysqlBind.exec(mysqlHandle, sql);
     },
     getNRows: function () {
@@ -5095,6 +5155,7 @@ if (typeof globalThis !== 'undefined') {
   globalThis.disposeRuntimeModules = disposeRuntimeModules;
   globalThis.createBoundMysqlDb = createBoundMysqlDb;
 }
+
 // clean runtime project JS entry
 // 该文件只负责 Frida 生命周期和启动调度，不写具体业务逻辑。
 //
@@ -5104,7 +5165,10 @@ if (typeof globalThis !== 'undefined') {
 // - dispose 阶段：调用统一清理函数
 //
 // 真实业务逻辑全部在 script/js/ 目录下的模块中。
-// 不要在此文件中出现真实地址、NativeFunction、Interceptor.attach、业务函数。
+// 不要在此文件中出现真实地址、NativeFunction、业务函数。
+//
+// 所有 hook（包括本文件的 early hook）都通过 attachOnce 注册，
+// 防止热重载时重复 attach。
 
 rpc.exports = {
   init: function (stage, parameters) {
@@ -5113,19 +5177,7 @@ rpc.exports = {
       // 为什么需要等待：服务器初始化完成前不能 hook，
       // 否则可能访问未初始化的数据导致崩溃
       // 来源：从旧 frida.js awake() 迁移
-      var addr = globalThis.PROJECT_ADDRESSES;
-      if (addr) {
-        Interceptor.attach(addr.check_argv, {
-          onEnter: function (args) {},
-          onLeave: function (retval) {
-            // check_argv 执行完毕=服务器初始化完成，开始加载
-            start();
-          }
-        });
-      } else {
-        // 降级方案：直接启动
-        start();
-      }
+      awake();
     } else {
       // 热重载：直接启动
       start();
@@ -5141,6 +5193,33 @@ rpc.exports = {
   },
 };
 
+// 延迟启动：等待 check_argv 执行完后启动
+function awake() {
+  var addr = globalThis.PROJECT_ADDRESSES;
+  if (!addr || !addr.check_argv) {
+    // 地址不可用，直接启动
+    console.log('[entry] check_argv 地址不可用，直接启动');
+    start();
+    return;
+  }
+
+  if (typeof globalThis.attachOnce !== 'function') {
+    // attachOnce 未加载，无法注册延迟启动 hook
+    console.log('[entry] attachOnce 不存在，无法注册 check_argv 延迟启动 hook，直接启动');
+    start();
+    return;
+  }
+
+  // 使用 attachOnce 防重复注册
+  globalThis.attachOnce('runtime_check_argv', addr.check_argv, {
+    onEnter: function (args) {},
+    onLeave: function (retval) {
+      // check_argv 执行完毕=服务器初始化完成，开始加载
+      start();
+    }
+  });
+}
+
 // 启动函数
 function start() {
   console.log('++++++++++++++++++++ frida init ++++++++++++++++++++');
@@ -5152,3 +5231,4 @@ function start() {
 
   console.log('++++++++++++++++++++ frida started ++++++++++++++++++++');
 }
+

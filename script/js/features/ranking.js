@@ -68,8 +68,11 @@ var g_ranklist = {
 // fridaDb: 绑定 frida 句柄的便捷 DB 对象（ctx.fridaDb）
 // 返回: 战力值，查询失败返回 undefined
 function getRankNumber(fridaDb, characNo) {
+  // DB 未初始化时直接返回 0，不查询
+  if (!fridaDb) {
+    return 0;
+  }
   // SQL 拼接未做转义，characNo 为数字类型是安全的
-  // TODO: 后续如有字符串类型输入需要增加转义
   var sql = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
   if (fridaDb.exec(sql)) {
     if (fridaDb.getNRows() == 1) {
@@ -284,13 +287,22 @@ function onUserEnterRanking(ctx, curUser) {
 
 // 用户离开时：更新排名
 function onUserLeaveRanking(ctx, curUser) {
-  if (!curUser.isNull()) {
-    setRanking(ctx, curUser);
-    // 存盘
-    if (ctx.fridaDb) {
-      saveRankInfoToDb(ctx.fridaDb);
-    }
+  // 防御式检查：curUser 可能为空
+  if (!curUser || curUser.isNull()) {
+    return;
   }
+
+  // DB 不可用时跳过排名更新和持久化
+  if (!ctx.fridaDb) {
+    if (ctx.log) {
+      ctx.log('[ranking] fridaDb 不存在，跳过排行榜更新');
+    }
+    return;
+  }
+
+  setRanking(ctx, curUser);
+  // 存盘
+  saveRankInfoToDb(ctx.fridaDb);
 }
 
 if (typeof globalThis !== 'undefined') {

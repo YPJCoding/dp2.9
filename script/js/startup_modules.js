@@ -357,8 +357,19 @@ function startRuntimeModules() {
 //   mysqlBind 的 exec/getNRows/fetch/getStr 等函数第一个参数是 mysql 句柄
 //   业务模块不应该直接持有和传递句柄，通过此对象统一管理
 function createBoundMysqlDb(mysqlBind, mysqlHandle) {
+  // 为什么需要这里统一 exec() 的布尔语义：
+  //   底层 MySQLExec 在游戏引擎中的返回值约定为「非零成功，零失败」，
+  //   业务模块不应直接依赖底层 raw 返回码。
+  //   exec() 返回布尔值：true=执行成功，false=执行失败。
+  //   execRaw() 返回底层原始值，供需要检查底层返回码时使用。
   return {
+    // 业务层通用接口：返回布尔值，true 表示 SQL 执行成功
     exec: function (sql) {
+      // 底层非零=成功，零=失败
+      return mysqlBind.exec(mysqlHandle, sql) != 0;
+    },
+    // 底层原始接口：返回游戏引擎的原始返回码（非零=成功，零=失败）
+    execRaw: function (sql) {
       return mysqlBind.exec(mysqlHandle, sql);
     },
     getNRows: function () {

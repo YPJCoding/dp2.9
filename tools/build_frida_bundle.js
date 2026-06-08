@@ -10,7 +10,7 @@ var path = require('path');
 
 var projectDir = path.resolve(__dirname, '..');
 var outputDir = path.join(projectDir, 'dist');
-var output = path.join(outputDir, 'dist/df_game_r.bundle.js');
+var output = path.join(outputDir, 'df_game_r.bundle.js');
 
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true });

@@ -89,37 +89,43 @@
 ## TODO
 
 1. SQL 拼接未做转义，高风险场景需改为参数化查询。当前仅数字类型安全的查询使用拼接
-2. `ranking.js` 中 `Object.values` / `findIndex` / `const` 可能存在 ES6+ 兼容性问题，已改为循环实现
-3. 线程安全：当前仅 TimerDispatcher 的 schedule 有互斥锁保护，其他直接状态修改需确认都通过 schedule 执行
-4. 数据库连接信息硬编码 localhost:3306，生产环境需改为从配置文件读取
-5. `lodash` / `setTimeout` 依赖 Frida 运行环境提供，不是所有环境都支持
-6. File 对象依赖 Frida 的 File API，部分环境可能不可用
+2. 线程安全：当前仅 TimerDispatcher 的 schedule 有互斥锁保护，其他直接状态修改需确认都通过 schedule 执行
+3. 数据库连接信息硬编码 localhost:3306，生产环境需改为从配置文件读取
+4. `setTimeout` 依赖 Frida 运行环境提供，不是所有环境都支持
 
-## 第二轮修复 (fix: stabilize modular frida runtime startup)
+## 第三轮修复 (fix: harden frida runtime db and bundle build)
 
-修复了以下 review 问题：
+修复了以下问题：
 
-1. **JS 模块加载链路**：新增 `tools/build_frida_bundle.sh` 和 `tools/build_frida_bundle.js`，按固定依赖顺序拼接所有 JS 模块生成 `dist/df_game_r.bundle.js`。
-2. **MySQL binding 接口不一致**：新增 `createBoundMysqlDb()`，区分 `ctx.mysql`（binding）、`ctx.db`（原始句柄）、`ctx.fridaDb`（便捷 DB 对象）。
-3. **frida_config.json 读取**：`file.js` 改为自初始化 libc API，不依赖外部 `globalThis.fopen`。
-4. **ctx.gw.sendNotiPacketMessage 缺失**：在 `game_world.js` 中实现完整的世界广播消息函数。`settlement.js` 改用 `ctx.va_notify.broadcastMessage()`。
-5. **清理裸地址**：`0x941F734` 和 `0x8C7FA20` 迁移到 `runtime_addresses.js`（`cipghelper_global` 和 `ipg_empty_string`）。
-6. **ctx.logger / ctx.log**：统一为 `ctx.logger`（完整对象）和 `ctx.log`（便捷函数），`online_reward.js` 改用 `ctx.logger.getTimestamp()`。
-7. **forEachUser 迭代器前进**：修复 `it = mapNext(it)` 并增加 guardCount 防死循环。
-8. **怪物攻城 hook try/catch**：所有 7 个 hook 均加了 try/catch，replace hook 异常时兜底执行原函数。
-9. **nf() 健壮性**：增加地址校验（缺失/空/未定义）。
-10. **time.js 裸地址回退**：移除 `ptr('0x941F714')` 回退值。
+1. **Node 构建脚本输出路径错误**：`tools/build_frida_bundle.js` 输出路径从 `dist/dist/df_game_r.bundle.js` 修正为 `dist/df_game_r.bundle.js`。
+2. **ranking.js DB 不可用时崩溃**：`getRankNumber()` 增加 `!fridaDb` 返回 0 的防御；`onUserLeaveRanking()` 增加 curUser 空检查和 fridaDb 空检查，并输出中文日志。
+3. **MySQL exec() 语义统一**：`createBoundMysqlDb()` 中 `exec(sql)` 返回布尔值（true=成功），新增 `execRaw(sql)` 返回底层原始码。`mysql.js` 注释修正为「底层非零=成功」。
+4. **df_game_r.js early hook**：改用 `attachOnce('runtime_check_argv', ...)` 注册，增加 `attachOnce` 不存在的降级处理。
+5. **文档过期 TODO 清理**：移除已解决的「File API 依赖」、「ES6+兼容性」等过期条目；补充 `exec/execRaw` 语义和 DB 不可用时行为说明。
 
 ## 部署说明
 
-推荐使用构建产物：
+两种构建方式等效，输出同一个文件：
 
 ```bash
-bash tools/build_frida_bundle.sh
+bash tools/build_frida_bundle.sh   # shell 版本
+node tools/build_frida_bundle.js   # Node 版本
 # 输出：dist/df_game_r.bundle.js
 ```
 
-部署时使用 `dist/df_game_r.bundle.js` 替代 `df_game_r.js`，因为 Frida 环境下不会自动加载 `script/js/` 下的拆分子模块。
+部署时使用 `dist/df_game_r.bundle.js` 替代 `df_game_r.js`。
+
+## DB 不可用时的模块行为
+
+- ranking：可下发默认榜单，不更新排名、不持久化（日志提示 `fridaDb 不存在，跳过排行榜更新`）
+- village_attack：可正常运行，但活动状态无法持久化（日志提示 `数据库未初始化，活动数据将无法持久化`）
+
+## MySQL 接口说明
+
+- `ctx.fridaDb.exec(sql)` — 业务层布尔语义，返回 `true` 表示 SQL 执行成功
+- `ctx.fridaDb.execRaw(sql)` — 底层原始返回码（非零=成功，零=失败）
+- `ctx.mysql` — MySQL binding 对象，用于 `open()` / `close()` 等操作
+- `ctx.db` — 原始数据库句柄集合 `{ taiwanCain, taiwanCain2nd, taiwanBilling, frida }`
 
 ## 检查结果
 
