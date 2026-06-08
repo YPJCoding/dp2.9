@@ -2,25 +2,14 @@
 --
 -- 当前模块迁移自 df_game_r.lua。
 
+local handler_utils = require("script.handler_utils")
+
 local M = {}
 
 local function is_sql_handler_enabled(ctx)
     local config = ctx.config or {}
     local risk = config.risk or {}
     return risk.enable_sql_handlers == true
-end
-
-local function log_item_return(ctx, user, item_id, reason)
-    local logger = ctx.logger
-    if logger then
-        logger.info(
-            "[useitem][return] module=job acc=%d chr=%d item_id=%d reason=%s",
-            user:GetAccId(),
-            user:GetCharacNo(),
-            item_id,
-            tostring(reason or "unknown")
-        )
-    end
 end
 
 local function log_success(ctx, user, item_id, action, extra)
@@ -37,25 +26,6 @@ local function log_success(ctx, user, item_id, action, extra)
     end
 end
 
-local function reject_sql_disabled(user, item_id, ctx, message, reason)
-    local dpx = ctx.dpx
-    local logger = ctx.logger
-
-    if logger then
-        logger.info(
-            "[useitem][reject] module=job risk=sql acc=%d chr=%d item_id=%d reason=%s",
-            user:GetAccId(),
-            user:GetCharacNo(),
-            item_id,
-            tostring(reason or "sql_disabled")
-        )
-    end
-
-    user:SendNotiPacketMessage(message or "注意： 当前 SQL 类功能未开启！")
-    dpx.item.add(user.cptr, item_id)
-    log_item_return(ctx, user, item_id, reason or "sql_disabled")
-end
-
 local function accept_quests(user, item_id, ctx, quest_ids, success_message)
     local dpx = ctx.dpx
     local level = user:GetCharacLevel()
@@ -69,7 +39,7 @@ local function accept_quests(user, item_id, ctx, quest_ids, success_message)
     else
         user:SendNotiPacketMessage("注意： 角色转职失败！")
         dpx.item.add(user.cptr, item_id)
-        log_item_return(ctx, user, item_id, "level_not_enough")
+        handler_utils.return_item(ctx, user, item_id, "job", "level_not_enough")
     end
 end
 
@@ -81,7 +51,7 @@ function M.register(item_handler, ctx)
     -- [RISK:HIGH][SQL] 女鬼剑职业转换券：直接修改 charac_info.job
     item_handler[2021458807] = function(user, item_id)
         if not is_sql_handler_enabled(ctx) then
-            reject_sql_disabled(user, item_id, ctx, "注意： 女鬼剑职业转换功能未开启！", "job_convert_sql_disabled")
+            handler_utils.reject_and_return(ctx, user, item_id, "job", "sql", "注意： 女鬼剑职业转换功能未开启！", "job_convert_sql_disabled")
             return
         end
 
@@ -95,7 +65,7 @@ function M.register(item_handler, ctx)
         else
             user:SendNotiPacketMessage("注意： 女鬼剑职业转换 失败！")
             dpx.item.add(user.cptr, item_id)
-            log_item_return(ctx, user, item_id, "level_not_one")
+            handler_utils.return_item(ctx, user, item_id, "job", "level_not_one")
         end
     end
 
@@ -109,7 +79,7 @@ function M.register(item_handler, ctx)
         else
             user:SendNotiPacketMessage("注意： 角色不满足觉醒要求， 觉醒失败！")
             dpx.item.add(user.cptr, item_id)
-            log_item_return(ctx, user, item_id, "invalid_first_awaken_grow_type")
+            handler_utils.return_item(ctx, user, item_id, "job", "invalid_first_awaken_grow_type")
         end
     end
 
@@ -123,7 +93,7 @@ function M.register(item_handler, ctx)
         else
             user:SendNotiPacketMessage("注意： 角色不满足觉醒要求， 觉醒失败！")
             dpx.item.add(user.cptr, item_id)
-            log_item_return(ctx, user, item_id, "invalid_second_awaken_grow_type")
+            handler_utils.return_item(ctx, user, item_id, "job", "invalid_second_awaken_grow_type")
         end
     end
 

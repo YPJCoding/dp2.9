@@ -2,26 +2,13 @@
 --
 -- 当前模块迁移自 df_game_r.lua，已接入 bootstrap 加载链路。
 
+local handler_utils = require("script.handler_utils")
+
 local M = {}
 
-local function log_item_return(ctx, user, item_id, reason)
-    local logger = ctx.logger
-    if logger then
-        logger.info(
-            "[useitem][return] module=inherit acc=%d chr=%d item_id=%d reason=%s",
-            user:GetAccId(),
-            user:GetCharacNo(),
-            item_id,
-            tostring(reason or "unknown")
-        )
-    end
-end
-
 local function reject(user, item_id, ctx, message, reason)
-    local dpx = ctx.dpx
     user:SendNotiPacketMessage(message)
-    dpx.item.add(user.cptr, item_id)
-    log_item_return(ctx, user, item_id, reason)
+    handler_utils.return_item(ctx, user, item_id, "inherit", reason)
 end
 
 local function get_amplify_type(info)
