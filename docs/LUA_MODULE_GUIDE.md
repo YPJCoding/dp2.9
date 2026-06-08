@@ -2,7 +2,9 @@
 
 ## 目标
 
-Lua 侧模块用于承载服务端运行时业务逻辑。入口文件只负责启动，具体功能必须放入 `script/modules/` 或 `script/handlers/`。
+Lua 侧模块用于承载项目运行时逻辑。入口文件建议只负责启动，具体功能可以放入 `script/modules/` 或 `script/handlers/`。
+
+本文档只说明模板结构和编码风格，不规定真实项目的业务逻辑。
 
 ## 推荐目录
 
@@ -19,7 +21,7 @@ script/
 
 ## 模块结构
 
-普通模块使用 `setup(ctx)`：
+普通模块可以使用 `setup(ctx)`：
 
 ```lua
 local M = {}
@@ -38,41 +40,40 @@ end
 return M
 ```
 
-handler 模块使用 `register(item_handler, ctx)`：
+handler 模块可以使用 `register(handler_table, ctx)`：
 
 ```lua
 local M = {}
 
-function M.register(item_handler, ctx)
+function M.register(handler_table, ctx)
     local logger = ctx and ctx.logger
 
-    if not item_handler then
+    if not handler_table then
         if logger then
-            logger.error('[handler] missing item_handler')
+            logger.error('[handler] missing handler_table')
         end
         return
     end
 
-    -- 真实项目中在这里注册 item_handler[item_id]
+    -- 在真实项目中按项目需要补充注册逻辑
 end
 
 return M
 ```
 
-## ctx 使用规范
+## ctx 使用建议
 
-模块只通过 `ctx` 获取运行时能力：
+模块建议通过 `ctx` 获取运行时能力：
 
 - `ctx.config`：配置。
 - `ctx.logger`：日志。
-- `ctx.game`：游戏对象。
-- `ctx.dpx`：DPX 能力。
+- `ctx.runtime`：运行时对象。
 
-不要直接依赖隐式全局变量。确实需要全局能力时，应在入口或 bootstrap 里显式注入。
+不建议直接依赖隐式全局变量。确实需要全局能力时，可以在入口或 bootstrap 里显式注入。
 
-## 配置规范
+## 配置读取示例
 
-所有模块必须先有配置开关：
+模板提供一个简单配置结构，用于展示模块如何读取配置：
 
 ```lua
 features = {
@@ -80,7 +81,7 @@ features = {
 }
 ```
 
-模块私有配置独立成区：
+模块私有配置也可以独立成区：
 
 ```lua
 example_module = {
@@ -88,17 +89,11 @@ example_module = {
 }
 ```
 
-高风险模块必须再增加 risk 开关：
+以上内容只是示例。真实项目可以按自身需要设计配置结构和功能接入方式。
 
-```lua
-risk = {
-    enable_example_sql = false,
-}
-```
+## Bootstrap 注册示例
 
-## Bootstrap 注册规范
-
-新增模块后，在 `script/bootstrap.lua` 的模块表中注册：
+新增模块后，可以在 `script/bootstrap.lua` 的模块表中注册：
 
 ```lua
 local modules = {
@@ -110,20 +105,20 @@ local modules = {
 }
 ```
 
-启动时必须用 `pcall` 包住模块 setup，避免单个模块异常影响整个启动流程。
+启动时可以用 `pcall` 包住模块 setup，避免单个模块异常影响整个启动流程。
 
-## Handler 开发规范
+## Handler 开发结构
 
-handler 常用于道具触发逻辑。真实业务中必须遵守：
+handler 可用于运行时事件接入。模板只展示结构，不提供真实业务绑定。
 
-- item_id 必须写清楚来源。
-- 不能使用模板中的示例 ID 作为真实业务 ID。
-- 失败时要提示玩家并记录日志。
-- 涉及发奖、删除、SQL、shell 时必须有 risk 开关。
-- 参数必须严格校验。
-- 不允许把用户输入直接拼入 SQL 或 shell。
+建议：
 
-## 日志规范
+- 示例 handler 不绑定真实项目标识。
+- 示例 handler 不包含真实业务配置。
+- 示例 handler 不包含真实业务逻辑。
+- 真实项目可以按自身需要定义注册来源、参数处理和返回行为。
+
+## 日志格式建议
 
 日志建议格式：
 
@@ -131,27 +126,17 @@ handler 常用于道具触发逻辑。真实业务中必须遵守：
 logger.info('[module] action=%s result=%s detail=%s', action, result, detail)
 ```
 
-高风险操作必须记录：
+日志字段可以按项目需要扩展。
 
-- 操作者账号。
-- 操作者角色。
-- 目标对象。
-- 参数。
-- 结果。
-- 失败原因。
+## 错误处理建议
 
-## 错误处理规范
+- 外部调用可以用 `pcall` 包裹。
+- 配置缺失时可以提供清晰日志。
+- 失败路径建议记录必要上下文，便于排查。
 
-- 外部 API 调用建议用 `pcall` 包裹。
-- 配置缺失时使用保守默认值。
-- 能拒绝就拒绝，不要猜测执行。
-- 失败路径也必须记录日志。
+## 模板注意事项
 
-## 禁止事项
-
-- 禁止入口文件直接写业务。
-- 禁止默认开启高风险功能。
-- 禁止通用 SQL 执行器。
-- 禁止通用 shell 执行器。
-- 禁止无日志的经济操作。
-- 禁止无权限判断的 GM 功能。
+- 入口文件不写真实业务逻辑。
+- 模板分支不保留真实业务模块。
+- 模板示例不绑定真实项目标识。
+- 模板文档不规定具体业务功能的实现策略。
