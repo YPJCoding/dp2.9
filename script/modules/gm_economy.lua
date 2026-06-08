@@ -109,13 +109,13 @@ local function charge_currency(user, input, prefix, currency_name, api_func, max
         user:SendNotiPacketMessage(
             string.format("已充值 %d %s", amount, currency_name), 14)
         log_op(user, currency_name, amount, "success", "input=" .. tostring(input))
+        return true
     else
         user:SendNotiPacketMessage(
             string.format("——————————充值失败——————————\n%s充值失败，请联系管理员。", currency_name), 14)
         log_op(user, currency_name, amount, "error", "err=" .. tostring(err or "unknown"))
+        return false
     end
-
-    return true
 end
 
 -- GmInput hook 回调
@@ -177,6 +177,7 @@ local function on_gm_input(fnext, _user, input)
 
     -- 其他 //cz 前缀命令，格式错误提示
     user:SendNotiPacketMessage("——————————充值失败——————————\n未知的充值指令，请输入 //cz 查看帮助。", 14)
+    log_op(user, "unknown", 0, "invalid_command", "input=" .. tostring(input))
     return 0
 end
 
