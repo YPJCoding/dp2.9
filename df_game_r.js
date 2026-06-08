@@ -533,19 +533,8 @@ var mysql_taiwan_cain = null;
 var mysql_taiwan_cain_2nd = null;
 var mysql_taiwan_billing = null;
 var mysql_frida = null;
-//怪物攻城活动当前状态
-const VILLAGEATTACK_STATE_P1 = 0; //一阶段
-const VILLAGEATTACK_STATE_P2 = 1; //二阶段
-const VILLAGEATTACK_STATE_P3 = 2; //三阶段
-const VILLAGEATTACK_STATE_END = 3; //活动已结束
-
-const TAU_CAPTAIN_MONSTER_ID = 50071; //牛头统帅id(P1阶段击杀该怪物可提升活动难度等级)
-const GBL_POPE_MONSTER_ID = 262; //GBL教主教(P2/P3阶段城镇存在该怪物 持续减少PT点数)
-const TAU_META_COW_MONSTER_ID = 17; //机械牛(P3阶段世界BOSS)
-
-const EVENT_VILLAGEATTACK_START_HOUR = 12; //每日北京时间20点开启活动
-const EVENT_VILLAGEATTACK_TARGET_SCORE = [100, 200, 300]; //各阶段目标PT
-const EVENT_VILLAGEATTACK_TOTAL_TIME = 3600; //活动总时长(秒)
+// 怪物攻城活动状态常量已迁移到 script/js/village_attack_state.js。
+// startup_modules.js 会无条件加载该状态模块，供 DB 存档和活动启动逻辑使用。
 
 const CUser_AddItem = new NativeFunction(ptr(0x867B6D4), 'int', ['pointer', 'int', 'int', 'int', 'pointer', 'int'], {"abi":"sysv"});
 //获取角色所在队伍
@@ -639,20 +628,8 @@ function api_CEnvironment_get_file_name() {
 	return filename.readUtf8String(-1);
 }
 
-//怪物攻城活动数据
-var villageAttackEventInfo = {
-		'state': VILLAGEATTACK_STATE_END, //活动当前状态
-		'score': 0, //当前阶段频道内总PT
-		'start_time': 0, //活动开始时间(UTC)
-		'difficult': 0, //活动难度(0-4)
-		'next_village_monster_id': 0, //下次刷新的攻城怪物id
-		'last_killed_monster_id': 0, //上次击杀的攻城怪物id
-		'p2_last_killed_monster_time': 0, //P2阶段上次击杀攻城怪物时间
-		'p2_kill_combo': 0, //P2阶段连续击杀相同攻城怪物数量
-		'gbl_cnt': 0, //城镇中存活的GBL主教数量
-		'defend_success': 0, //怪物攻城活动防守成功
-		'user_pt_info': {}, //角色个人pt数据
-}
+// 怪物攻城活动默认状态已迁移到 script/js/village_attack_state.js。
+// 该模块会在缺失时创建 villageAttackEventInfo，避免热加载时重置活动数据。
 
 //文件记录日志
 const frida_log_dir_path = './frida_log/'
