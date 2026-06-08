@@ -4,9 +4,9 @@
 // 不包含真实 hook 地址，不 attach，不 patch。
 
 function startExampleModule() {
-    console.log('[template-js][example_module] started');
+  console.log('[template-js][example_module] started');
 }
 
 if (typeof globalThis !== 'undefined') {
-    globalThis.startExampleModule = startExampleModule;
+  globalThis.startExampleModule = startExampleModule;
 }
