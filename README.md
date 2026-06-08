@@ -2,7 +2,7 @@
 
 这是一个干净的 DP runtime 模板分支。
 
-本分支用于创建新项目底板，只保留最小运行结构、示例模块和开发规范，不包含任何当前业务逻辑。
+本分支用于创建新项目底板，只保留最小运行结构、示例模块和开发说明。
 
 ## 分支定位
 
@@ -23,16 +23,10 @@
 
 ## 不包含
 
-- 不包含真实业务 Lua 模块。
-- 不包含真实 JS/Frida hook。
-- 不包含真实内存地址。
-- 不包含真实 item_id。
-- 不包含 SQL。
-- 不包含 shell。
-- 不包含发奖逻辑。
-- 不包含删除逻辑。
-- 不包含 GM 经济命令。
-- 不包含 ranking / online_reward / lucky_online。
+- 真实业务逻辑。
+- 真实业务配置。
+- 真实运行时地址。
+- 真实 item_id。
 
 ## 目录结构
 
@@ -61,7 +55,6 @@ docs/
   MODULE_GUIDE.md
   LUA_MODULE_GUIDE.md
   FRIDA_MODULE_GUIDE.md
-  SAFETY_RULES.md
   LOCAL_CHECKS.md
 ```
 
@@ -71,7 +64,6 @@ docs/
 - [模块开发总览](docs/MODULE_GUIDE.md)
 - [Lua 模块开发指南](docs/LUA_MODULE_GUIDE.md)
 - [Frida/JS 模块开发指南](docs/FRIDA_MODULE_GUIDE.md)
-- [安全规则](docs/SAFETY_RULES.md)
 - [本地检查](docs/LOCAL_CHECKS.md)
 
 ## 本地检查
@@ -83,23 +75,10 @@ bash tools/check_lua_syntax.sh
 
 `check_lua_syntax.sh` 依赖本机安装 `luac`。
 
-## 使用建议
-
-新项目可以从该分支复制结构，然后按模块逐步新增业务功能。
-
-所有业务功能必须：
-
-1. 默认关闭。
-2. 有配置开关。
-3. 有日志。
-4. 高风险功能必须有独立 risk 开关。
-5. 不允许把业务逻辑直接堆进入口文件。
-
-## 新项目初始化建议
+## 使用方式
 
 1. 从 `template/clean-runtime-skeleton` 拉业务分支。
 2. 修改 README 中的项目名称和版本说明。
-3. 在 `script/config.lua` 增加项目级配置。
-4. 按 `docs/LUA_MODULE_GUIDE.md` 添加 Lua 模块。
-5. 按 `docs/FRIDA_MODULE_GUIDE.md` 添加 Frida/JS 模块。
-6. 每个业务模块单独提交，便于 review 和回滚。
+3. 在 `script/config.lua` 增加项目配置。
+4. 按模块新增业务功能。
+5. 每个业务模块单独提交，便于 review。
