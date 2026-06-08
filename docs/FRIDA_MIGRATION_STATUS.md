@@ -35,7 +35,7 @@
 | 时装潜能 | `script/js/hidden_option.js` | `enable_hidden_option=true` | `[~]` | 已拆模块；已补重复 hook 保护和旧入口 `start_hidden_option()` 兼容。 |
 | 回归勇士 | `script/js/return_user.js` | `enable_return_user=true` | `[~]` | 已拆模块；已补参数校验、重复应用保护和旧入口 `set_return_user()` 兼容。 |
 | VIP 登录公告 | `script/js/vip_login.js` | `enable_vip_login=true` | `[~]` | 已拆模块；已修复广播函数名、旧大小写函数名兼容和重复 hook 保护。 |
-| 怪物攻城 | `script/js/village_attack*.js` / `df_game_r.js` native/common infra | `enable_village_attack=true` | `[!]` | 已拆出启动适配、state、DB、flow、notify、hook、settlement，并将副本回调奖励迁入 hook；`df_game_r.js` 仍保留 NativeFunction/API/MySQL/Packet/邮件 helper 和 user_inout 残留，需专项实测。 |
+| 怪物攻城 | `script/js/village_attack*.js` / `df_game_r.js` native/common infra | `enable_village_attack=true` | `[!]` | 业务迁移基本完成：启动适配、state、DB、flow、notify、hook、settlement 和副本回调奖励均已拆出；`df_game_r.js` 仅保留迁移注释、NativeFunction/API/MySQL/Packet/邮件 helper 和 user_inout 残留，需专项实测。 |
 | 掉落公告 / 掉落奖励 | `script/js/drop_announce.js` | `enable_drop_announce=false` | `[!]` | 已从 `df_game_r.js` 残留 `processing_data(...)` 拆出独立模块，默认关闭；会全服公告并发点券，需专项测试。 |
 | 批量物品 UI 通知 | `script/js/batch_item_notify.js` | `enable_batch_item_add=true` | `[~]` | 已从旧 `api_CUser_Add_Item_list()` / `SendItemWindowNotification()` 拆出独立模块；Lua 回调发物品侧已加固，入口仍待切换。 |
 
@@ -81,6 +81,7 @@
   - 怪物攻城已拆出 state、DB、flow、notify、hook、settlement 和启动适配模块。
   - `event_villageattack_save_to_db()` / `event_villageattack_load_from_db()` 已迁入 `village_attack_db.js`，并增加 DB-ready/JSON parse 日志保护。
   - `VillageAttackedRewardSendReward(user)` 已迁入 `village_attack_hook.js`，保留旧奖励邮件映射。
+  - `df_game_r.js` 中怪物攻城实现函数已清理，只保留对应迁移注释和仍被模块依赖的公共基础设施。
 
 - `tools/check_df_game_r_start.py`
   - 只读检查器用于区分 `pending`、`patched`、`broken/mixed` 三种入口状态。
@@ -93,7 +94,7 @@
 优先级建议：
 
 1. 重启 Frida 并检查启动日志：`startup_helpers`、`startup_modules`、`migrated module startup finished`、`village_attack_state`、`village_attack_db`、`village_attack_flow`、DB-ready retry、`set function success`。
-2. 继续拆分 `df_game_r.js` 中剩余旧业务到 `script/js/*.js`；native declarations、MySQL/Packet/API/common mail helpers 需先搜索全仓引用，不能一次性删除。
+2. 继续清理 `df_game_r.js` 中其他已拆模块的旧重复实现；native declarations、MySQL/Packet/API/common mail helpers 需先搜索全仓引用，不能一次性删除。
 3. 对高风险默认 true 的 JS 功能逐项确认是否应保持开启，尤其 `enable_village_attack`、`enable_luck_point_drop`、`enable_ranking`、`enable_hidden_option`、`enable_vip_login`。
 4. `account_cargo`、`online_reward`、`lucky_online`、`drop_announce` 继续默认关闭，找到真实实现并专项测试前不要开启。
 5. 最后再做测试服验证和 Bug 修复。

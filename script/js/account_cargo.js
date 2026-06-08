@@ -1121,3 +1121,4 @@ function enable_online_reward() {
 			onLeave: function (retval) {
 			}
 		});
+}

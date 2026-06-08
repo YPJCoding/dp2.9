@@ -148,6 +148,7 @@
 
 ### Fixed
 
+- Fixed `script/js/account_cargo.js` syntax by restoring the missing `enable_online_reward()` closing brace so full `script/js/*.js` syntax checks pass.
 - Fixed level cap startup wiring to call `dpx.set_max_level(...)` instead of `dpx.set_auction_min_level(...)`.
 - Fixed the fallback startup path in `df_game_r.lua` to use `dpx.set_max_level(85)`.
 - Fixed `features.enable_item_handlers` so it now actually disables handler registration.

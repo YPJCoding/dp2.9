@@ -37,7 +37,7 @@ js_features.enable_account_cargo = false
 
 ## 2. 怪物攻城 `village_attack`
 
-状态：`[!] 已拆成多个 script/js 模块并接入 startup_modules，默认开启但未专项验证`
+状态：`[!] 业务迁移基本完成并接入 startup_modules，默认开启但未专项验证`
 
 相关文件：
 
@@ -80,6 +80,7 @@ js_features.enable_village_attack = true
 过渡期说明：
 
 - `df_game_r.js` 内的旧直接 `start_event_villageattack` 调度已删除，应只通过 `startup_modules.js -> village_attack.js -> startVillageAttack()` 启动。
+- `df_game_r.js` 中怪物攻城业务实现函数已清理，只保留对应迁移注释。
 - `df_game_r.js` 仍保留 NativeFunction declarations、MySQL/Packet/API/common mail helper 等通用基础设施；这些符号仍被迁移模块引用，不能贸然删除。
 - `df_game_r.js` 仍保留 `hook_user_inout_game_world()` 旧残留，其中包含怪物攻城 UI 通知联动；`user_inout.js` 当前只是兼容桩，不能凭空重写业务。
 - `village_attack_state.js` 只在缺失时补齐全局定义，不强制覆盖旧状态，避免热加载或重复加载时重置活动进度。
@@ -100,7 +101,7 @@ js_features.enable_village_attack = true
 - [x] 增加 DB 未就绪保护：`village_attack.js` 会等待 `mysql_taiwan_cain` / `mysql_frida` 初始化后再调用旧 `start_event_villageattack`。
 - [x] 小步拆出状态与常量承接模块：`village_attack_state.js`。
 - [x] 清理 `df_game_r.js` 状态定义、纯状态函数、启动流程、通知、hook、settlement、DB helper 和副本回调奖励函数体。
-- [~] 继续检查 `df_game_r.js` 中 native declarations、MySQL/Packet/API/common mail helper 的引用边界，后续如拆基础设施必须先搜索全仓引用。
+- [~] 继续检查 `df_game_r.js` 中 native declarations、MySQL/Packet/API/common mail helper 的引用边界，后续如拆公共基础设施必须先搜索全仓引用。
 - [~] 处理 `hook_user_inout_game_world()` 残留：必须找到旧来源或做兼容桩，不凭空实现。
 - [ ] 拆分测试：状态初始化 -> DB load/save -> 活动开始 -> UI -> 刷怪 -> PT -> 结算 -> 奖励邮件。
 - [ ] 决定默认开关是否继续保持 true。

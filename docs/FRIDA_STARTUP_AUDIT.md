@@ -198,7 +198,8 @@ startModuleFeature('luck_point_drop', cfg.enable_luck_point_drop === true, 'luck
 
 - `vip_login.js` 已接入集中启动，并保留 `vip_Login()` 兼容入口、小写广播函数别名和重复 hook 保护。
 - `df_game_r.js start()` 大括号结构已修复，`set function success` 后入口作用域已闭合。
-- 怪物攻城 DB helper 和副本回调奖励函数体已移出 `df_game_r.js`。
+- 怪物攻城业务迁移基本完成；状态、启动流程、通知、hook、settlement、DB helper 和副本回调奖励函数体已移出 `df_game_r.js`，文件内仅保留迁移注释和公共基础设施。
+- `script/js/account_cargo.js` 已补齐文件末尾函数闭合，全量 `script/js/*.js` 可通过 Node 语法检查。
 
 仍需后续处理：
 
@@ -229,25 +230,25 @@ startModuleFeature('luck_point_drop', cfg.enable_luck_point_drop === true, 'luck
 
 ### 4.2 怪物攻城
 
-位置：`df_game_r.js`
+位置：`script/js/village_attack*.js` / `df_game_r.js`
 
 原因：
 
-- 大型系统。
-- 涉及 DB、timer、UI 包、刷怪、奖励邮件。
-- 当前 `enable_village_attack=true`，但未实测。
+- 大型系统，业务逻辑虽已拆出但仍涉及 DB、timer、UI 包、刷怪、奖励邮件。
+- 当前 `enable_village_attack=true`，但未完成测试服端到端实测。
+- `df_game_r.js` 仍保留被模块依赖的 NativeFunction/API/MySQL/Packet/mail 公共基础设施。
 
 策略：
 
-- 后续拆分为独立 `script/js/village_attack.js`。
-- 再补 DB 初始化检查和重复启动保护。
+- 不再继续改怪物攻城业务规则。
+- 优先验证启动日志、DB-ready retry 和端到端活动流程。
+- 后续公共基础设施拆分必须先搜索全仓引用。
 
-状态：`[!] 高风险待拆分/待测`
+状态：`[!] 业务迁移基本完成，高风险待测`
 
 ## 5. 后续优先级
 
-1. 给 `df_game_r.js` 的 `start()` 接入 `startup_helpers.js` 和 `startup_modules.js`。
-2. 确认 `start()` 的大括号结构，避免旧功能定义被意外包进 `start()` 内部。
-3. 逐步从 `df_game_r.js` 中删除已拆分模块的旧内联实现。
-4. 把怪物攻城拆成独立模块。
-5. 对高风险默认 true 的 JS 功能逐项决定是否保持开启。
+1. 重启 Frida 并验证 `startup_helpers`、`startup_modules`、`village_attack_*`、DB-ready retry 和 `set function success` 启动日志。
+2. 逐步从 `df_game_r.js` 中删除其他已拆分模块的旧重复实现。
+3. 对高风险默认 true 的 JS 功能逐项决定是否保持开启。
+4. 最后再拆 `native_bindings`、`db_helpers`、`packet_helpers`、`common_api` 等公共基础设施，并且必须先搜索全仓引用。
