@@ -1873,45 +1873,9 @@ function start_ranking() {
 }
 
 // ===== Feature: VIP Login (VIP 登录公告) =====
-
-// VIP 等级对应任务 ID（来源：dp2/df_game_r.js）
-function getQuestIds1() { return [8892]; }
-function getQuestIds2() { return [8893]; }
-function getQuestIds3() { return [8894]; }
-function getQuestIds4() { return [8895]; }
-function getQuestIds5() { return [8896]; }
-
-// 检查任务完成状态（来源：dp2/df_game_r.js）
-function Inspection_tasks(user, quest_ids) {
-	const WongWork_CQuestClear = CUser_getCurCharacQuestW(user).add(4);
-	const completedQuests = [];
-	for (var i = 0; i < quest_ids.length; i++) {
-		if (WongWork_CQuestClear_isClearedQuest(WongWork_CQuestClear, quest_ids[i])) {
-			completedQuests.push(quest_ids[i]);
-		}
-	}
-	return completedQuests;
-}
-
-// VIP 登录公告（来源：dp2/df_game_r.js）
-function vip_Login() {
-	Interceptor.attach(ptr(0x86C4E50), {
-		onEnter: function (args) { this.user = args[1]; },
-		onLeave: function (retval) {
-			const user = this.user;
-			const c1 = Inspection_tasks(user, getQuestIds1()).length;
-			const c2 = Inspection_tasks(user, getQuestIds2()).length;
-			const c3 = Inspection_tasks(user, getQuestIds3()).length;
-			const c4 = Inspection_tasks(user, getQuestIds4()).length;
-			const c5 = Inspection_tasks(user, getQuestIds5()).length;
-			if (c5 > 0) { api_gameWorld_SendNotiPacketMessage('尊贵的心悦Vip5玩家[' + api_CUserCharacInfo_getCurCharacName(this.user) + ']上线了！！！', 14); }
-			else if (c4 > 0) { api_gameWorld_SendNotiPacketMessage('尊贵的心悦Vip4玩家[' + api_CUserCharacInfo_getCurCharacName(this.user) + ']上线了！！！', 14); }
-			else if (c3 > 0) { api_gameWorld_SendNotiPacketMessage('尊贵的心悦Vip3玩家[' + api_CUserCharacInfo_getCurCharacName(this.user) + ']上线了！！！', 14); }
-			else if (c2 > 0) { api_gameWorld_SendNotiPacketMessage('尊贵的心悦Vip2玩家[' + api_CUserCharacInfo_getCurCharacName(this.user) + ']上线了！！！', 14); }
-			else if (c1 > 0) { api_gameWorld_SendNotiPacketMessage('尊贵的心悦Vip1玩家[' + api_CUserCharacInfo_getCurCharacName(this.user) + ']上线了！！！', 14); }
-		}
-	});
-}
+//
+// 旧内联实现已迁移到 script/js/vip_login.js。
+// 兼容入口 vip_Login() 由模块提供，避免主入口继续保留重复 hook 实现。
 
 // ===== Utils: Batch Item Add (批量物品添加) =====
 
