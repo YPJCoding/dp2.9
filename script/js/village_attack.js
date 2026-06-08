@@ -12,6 +12,7 @@ var g_village_attack_pending_starter = null;
 var g_village_attack_pending_source = '';
 var g_village_attack_start_retry_count = 0;
 var g_village_attack_state_loaded = false;
+var g_village_attack_flow_loaded = false;
 
 var VILLAGE_ATTACK_DB_RETRY_MS = 1000;
 var VILLAGE_ATTACK_DB_RETRY_MAX = 30;
@@ -47,10 +48,37 @@ function loadVillageAttackStateModule() {
   return g_village_attack_state_loaded;
 }
 
+function loadVillageAttackFlowModule() {
+  if (g_village_attack_flow_loaded) {
+    return true;
+  }
+
+  loadVillageAttackStateModule();
+
+  try {
+    if (typeof safeLoadModule === 'function') {
+      g_village_attack_flow_loaded = safeLoadModule('village_attack_flow');
+    } else {
+      dp_load('village_attack_flow');
+      g_village_attack_flow_loaded = true;
+    }
+  } catch (e) {
+    villageAttackLog('load village_attack_flow failed: ' + e.message);
+    g_village_attack_flow_loaded = false;
+  }
+
+  if (g_village_attack_flow_loaded) {
+    villageAttackLog('loaded village_attack_flow');
+  }
+  return g_village_attack_flow_loaded;
+}
+
 function resolveLegacyVillageAttackStarter() {
   if (g_village_attack_legacy_start_original) {
     return g_village_attack_legacy_start_original;
   }
+
+  loadVillageAttackFlowModule();
 
   if (typeof start_event_villageattack === 'function') {
     return start_event_villageattack;
@@ -157,7 +185,7 @@ function callVillageAttackStarterOnce(starter, source) {
     return false;
   }
 
-  loadVillageAttackStateModule();
+  loadVillageAttackFlowModule();
 
   g_village_attack_start_requested = true;
   g_village_attack_pending_starter = starter;
@@ -208,7 +236,7 @@ function installVillageAttackLegacyStartGuard() {
 }
 
 function startVillageAttack() {
-  loadVillageAttackStateModule();
+  loadVillageAttackFlowModule();
   var starter = resolveLegacyVillageAttackStarter();
   return callVillageAttackStarterOnce(starter, 'startVillageAttack');
 }
@@ -220,5 +248,5 @@ function start_village_attack() {
 
 // 模块加载时先保护旧入口。若 df_game_r.js 中仍残留旧直接调度，
 // guard 会保证重复请求只记录 skip，不会重复启动。
-loadVillageAttackStateModule();
+loadVillageAttackFlowModule();
 installVillageAttackLegacyStartGuard();
