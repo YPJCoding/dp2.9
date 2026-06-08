@@ -165,6 +165,7 @@
 - Removed migrated random-option helper bodies from `df_game_r.js`; `script/js/random_option.js` keeps the old compatibility function names.
 - Removed the migrated `fix_use_emblem()` helper body from `df_game_r.js`; `script/js/emblem_fix.js` keeps the old compatibility function name.
 - Removed the migrated `processing_data()` drop-announce helper body from `df_game_r.js`; `script/js/drop_announce.js` keeps the active implementation behind the default-disabled feature flag.
+- Removed the migrated `hook_history_log()` helper body from `df_game_r.js`; `script/js/history_log.js` provides `startHistoryLog()` and retains the old `hook_history_log()` compatibility name.
 - Removed the migrated `UserUseItemEvent()` helper body from `df_game_r.js`; `script/js/user_use_item_event.js` keeps the old compatibility function name.
 - Removed migrated batch item notification helper bodies from `df_game_r.js`; `script/js/batch_item_notify.js` keeps the old compatibility function names.
 - Removed `script/Work_Reload.lua`; config hot reload is now handled directly through `script/config.lua`.

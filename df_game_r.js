@@ -1547,81 +1547,8 @@ function api_set_JewelSocketData(jewelSocketData, slot, emblem_item_id) {
 // 时装镶嵌修复函数已迁移到 script/js/emblem_fix.js。
 // 旧函数名由迁移模块提供，df_game_r.js 不再保留实现。
 
-//捕获玩家游戏事件
-function hook_history_log() {
-	//cHistoryTrace::operator()
-	Interceptor.attach(ptr(0x854F990),
-		{
-			onEnter: function (args) {
-				//解析日志内容: "18000008",18000008,D,145636,"nickname",1,72,8,0,192.168.200.1,192.168.200.1,50963,11, DungeonLeave,"龍人之塔",0,0,"aabb","aabb","N/A","N/A","N/A"
-				const history_log = args[1].readUtf8String(-1);
-				const group = history_log.split(',');
-				//角色信息
-				const account_id = parseInt(group[1]);
-				const time_hh_mm_ss = group[3];
-				const charac_name = group[4];
-				const charac_no = group[5];
-				const charac_level = group[6];
-				const charac_job = group[7];
-				const charac_growtype = group[8];
-				const user_web_address = group[9];
-				const user_peer_ip2 = group[10];
-				const user_port = group[11];
-				const channel_index = group[12]; //当前频道id
-				//玩家游戏事件
-				const game_event = group[13].slice(1); //删除多余空格
-				//触发游戏事件的角色
-				const user = GameWorld_find_user_from_world_byaccid(G_GameWorld(), account_id);
-				if (user.isNull())
-					return;
-				//道具减少:  Item-,1,10000113,63,1,3,63,0,0,0,0,0,0000000000000000000000000000,0,0,00000000000000000000
-				if (game_event == 'Item-') {
-					const item_id = parseInt(group[15]); //本次操作道具id
-					const item_cnt = parseInt(group[17]); //本次操作道具数量
-					const reason = parseInt(group[18]); //本次操作原因
-					//log('玩家[' + charac_name + '道具减少, 原因:' + reason + '(道具id=' + item_id + ', 使用数量=' + item_cnt
-					if (5 == reason) {
-						//丢弃道具
-					} else if (3 == reason) {
-						//使用道具
-						UserUseItemEvent(user, item_id, account_id); //角色使用道具触发事件
-						//这里并未改变道具原始效果 原始效果成功执行后触发下面的代码
-					} else if (9 == reason) {
-						//分解道具
-					} else if (10 == reason) {
-						//使用属性石头
-					}
-				}
-				//道具增加:  Item-,
-				else if (game_event == 'Item+') {
-					const item_id = parseInt(group[15]);
-					const group_18 = parseInt(group[18]);
-					if (group_18 == 4) {
-						//processing_data(item_id, user, 3257, 2500, get_random_int(50, 888));
-					}
-				}
-				else if (game_event == 'KillMob') //杀死怪物
-				{
-					//魔法封印装备词条升级
-					//boost_random_option_equ(user);
-				} else if (game_event == 'Money+') {
-					const cur_money = parseInt(group[14]); //当前持有的金币数量
-					const add_money = parseInt(group[15]); //本次获得金币数量
-					const reason = parseInt(group[16]); //本次获得金币原因
-					//log('玩家[' + charac_name + ']获取金币, 原因:' + reason + '(当前持有金币=' + cur_money + ', 本次获得金币数量=' + add_money);
-					if (4 == reason) {
-						//副本拾取
-					} else if (5 == reason) {
-						//副本通关翻牌获取金币
-					}
-				} else if (game_event == 'DungeonLeave') {
-					//离开副本
-				}
-			},
-			onLeave: function (retval) {
-			}
-		});
-}
+// 历史日志追踪函数已迁移到 script/js/history_log.js。
+// 新模块提供 startHistoryLog() 替代旧 hook_history_log()，df_game_r.js 不再保留实现。
 
 // 掉落公告/奖励函数已迁移到 script/js/drop_announce.js。
 // 新模块提供 processDropAnnounce(...)，df_game_r.js 不再保留旧 processing_data(...) 实现。

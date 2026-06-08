@@ -19,7 +19,7 @@
 | 已迁移模块集中启动器 | `script/js/startup_modules.js` | `js_features.*` | `[~]` | 已通过 `startMigratedModules(cfg)` 集中启动已拆分模块，并纳入 patches、account_cargo、village_attack 等调度；仍需测试服验证启动日志。 |
 | 绝望之塔修复 | `df_game_r.js` / Lua `legacy_patches.lua` | `enable_tod_fix` / `legacy_patches.*` | `[~]` | 金币/门票类入口已迁移；跳过 UserAPC 等细节仍需实测确认。 |
 | 时装镶嵌修复 | `script/js/emblem_fix.js` | `enable_emblem_fix` | `[~]` | 已从旧 `fix_use_emblem()` 拆出独立模块，增加重复 hook 保护，并清理 `df_game_r.js` 旧实现；待实测。 |
-| 历史日志追踪 | `script/js/history_log.js` | `enable_history_log` | `[~]` | 已从旧 `hook_history_log()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
+| 历史日志追踪 | `script/js/history_log.js` | `enable_history_log` | `[~]` | 已从旧 `hook_history_log()` 拆出独立模块，增加重复 hook 保护，并清理 `df_game_r.js` 旧实现；待实测。 |
 | 角色使用道具事件 | `script/js/user_use_item_event.js` | `enable_history_log` | `[~]` | 已从旧 `UserUseItemEvent()` 拆出独立模块，仅保留原本实际启用的坐骑变身器返还邮件逻辑，并清理 `df_game_r.js` 旧实现；待实测。 |
 | 上下线处理 | `script/js/user_inout.js` | `enable_user_inout_hook=true` | `[~]` | `user_inout.js` 当前保持兼容桩；`df_game_r.js` 仍有旧 `hook_user_inout_game_world()` 残留（含幸运点与怪物攻城 UI 通知），后续必须找到真实旧来源或专项拆分，不能凭空实现。 |
 | 在线奖励 | `script/js/online_reward.js` | `enable_online_reward=false` | `[!]` | 已从旧 `enable_online_reward()` 拆出独立模块，增加重复 hook 保护；会发点券，默认关闭，入口仍待切换。 |
@@ -46,7 +46,7 @@
 | `df_game_r.js start()` 集中启动接入 | `[x]` | `start()` 已加载 `startup_helpers` / `startup_modules`，并调用 `startMigratedModules(cfg)`；旧逐项启动调用已移出入口。 |
 | 启动日志实测 | `[~]` | 需在测试服确认 `startup_helpers`、`startup_modules`、`migrated module startup finished`、`set function success` 等日志完整出现。 |
 | 时装镶嵌旧实现清理 | `[x]` | `emblem_fix.js` 已保留旧函数名兼容，`startup_modules.js` 已调度，`df_game_r.js` 旧函数已删除。 |
-| 历史日志入口切换 | `[~]` | `history_log.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
+| 历史日志旧实现清理 | `[x]` | `history_log.js` 已保留旧函数名兼容，`startup_modules.js` 已调度，`df_game_r.js` 旧函数已删除。 |
 | 角色使用道具事件旧实现清理 | `[x]` | `user_use_item_event.js` 已保留旧函数名兼容，`df_game_r.js` 旧 `UserUseItemEvent()` 已删除。 |
 | 上下线处理真实实现 | `[ ]` | `user_inout.js` 当前只是兼容桩；真实 `hook_user_inout_game_world()` 未在当前仓库或旧仓库中找到。 |
 | 在线奖励入口切换 | `[~]` | `online_reward.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
