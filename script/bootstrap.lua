@@ -28,6 +28,7 @@ local infra_modules = {
     { key = 'command_help', module = 'script.modules.command_help' },
     { key = 'signin', module = 'script.modules.signin' },
     { key = 'gm_send_item', module = 'script.modules.gm_send_item' },
+    { key = 'gm_economy', module = 'script.modules.gm_economy' },
     { key = 'exp_dungeon', module = 'script.modules.exp_dungeon' },
     { key = 'dungeon_gate', module = 'script.modules.dungeon_gate' },
     { key = 'drop_rules', module = 'script.modules.drop_rules' },
@@ -120,6 +121,9 @@ local function is_module_enabled(ctx, module_key)
     end
     if module_key == 'gm_send_item' then
         return features.enable_gm_send_item == true
+    end
+    if module_key == 'gm_economy' then
+        return features.enable_gm_economy == true
     end
     if module_key == 'exp_dungeon' then
         return features.enable_exp_dungeon == true
