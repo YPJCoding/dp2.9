@@ -17,7 +17,8 @@
 - 加载 `df.frida`
 - 注册 `on_frida_call`
 - 注册上线提示 hook
-- 注册 `UseItem2` hook
+- 注册 `UseItem1` hook，并接入普通右键消耗品 `UseItem1 -> item_handler` 分发
+- 保留 `UseItem2` hook 作为兼容入口
 - 通过 `bootstrap.apply_dpx_startup(ctx)` 应用 DPX 启动配置
 
 业务 handler 已迁移到：
@@ -30,6 +31,26 @@ script/handlers/
   inherit.lua
   pvp.lua
   misc.lua
+```
+
+玩法与基础设施模块已迁移到：
+
+```text
+script/modules/
+  online.lua
+  broadcast.lua
+  gm_permissions.lua
+  item_query.lua
+  player_info.lua
+  command_menu.lua
+  command_help.lua
+  signin.lua
+  exp_dungeon.lua
+  dungeon_gate.lua
+  drop_rules.lua
+  finish_back_home.lua
+  hot_reload.lua
+  legacy_patches.lua
 ```
 
 ## 2. 部署目录检查
@@ -56,6 +77,21 @@ script/handlers/
       inherit.lua
       pvp.lua
       misc.lua
+    modules/
+      online.lua
+      broadcast.lua
+      gm_permissions.lua
+      item_query.lua
+      player_info.lua
+      command_menu.lua
+      command_help.lua
+      signin.lua
+      exp_dungeon.lua
+      dungeon_gate.lua
+      drop_rules.lua
+      finish_back_home.lua
+      hot_reload.lua
+      legacy_patches.lua
 ```
 
 检查重点：
@@ -64,6 +100,7 @@ script/handlers/
 - `script/bootstrap.lua` 必须存在。
 - `script/utils.lua` 必须存在。
 - `script/handlers/*.lua` 必须存在。
+- `script/modules/*.lua` 必须存在。
 - `df_game_r.js` 必须仍在 `/dp2/df_game_r.js`。
 - `frida.js` 不是默认加载文件，不作为部署必需项。
 
@@ -101,8 +138,23 @@ features = {
         pvp = true,
         misc = true,
     },
+    enable_online_module = true,
+    enable_broadcast_module = true,
+    enable_item_query = true,
+    enable_player_info = true,
+    enable_command_menu = true,
+    enable_command_help = true,
+    enable_signin = false,
+    enable_finish_back_home = true,
+    enable_legacy_patches = false,
 }
 ```
+
+说明：
+
+- `signin` 默认关闭，测试服确认后再按需要开启。
+- `legacy_patches` 默认关闭；子功能开启路径已在测试服验证，但发布前仍建议保持关闭，按需要逐项启用。
+- `hot_reload.enabled=true` 默认开启，仅热应用显式支持的运行时配置。
 
 ### 4.2 风险开关
 
@@ -139,6 +191,17 @@ risk = {
 [bootstrap] applied dpx startup config
 ```
 
+如果启用了对应模块，还应关注：
+
+```text
+[online] registered Reach_GameWord/Leave_GameWord hooks
+[item_query] registered GmInput hook
+[player_info] registered GmInput hook command=//myinfo
+[command_menu] registered GmInput hook command=//指令
+[command_help] registered GmInput hooks
+[hot_reload] timer started
+```
+
 如果看到：
 
 ```text
@@ -165,36 +228,62 @@ risk = {
 - 角色能登录频道。
 - 上线提示能正常显示。
 - `frida.load` 不报错。
+- 普通右键消耗品确认走 `UseItem1`。
+- `UseItem1 -> item_handler` 分发可用。
 
-### 6.2 低风险 handler
+### 6.2 已完成主路径验证
 
-优先测试：
+以下已完成主路径或测试服验证：
+
+- 普通频道启动。
+- bootstrap 日志正常。
+- `frida.load` 正常。
+- `Reach_GameWord` 登录 hook 正常。
+- `UseItem1` 是普通右键消耗品入口。
+- `UseItem1 -> item_handler` 分发已接入。
+- 高风险 handler 默认关闭时拒绝并返还道具。
+- 等级上限 85 与拍卖行最低等级 10。
+- `legacy_patches` 默认关闭与三个子功能开启路径。
+- `hot_reload` config-only 主路径。
+- `finish_back_home` mode `0`~`5` 与 `equipment_rarities={0,1}` 主路径。
+
+### 6.3 已迁移，待专项验证
+
+以下已迁移，仍建议按模块专项验证：
+
+- `signin`：默认关闭；开启后验证 `//qd`、重复签到、邮件奖励和可选广播。
+- `player_info`：验证 `//myinfo` 展示基础信息。
+- `command_menu`：验证 `//指令` 只展示安全命令。
+- `command_help`：验证 `//getq`、`//clearq`、`//zhiye`、`//trans`、`//pvp` 只展示说明，不执行旧高风险逻辑。
+- `item_query`：验证 `//view`、`//viewid`、`//viewname` 与旧无空格写法。
+- `exp_dungeon`：需确认副本 `5000` 存在。
+- `dungeon_gate`：需配置规则后验证。
+- `drop_rules`：需高级角色 + 低级副本 + 豁免道具场景验证。
+
+### 6.4 PVF 正式道具验证（后置）
+
+当前 PVF 暂不添加 DP 正式道具，以下放到最后阶段验证：
 
 - 主线任务清理券
 - 每日任务清理券
 - 成就任务清理券
 - 异界 E2/E3 重置券
-
-### 6.3 中风险 handler
-
-再测试：
-
 - 觉醒券
 - 转职任务获取券
 - 装备继承券
 - 跨界石
 
-### 6.4 高风险默认关闭验证
+### 6.5 高风险能力恢复验证（后置）
 
-在风险开关关闭时测试：
+只有在明确需要恢复旧行为，并完成备份、回滚和专项验证后，才考虑开启：
 
-- 女鬼剑职业转换券应提示功能未开启并返还道具。
-- 角色出战券应提示功能未开启并返还道具。
-- 装备设计图熟练度券应提示功能未开启并返还道具。
-- 宠物清理券应提示功能未开启并返还道具。
-- 时装清理券应提示功能未开启并返还道具。
-- 副职业一键分解券应提示功能未开启并返还道具。
-- PVP 经验书应提示功能未开启并返还道具。
+- 女鬼剑职业转换券：需 `enable_sql_handlers=true`。
+- 角色出战券：需 `enable_sql_handlers=true`。
+- 装备设计图熟练度券：需 `enable_sql_handlers=true`。
+- 宠物清理券：需 `enable_delete_handlers=true` 且部分路径需要 `enable_sql_handlers=true`。
+- 时装清理券：需 `enable_delete_handlers=true` 且部分路径需要 `enable_sql_handlers=true`。
+- 副职业一键分解券：需 `enable_delete_handlers=true`。
+- PVP 经验书：需 `enable_shell_handlers=true` 且 `enable_sql_handlers=true`。
 
 ## 7. 回滚方式
 
@@ -215,6 +304,8 @@ modular_handlers = {
 
 注意：当前 `df_game_r.lua` 已移除旧 handler，所以关闭模块后，对应道具不会再执行旧逻辑。
 
+玩法模块可通过 `features.enable_*` 开关关闭，通常需要重启频道才能彻底取消已注册 hook。
+
 ### 7.2 回滚到 main
 
 如果重构分支启动异常，回滚到 main 分支对应版本的 `/dp2` 文件。
@@ -223,20 +314,21 @@ modular_handlers = {
 
 ```text
 df_game_r.lua
+df_game_r.js
 script/
 ```
 
-如果 JS 侧没有改动，可暂不回滚 `df_game_r.js`。
-
 ### 7.3 回滚高风险能力
 
-只需保持风险开关关闭：
+保持风险开关关闭：
 
 ```lua
 enable_sql_handlers = false
 enable_delete_handlers = false
 enable_shell_handlers = false
 ```
+
+JS/Frida 高风险功能按 `js_features` 逐项关闭，并重启频道。
 
 ## 8. 发布前不建议开启的能力
 
@@ -245,16 +337,20 @@ enable_shell_handlers = false
 - `enable_sql_handlers`
 - `enable_delete_handlers`
 - `enable_shell_handlers`
-- GM 模式
+- GM 聊天写操作指令
 - 未完成审查的 JS Hook
+- `js_features` 中标记为 `[RISK:HIGH]` 或 `[RISK:CRITICAL]` 且未完成专项验证的功能
 
 ## 9. 部署前最终确认
 
 - [ ] 已备份旧 `/dp2` 目录。
 - [ ] 已确认 `script/config.lua` 风险开关默认关闭。
 - [ ] 已确认所有 handler 模块存在。
+- [ ] 已确认所有启用的 `script/modules/*.lua` 存在。
 - [ ] 已确认 `df_game_r.lua` 可以加载 `script/bootstrap.lua`。
 - [ ] 已确认 `df_game_r.js` 文件存在。
 - [ ] 已完成至少一次普通频道启动验证。
-- [ ] 已完成至少一次低风险 handler 验证。
+- [ ] 已确认普通右键消耗品走 `UseItem1`。
+- [ ] 已确认 `UseItem1 -> item_handler` 分发可用。
 - [ ] 已确认高风险功能默认拒绝并返还道具。
+- [ ] 已确认 PVF 正式道具验证仍为后置项，不阻塞安全底板部署。
