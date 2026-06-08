@@ -63,11 +63,11 @@ df_game_r.js
 
 ```js
 var PROJECT_ADDRESSES = {
-    // 示例函数地址
-    // 来源：待确认
-    // 版本：当前项目版本
-    // 用途：示例占位，不能直接使用
-    example_function: ptr('0x00000000'),
+  // 示例函数地址
+  // 来源：待确认
+  // 版本：当前项目版本
+  // 用途：示例占位，不能直接使用
+  example_function: ptr('0x00000000'),
 };
 ```
 
@@ -89,31 +89,31 @@ var PROJECT_ADDRESSES = {
 var g_example_started = false;
 
 function startExampleFeature(cfg, addresses) {
-    if (g_example_started) {
-        console.log('[example] already started');
-        return;
-    }
+  if (g_example_started) {
+    console.log('[example] already started');
+    return;
+  }
 
-    g_example_started = true;
+  g_example_started = true;
 
-    if (!addresses || !addresses.example_function) {
-        console.log('[example] missing address: example_function');
-        return;
-    }
+  if (!addresses || !addresses.example_function) {
+    console.log('[example] missing address: example_function');
+    return;
+  }
 
-    try {
-        // Interceptor.attach(addresses.example_function, {
-        //     onEnter: function (args) {},
-        //     onLeave: function (retval) {},
-        // });
-        console.log('[example] started');
-    } catch (err) {
-        console.log('[example] failed: ' + err);
-    }
+  try {
+    // Interceptor.attach(addresses.example_function, {
+    //   onEnter: function (args) {},
+    //   onLeave: function (retval) {},
+    // });
+    console.log('[example] started');
+  } catch (err) {
+    console.log('[example] failed: ' + err);
+  }
 }
 
 if (typeof globalThis !== 'undefined') {
-    globalThis.startExampleFeature = startExampleFeature;
+  globalThis.startExampleFeature = startExampleFeature;
 }
 ```
 
@@ -123,9 +123,9 @@ JS 配置可以集中管理：
 
 ```js
 var PROJECT_JS_CONFIG = {
-    features: {
-        enable_example_feature: false,
-    },
+  features: {
+    enable_example_feature: false,
+  },
 };
 ```
 
@@ -150,7 +150,7 @@ Frida JS 模块应使用当前运行环境兼容的语法：
 - 不使用 `let`。
 - 变量声明优先使用 `const`。
 - 只有需要重新赋值时才使用 `var`。
-- 使用 4 空格缩进。
+- 使用 2 空格缩进。
 - 函数体内保持早返回，减少嵌套层级。
 
 ## 命名规范
