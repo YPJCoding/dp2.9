@@ -8,7 +8,7 @@
 
 - `main`：业务项目主线。
 - `template/clean-runtime-skeleton`：干净模板底板。
-- 新业务项目建议从 template 分支拉新分支开发，不要把 template 分支合并回业务主线。
+- 新项目建议从 template 分支拉新分支开发，不要把 template 分支合并回业务主线。
 
 ## 保留内容
 
@@ -77,8 +77,8 @@ bash tools/check_lua_syntax.sh
 
 ## 使用方式
 
-1. 从 `template/clean-runtime-skeleton` 拉业务分支。
+1. 从 `template/clean-runtime-skeleton` 拉项目分支。
 2. 修改 README 中的项目名称和版本说明。
-3. 在 `script/config.lua` 增加项目配置。
-4. 按模块新增业务功能。
-5. 每个业务模块单独提交，便于 review。
+3. 按项目需要调整 `script/config.lua`。
+4. 按项目需要新增模块。
+5. 根据团队习惯安排提交和 review。
