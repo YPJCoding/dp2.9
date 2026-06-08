@@ -11,12 +11,14 @@
 // - 核心 hook、刷怪、PT 结算、奖励邮件仍保留在 df_game_r.js。
 // - UI/进度通知已拆到 village_attack_notify.js。
 // - hook 重复安装保护已拆到 village_attack_hook.js。
+// - 结束与结算流程已拆到 village_attack_settlement.js。
 // - 本模块目前保持旧流程语义，用于承接下一步 df_game_r.js 瘦身。
 // - 先加载 village_attack_state，确保状态对象、常量和纯状态函数可用。
 
 var g_village_attack_flow_loaded = true;
 var g_village_attack_notify_loaded = false;
 var g_village_attack_hook_loaded = false;
+var g_village_attack_settlement_loaded = false;
 
 function villageAttackFlowLog(message) {
   try {
@@ -26,13 +28,17 @@ function villageAttackFlowLog(message) {
   }
 }
 
+function loadVillageAttackFlowModuleByName(moduleName) {
+  if (typeof safeLoadModule === 'function') {
+    return safeLoadModule(moduleName);
+  }
+  dp_load(moduleName);
+  return true;
+}
+
 function ensureVillageAttackFlowStateModule() {
   try {
-    if (typeof safeLoadModule === 'function') {
-      return safeLoadModule('village_attack_state');
-    }
-    dp_load('village_attack_state');
-    return true;
+    return loadVillageAttackFlowModuleByName('village_attack_state');
   } catch (e) {
     villageAttackFlowLog('load village_attack_state failed: ' + e.message);
     return false;
@@ -47,12 +53,7 @@ function ensureVillageAttackNotifyModule() {
   ensureVillageAttackFlowStateModule();
 
   try {
-    if (typeof safeLoadModule === 'function') {
-      g_village_attack_notify_loaded = safeLoadModule('village_attack_notify');
-    } else {
-      dp_load('village_attack_notify');
-      g_village_attack_notify_loaded = true;
-    }
+    g_village_attack_notify_loaded = loadVillageAttackFlowModuleByName('village_attack_notify');
   } catch (e) {
     villageAttackFlowLog('load village_attack_notify failed: ' + e.message);
     g_village_attack_notify_loaded = false;
@@ -70,12 +71,7 @@ function ensureVillageAttackHookModule() {
   }
 
   try {
-    if (typeof safeLoadModule === 'function') {
-      g_village_attack_hook_loaded = safeLoadModule('village_attack_hook');
-    } else {
-      dp_load('village_attack_hook');
-      g_village_attack_hook_loaded = true;
-    }
+    g_village_attack_hook_loaded = loadVillageAttackFlowModuleByName('village_attack_hook');
   } catch (e) {
     villageAttackFlowLog('load village_attack_hook failed: ' + e.message);
     g_village_attack_hook_loaded = false;
@@ -87,10 +83,31 @@ function ensureVillageAttackHookModule() {
   return g_village_attack_hook_loaded;
 }
 
+function ensureVillageAttackSettlementModule() {
+  if (g_village_attack_settlement_loaded) {
+    return true;
+  }
+
+  ensureVillageAttackFlowStateModule();
+
+  try {
+    g_village_attack_settlement_loaded = loadVillageAttackFlowModuleByName('village_attack_settlement');
+  } catch (e) {
+    villageAttackFlowLog('load village_attack_settlement failed: ' + e.message);
+    g_village_attack_settlement_loaded = false;
+  }
+
+  if (g_village_attack_settlement_loaded) {
+    villageAttackFlowLog('loaded village_attack_settlement');
+  }
+  return g_village_attack_settlement_loaded;
+}
+
 // 怪物攻城活动计时器(每5秒触发一次)
 function event_villageattack_timer() {
   ensureVillageAttackEventInfo();
   ensureVillageAttackNotifyModule();
+  ensureVillageAttackSettlementModule();
 
   if (villageAttackEventInfo.state == VILLAGEATTACK_STATE_END) {
     return;
@@ -151,6 +168,7 @@ function start_villageattack() {
 // 开始怪物攻城活动。
 function on_start_event_villageattack() {
   ensureVillageAttackNotifyModule();
+  ensureVillageAttackSettlementModule();
   reset_villageattack_info();
   start_villageattack();
   api_scheduleOnMainThread_delay(event_villageattack_timer, null, 5000);
@@ -174,6 +192,7 @@ function start_event_villageattack() {
   ensureVillageAttackEventInfo();
   ensureVillageAttackNotifyModule();
   ensureVillageAttackHookModule();
+  ensureVillageAttackSettlementModule();
 
   // patch 相关函数，修复活动流程。hook 实现仍保留在 df_game_r.js。
   hook_VillageAttack();
@@ -189,4 +208,5 @@ function start_event_villageattack() {
 ensureVillageAttackFlowStateModule();
 ensureVillageAttackNotifyModule();
 ensureVillageAttackHookModule();
+ensureVillageAttackSettlementModule();
 villageAttackFlowLog('flow helpers loaded');
