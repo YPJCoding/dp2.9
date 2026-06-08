@@ -2103,48 +2103,9 @@ function check_move_comboSkillSlot_force_true() {
 	});
 }
 
-//角色使用道具触发事件
-function UserUseItemEvent(user, item_id, accid) {
-	switch (item_id) {
-		case 20206321:
-		case 20206322:
-		case 20206323:
-		case 20206324:
-		case 20206325:
-		case 20206326:
-		case 20206327:
-		case 20206328:
-		case 20206329:
-		case 20206330:
-		case 20226321:
-		case 20226322:
-		case 20226323:
-		case 20226324:
-		case 20226325:
-		case 20226326:
-		case 20226327:
-		case 20226328:
-		case 20226329:
-		case 20226330:
-			//api_CUser_AddItem(user, item_id, 2);
-			//dp2_lua_call(accid, 0.0, "additem,"+item_id);
-			CMailBoxHelperReqDBSendNewSystemMail(user, item_id, 1, "GM", "返还坐骑变身器：");
-			break;
-		case 1047:
-			//use_ftcoin_change_luck_point(user);
-			break;
-		case 10303917:
-			//辅助装备任务完成券
-			//clear_doing_questEx(user, 674);
-			break;
-		case 10303918:
-			//魔法石任务完成券
-			//clear_doing_questEx(user, 675);
-			break;
-		default:
-			return;
-	}
-}
+// 角色使用道具事件函数已迁移到 script/js/user_use_item_event.js。
+// 旧函数名由迁移模块提供，df_game_r.js 不再保留实现。
+
 
 //加载主功能
 function start() {

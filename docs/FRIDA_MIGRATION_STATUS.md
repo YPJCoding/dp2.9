@@ -20,7 +20,7 @@
 | 绝望之塔修复 | `df_game_r.js` / Lua `legacy_patches.lua` | `enable_tod_fix` / `legacy_patches.*` | `[~]` | 金币/门票类入口已迁移；跳过 UserAPC 等细节仍需实测确认。 |
 | 时装镶嵌修复 | `script/js/emblem_fix.js` | `enable_emblem_fix` | `[~]` | 已从旧 `fix_use_emblem()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
 | 历史日志追踪 | `script/js/history_log.js` | `enable_history_log` | `[~]` | 已从旧 `hook_history_log()` 拆出独立模块，增加重复 hook 保护；入口仍待切换。 |
-| 角色使用道具事件 | `script/js/user_use_item_event.js` | `enable_history_log` | `[~]` | 已从旧 `UserUseItemEvent()` 拆出独立模块，仅保留原本实际启用的坐骑变身器返还邮件逻辑；入口仍待切换。 |
+| 角色使用道具事件 | `script/js/user_use_item_event.js` | `enable_history_log` | `[~]` | 已从旧 `UserUseItemEvent()` 拆出独立模块，仅保留原本实际启用的坐骑变身器返还邮件逻辑，并清理 `df_game_r.js` 旧实现；待实测。 |
 | 上下线处理 | `script/js/user_inout.js` | `enable_user_inout_hook=true` | `[~]` | `user_inout.js` 当前保持兼容桩；`df_game_r.js` 仍有旧 `hook_user_inout_game_world()` 残留（含幸运点与怪物攻城 UI 通知），后续必须找到真实旧来源或专项拆分，不能凭空实现。 |
 | 在线奖励 | `script/js/online_reward.js` | `enable_online_reward=false` | `[!]` | 已从旧 `enable_online_reward()` 拆出独立模块，增加重复 hook 保护；会发点券，默认关闭，入口仍待切换。 |
 | 幸运在线玩家 | `script/js/lucky_online.js` | `enable_lucky_online=false` | `[!]` | 当前仓库和旧仓库未找到真实 `start_event_lucky_online_user()` 实现；已补兼容桩避免 ReferenceError，不凭空实现抽奖/发奖逻辑。 |
@@ -47,7 +47,7 @@
 | 启动日志实测 | `[~]` | 需在测试服确认 `startup_helpers`、`startup_modules`、`migrated module startup finished`、`set function success` 等日志完整出现。 |
 | 时装镶嵌入口切换 | `[~]` | `emblem_fix.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
 | 历史日志入口切换 | `[~]` | `history_log.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
-| 角色使用道具事件入口切换 | `[~]` | `user_use_item_event.js` 已新增，但入口调度仍需和 `history_log.js` 一起加载。 |
+| 角色使用道具事件旧实现清理 | `[x]` | `user_use_item_event.js` 已保留旧函数名兼容，`df_game_r.js` 旧 `UserUseItemEvent()` 已删除。 |
 | 上下线处理真实实现 | `[ ]` | `user_inout.js` 当前只是兼容桩；真实 `hook_user_inout_game_world()` 未在当前仓库或旧仓库中找到。 |
 | 在线奖励入口切换 | `[~]` | `online_reward.js` 已新增，但入口调度仍需切换到 `startup_modules.js`。 |
 | 幸运在线玩家真实实现 | `[ ]` | `lucky_online.js` 当前只是兼容桩；真实 `start_event_lucky_online_user()` 未在当前仓库或旧仓库中找到。 |

@@ -118,7 +118,7 @@ script/js/startup_modules.js
 | 模块 | 旧入口/旧来源 | 新入口 | 状态 |
 |---|---|---|---|
 | `script/js/history_log.js` | `hook_history_log()` | `startHistoryLog()` | `[~] 已集中调度，待实测` |
-| `script/js/user_use_item_event.js` | `UserUseItemEvent()` | `UserUseItemEvent()` / `dispatchUserUseItemEvent()` | `[~] 待随 history_log 一起加载` |
+| `script/js/user_use_item_event.js` | `UserUseItemEvent()` | `UserUseItemEvent()` / `dispatchUserUseItemEvent()` | `[~] 已集中调度并清理 df_game_r.js 旧实现，待实测` |
 | `script/js/user_inout.js` | `hook_user_inout_game_world()` 入口残留 | `startUserInoutHook()` / `hook_user_inout_game_world()` | `[~] 兼容桩，真实实现待确认` |
 | `script/js/lucky_online.js` | `start_event_lucky_online_user()` 入口残留 | `startLuckyOnlineUserEvent()` / `start_event_lucky_online_user()` | `[~] 兼容桩，真实实现待确认` |
 | `script/js/batch_item_notify.js` | `api_CUser_Add_Item_list()` / `SendItemWindowNotification()` | 旧入口兼容 | `[~] 已集中调度，待实测` |
@@ -199,6 +199,7 @@ startModuleFeature('luck_point_drop', cfg.enable_luck_point_drop === true, 'luck
 - `vip_login.js` 已接入集中启动，并保留 `vip_Login()` 兼容入口、小写广播函数别名和重复 hook 保护。
 - `df_game_r.js start()` 大括号结构已修复，`set function success` 后入口作用域已闭合。
 - 怪物攻城业务迁移基本完成；状态、启动流程、通知、hook、settlement、DB helper 和副本回调奖励函数体已移出 `df_game_r.js`，文件内仅保留迁移注释和公共基础设施。
+- `UserUseItemEvent()` 旧实现已从 `df_game_r.js` 移出，旧函数名由 `script/js/user_use_item_event.js` 提供。
 - 批量物品 UI 通知旧实现已从 `df_game_r.js` 移出，旧函数名由 `script/js/batch_item_notify.js` 提供。
 - `script/js/account_cargo.js` 已补齐文件末尾函数闭合，全量 `script/js/*.js` 可通过 Node 语法检查。
 
