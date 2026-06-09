@@ -785,7 +785,6 @@ const PROJECT_ADDRESSES = {
 if (typeof globalThis !== 'undefined') {
   globalThis.PROJECT_ADDRESSES = PROJECT_ADDRESSES;
 }
-
 // JS Runtime 配置中心
 // 来源：从旧 frida.js 迁移并重构
 // 用途：集中管理所有功能开关和参数，不要在 df_game_r.js 或业务模块中硬编码
@@ -865,7 +864,6 @@ const PROJECT_JS_CONFIG = {
 if (typeof globalThis !== 'undefined') {
   globalThis.PROJECT_JS_CONFIG = PROJECT_JS_CONFIG;
 }
-
 // NativeFunction 工厂与统一管理
 // 来源：从旧 frida.js 重构
 // 用途：提供统一的 nf() 工厂函数，集中管理所有 NativeFunction 创建
@@ -895,7 +893,6 @@ function nf(address, retType, argTypes) {
 if (typeof globalThis !== 'undefined') {
   globalThis.nf = nf;
 }
-
 // 日志模块
 // 来源：从旧 frida.js 迁移
 // 用途：统一日志输出（控制台 + 文件）
@@ -987,7 +984,6 @@ function createLogger(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createLogger = createLogger;
 }
-
 // 时间模块
 // 来源：从旧 frida.js 迁移
 // 用途：提供系统时间、时间戳等相关工具函数
@@ -1018,7 +1014,6 @@ function createTimeModule(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createTimeModule = createTimeModule;
 }
-
 // 随机数模块
 // 来源：从旧 frida.js 迁移
 // 用途：提供统一的随机数生成函数，避免各模块重复定义 get_random_int
@@ -1030,7 +1025,6 @@ function getRandomInt(min, max) {
 if (typeof globalThis !== 'undefined') {
   globalThis.getRandomInt = getRandomInt;
 }
-
 // 内存操作模块
 // 来源：从旧 frida.js 迁移
 // 用途：封装 Memory.protect 和 patch 字节写入等内存操作
@@ -1085,7 +1079,6 @@ if (typeof globalThis !== 'undefined') {
   globalThis.bin2hex = bin2hex;
   globalThis.memoryProtectAndWrite = protectAndWrite;
 }
-
 // 文件操作模块
 // 来源：从旧 frida.js 迁移并重构
 // 用途：封装 Linux 文件读写操作
@@ -1168,7 +1161,6 @@ function createFileModule() {
 if (typeof globalThis !== 'undefined') {
   globalThis.createFileModule = createFileModule;
 }
-
 // Hook 防重复模块
 // 来源：新增模块，用于防止热重载时重复 hook 造成逻辑叠加
 // 用途：所有 Interceptor.attach 和 Interceptor.replace 都必须走这里
@@ -1178,9 +1170,28 @@ if (typeof globalThis !== 'undefined') {
 // 2. 重复 attach 会导致同一个函数被多次 hook，造成逻辑叠加
 // 3. 比如一个扣血 hook 重复 attach 3 次，角色受伤会翻 3 倍
 // 4. 统一管理能确保同一个 key 只 hook 一次
+//
+// 为什么缓存必须挂到 globalThis：
+// dp_load 每加载一次本文件，局部变量 `var g_hook_xxx = {}` 会被重新初始化。
+// 将缓存挂在 globalThis 上，确保重复 dp_load 不会清空已注册的 hook key。
 
-var g_hook_attached = {};
-var g_hook_replaced = {};
+// 从 globalThis 恢复持久化缓存，避免重复 dp_load 清空
+if (typeof globalThis !== 'undefined') {
+  if (typeof globalThis.__dp_hook_attached === 'undefined') {
+    globalThis.__dp_hook_attached = {};
+  }
+  if (typeof globalThis.__dp_hook_replaced === 'undefined') {
+    globalThis.__dp_hook_replaced = {};
+  }
+}
+
+var g_hook_attached = (typeof globalThis !== 'undefined')
+  ? globalThis.__dp_hook_attached
+  : {};
+
+var g_hook_replaced = (typeof globalThis !== 'undefined')
+  ? globalThis.__dp_hook_replaced
+  : {};
 
 // 防止重复 attach
 // key: 唯一标识，同一 key 多次调用只执行一次
@@ -1232,10 +1243,15 @@ function replaceOnce(key, address, callback, retType, argTypes) {
   }
 }
 
-// 重置状态（热重载时可能需要调用）
+// 重置状态（手动调用，会清除 globalThis 上的持久化缓存）
 function resetHookGuard() {
   g_hook_attached = {};
   g_hook_replaced = {};
+
+  if (typeof globalThis !== 'undefined') {
+    globalThis.__dp_hook_attached = g_hook_attached;
+    globalThis.__dp_hook_replaced = g_hook_replaced;
+  }
 }
 
 if (typeof globalThis !== 'undefined') {
@@ -1243,7 +1259,6 @@ if (typeof globalThis !== 'undefined') {
   globalThis.replaceOnce = replaceOnce;
   globalThis.resetHookGuard = resetHookGuard;
 }
-
 // 封包操作 binding
 // 来源：从旧 frida.js PacketBuf_* 和 InterfacePacketBuf_* 系列迁移
 // 用途：客户端封包读取 + 服务器封包组包
@@ -1375,7 +1390,6 @@ function createPacketBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createPacketBinding = createPacketBinding;
 }
-
 // MySQL 数据库操作 binding
 // 来源：从旧 frida.js MySQL_* 系列函数迁移
 // 用途：封装 MySQL 连接、查询、结果读取
@@ -1524,7 +1538,6 @@ function createMysqlBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createMysqlBinding = createMysqlBinding;
 }
-
 // 角色操作 binding
 // 来源：从旧 frida.js CUser* 系列函数迁移
 // 用途：封装角色状态、属性、数据相关操作
@@ -1751,7 +1764,6 @@ function createUserBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createUserBinding = createUserBinding;
 }
-
 // 背包/道具 binding
 // 来源：从旧 frida.js CInventory*/Inven_Item* 系列函数迁移
 // 用途：封装背包操作、道具查询等
@@ -1856,7 +1868,6 @@ function createInventoryBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createInventoryBinding = createInventoryBinding;
 }
-
 // 道具/装备数据 binding
 // 来源：从旧 frida.js CItem* / CStackableItem* 系列函数迁移
 // 用途：封装道具属性查询、PVF 数据查询等
@@ -1937,7 +1948,6 @@ function createItemBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createItemBinding = createItemBinding;
 }
-
 // 邮件系统 binding
 // 来源：从旧 frida.js CMailBoxHelper*/ReqDBSendNewSystemMail* 系列函数迁移
 // 用途：封装系统邮件发送操作（多道具、时装、单道具）
@@ -2014,7 +2024,6 @@ function createMailBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createMailBinding = createMailBinding;
 }
-
 // GameWorld 操作 binding
 // 来源：从旧 frida.js G_GameWorld / GameWorld_* 系列函数迁移
 // 用途：封装游戏世界操作（全服广播、玩家遍历、查找玩家等）
@@ -2186,7 +2195,6 @@ function createGameWorldBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createGameWorldBinding = createGameWorldBinding;
 }
-
 // 定时器调度 binding
 // 来源：从旧 frida.js timer_dispatcher_list + do_timer_dispatch 迁移
 // 用途：在 dispatcher 线程安全地执行任务
@@ -2265,7 +2273,6 @@ function createTimerDispatcherBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createTimerDispatcherBinding = createTimerDispatcherBinding;
 }
-
 // 任务系统 binding
 // 来源：从旧 frida.js quest 相关函数迁移
 // 用途：封装任务完成、提交奖励等操作
@@ -2326,7 +2333,6 @@ function createQuestBinding(addr) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createQuestBinding = createQuestBinding;
 }
-
 // 绝望之塔修复模块
 // 来源：从旧 frida.js fix_TOD(skip_user_apc) 迁移
 // 用途：修复绝望之塔的门票、金币、每10层跳过用户APC
@@ -2426,7 +2432,6 @@ function startTodFixFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startTodFixFeature = startTodFixFeature;
 }
-
 // 时装徽章镶嵌修复模块
 // 来源：从旧 frida.js fix_use_emblem() 迁移
 // 用途：处理时装徽章镶嵌请求，替代游戏原有的（已失效的）镶嵌流程
@@ -2631,7 +2636,6 @@ function startEmblemFixFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startEmblemFixFeature = startEmblemFixFeature;
 }
-
 // 时装潜能（隐藏属性）模块
 // 来源：从旧 frida.js hidden_option() + start_hidden_option() 迁移
 // 用途：修改时装潜能属性下发逻辑
@@ -2706,7 +2710,6 @@ function startHiddenOptionFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startHiddenOptionFeature = startHiddenOptionFeature;
 }
-
 // 勇士归来（回归用户）模块
 // 来源：从旧 frida.js set_return_user(day) 迁移
 // 用途：修改游戏内存中的回归用户判定时间阈值
@@ -2755,7 +2758,6 @@ function startReturnUserFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startReturnUserFeature = startReturnUserFeature;
 }
-
 // 在线奖励模块
 // 来源：从旧 frida.js enable_online_reward() + api_recharge_cash_cera() + api_recharge_cash_cera_point() 迁移
 // 用途：在线每 5 分钟发放点券奖励
@@ -2861,7 +2863,6 @@ function startOnlineRewardFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startOnlineRewardFeature = startOnlineRewardFeature;
 }
-
 // 战力排行模块
 // 来源：从旧 frida.js ranklist / GetRankNumber / GetMyEquInfo / SetRanking / SendRankLits - 相关函数迁移
 // 用途：维护服务器战力排行榜前三名，在城镇显示雕像
@@ -3175,7 +3176,6 @@ if (typeof globalThis !== 'undefined') {
   globalThis.ranking_onUserLeave = onUserLeaveRanking;
   globalThis.ranking_saveToDb = saveRankInfoToDb;
 }
-
 // 玩家上线/下线处理模块
 // 来源：从旧 frida.js hook_user_inout_game_world() 迁移
 // 用途：处理玩家进入和离开游戏世界的事件
@@ -3263,7 +3263,6 @@ function startUserInoutFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startUserInoutFeature = startUserInoutFeature;
 }
-
 // 怪物攻城活动常量
 // 来源：从旧 frida.js VILLAGEATTACK_STATE_* / EVENT_VILLAGEATTACK_* 常量迁移
 // 用途：定义怪物攻城活动的所有常量，供模块内各文件共享
@@ -3342,7 +3341,6 @@ const VILLAGE_ATTACK_CONSTANTS = {
 if (typeof globalThis !== 'undefined') {
   globalThis.VILLAGE_ATTACK_CONSTANTS = VILLAGE_ATTACK_CONSTANTS;
 }
-
 // 怪物攻城活动状态管理
 // 来源：从旧 frida.js villageAttackEventInfo 及其相关状态操作迁移
 // 用途：集中管理怪物攻城活动的所有状态数据
@@ -3575,7 +3573,6 @@ if (typeof globalThis !== 'undefined') {
     reset: reset,
   };
 }
-
 // 怪物攻城数据库操作
 // 来源：从旧 frida.js event_villageattack_save_to_db/load_from_db 迁移
 // 用途：持久化怪物攻城活动状态到 frida.game_event 表
@@ -3628,7 +3625,6 @@ function createVillageAttackDb(fridaDb) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackDb = createVillageAttackDb;
 }
-
 // 怪物攻城世界广播与通知
 // 来源：从旧 frida.js event_villageattack_broadcast_diffcult / gameworld_update_villageattack_score / notify_villageattack_score 迁移
 // 用途：向玩家发送怪物攻城活动进度和状态通知
@@ -3712,7 +3708,6 @@ function createVillageAttackNotify(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackNotify = createVillageAttackNotify;
 }
-
 // 怪物攻城挑战奖励模块
 // 来源：从旧 frida.js VillageAttackedRewardSendReward() 迁移
 // 用途：根据挑战次数发放对应的邮件奖励
@@ -3781,7 +3776,6 @@ function createVillageAttackReward(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackReward = createVillageAttackReward;
 }
-
 // 怪物攻城活动结算模块
 // 来源：从旧 frida.js on_end_event_villageattack 中的结算逻辑迁移
 // 用途：活动结束时进行结算（发奖/惩罚）
@@ -3958,7 +3952,6 @@ function createVillageAttackSettlement(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackSettlement = createVillageAttackSettlement;
 }
-
 // 怪物攻城活动流程控制
 // 来源：从旧 frida.js start_villageattack / on_start_event_villageattack / event_villageattack_timer / on_end_event_villageattack 等迁移
 // 用途：控制活动开启、计时、阶段流转、活动结束
@@ -4146,7 +4139,6 @@ function createVillageAttackFlow(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackFlow = createVillageAttackFlow;
 }
-
 // 怪物攻城活动 Hook 集合
 // 来源：从旧 frida.js hook_VillageAttack() 迁移（约 400 行 hook 代码）
 // 用途：包含所有怪物攻城相关的 Interceptor.attach/replace
@@ -4578,7 +4570,6 @@ function createVillageAttackHooks(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.createVillageAttackHooks = createVillageAttackHooks;
 }
-
 // 怪物攻城活动入口模块
 // 来源：从旧 frida.js start_event_villageattack() 迁移
 // 用途：启动怪物攻城功能的所有子模块
@@ -4679,20 +4670,58 @@ function startVillageAttackFeature(ctx) {
 if (typeof globalThis !== 'undefined') {
   globalThis.startVillageAttackFeature = startVillageAttackFeature;
 }
-
 // 启动辅助模块
-// 来源：从旧 frida.js 工具函数迁移并重构
-// 用途：提供日志、环境检测、通道名获取等辅助函数
+// 来源：从旧 frida.js 工具函数迁移并重构，对齐 main 分支 dp_load 模式
+// 用途：
+//   - 提供 safeLoadModule() 通过 dp_load 加载模块（带缓存）
+//   - 提供创建 startup helpers 对象（日志辅助等）
+
+// 模块加载缓存，避免同一启动流程重复 load
+var g_startup_loaded_modules = (typeof g_startup_loaded_modules !== 'undefined') ? g_startup_loaded_modules : {};
+
+// 通过 dp_load 安全加载模块
+// moduleName: 模块路径名（如 'core/hook_guard'、'features/ranking'）
+// 返回: true=加载成功或已加载, false=加载失败
+function safeLoadModule(moduleName) {
+  if (!moduleName) {
+    return false;
+  }
+
+  // 已加载过，跳过
+  if (g_startup_loaded_modules[moduleName] === true) {
+    return true;
+  }
+
+  // dp_load 不存在时无法加载
+  if (typeof dp_load !== 'function') {
+    console.log('[startup] dp_load 不存在，无法加载模块: ' + moduleName);
+    return false;
+  }
+
+  try {
+    var ok = dp_load(moduleName);
+    if (ok !== true) {
+      console.log('[startup] dp_load 返回失败: ' + moduleName);
+      return false;
+    }
+
+    g_startup_loaded_modules[moduleName] = true;
+    return true;
+  } catch (e) {
+    console.log('[startup] dp_load 异常: ' + moduleName + ', error=' + e);
+    return false;
+  }
+}
 
 // 获取服务器环境配置
 // 来源：从旧 frida.js G_CEnvironment + CEnvironment_get_file_name 迁移
 function createStartupHelpers(addr) {
-  const _G_CEnvironment = nf(addr.g_cenvironment, 'pointer', []);
-  const _GetFileName = nf(addr.cenvironment_get_file_name, 'pointer', ['pointer']);
+  var _G_CEnvironment = nf(addr.g_cenvironment, 'pointer', []);
+  var _GetFileName = nf(addr.cenvironment_get_file_name, 'pointer', ['pointer']);
 
   function getChannelName() {
     try {
-      const filename = _GetFileName(_G_CEnvironment());
+      var filename = _GetFileName(_G_CEnvironment());
       return filename.readUtf8String(-1);
     } catch (e) {
       return 'unknown';
@@ -4726,12 +4755,17 @@ function createStartupHelpers(addr) {
 }
 
 if (typeof globalThis !== 'undefined') {
+  globalThis.safeLoadModule = safeLoadModule;
+  globalThis.g_startup_loaded_modules = g_startup_loaded_modules;
   globalThis.createStartupHelpers = createStartupHelpers;
 }
-
 // 模块启动调度中心
 // 来源：从旧 frida.js start() 迁移并重构
 // 用途：按配置和顺序启动所有 JS 模块
+//
+// 在 dp_load 模式下，本文件被 df_game_r.js 通过 dp_load('startup_modules') 加载。
+// 加载后会先通过 safeLoadModule() 加载所有依赖子模块，
+// 再按 ctx 模式创建 bindings 并启动各功能模块。
 //
 // 启动顺序推荐（来源：模块依赖关系）：
 // 1. Logger/Config（任何模块都依赖日志和配置）
@@ -4746,13 +4780,95 @@ if (typeof globalThis !== 'undefined') {
 
 var g_runtime_modules_started = false;
 
+// 加载所有依赖子模块（dp_load 模式下必须主动加载）
+// 顺序必须与 tools/build_frida_bundle.js 中的拼接顺序一致
+//
+// 返回: true=全部加载成功或 bundle fallback 模式，false=有模块加载失败
+function loadRuntimeDependencies() {
+  // bundle fallback：如果 dp_load 不存在，说明可能是 dist/df_game_r.bundle.js 单文件模式
+  // 此时模块已经在拼接时加载完成，不需要动态加载依赖
+  if (typeof dp_load !== 'function') {
+    console.log('[startup] dp_load 不存在，按 bundle fallback 模式运行，跳过动态依赖加载');
+    return true;
+  }
+
+  if (typeof safeLoadModule !== 'function') {
+    console.log('[startup] safeLoadModule 不存在，无法加载依赖模块，终止 runtime 启动');
+    return false;
+  }
+
+  var modules = [
+    // 核心和 binding 已经在 df_game_r.js 中预加载：
+    //   runtime_addresses, runtime_config, core/hook_guard,
+    //   startup_helpers, startup_modules（本文件）
+    // 以下加载其余所有依赖：
+
+    'bindings/native_functions',
+
+    'core/logger',
+    'core/time',
+    'core/random',
+    'core/memory',
+    'core/file',
+
+    'bindings/packet',
+    'bindings/mysql',
+    'bindings/user',
+    'bindings/inventory',
+    'bindings/item',
+    'bindings/mail',
+    'bindings/game_world',
+    'bindings/timer_dispatcher',
+    'bindings/quest',
+
+    'features/tod_fix',
+    'features/emblem_fix',
+    'features/hidden_option',
+    'features/return_user',
+    'features/online_reward',
+    'features/ranking',
+    'features/user_inout',
+
+    'features/village_attack/constants',
+    'features/village_attack/state',
+    'features/village_attack/db',
+    'features/village_attack/notify',
+    'features/village_attack/reward',
+    'features/village_attack/settlement',
+    'features/village_attack/flow',
+    'features/village_attack/hooks',
+    'features/village_attack/index',
+  ];
+
+  var allOk = true;
+  for (var i = 0; i < modules.length; i++) {
+    if (!safeLoadModule(modules[i])) {
+      console.log('[startup] 依赖模块加载失败: ' + modules[i]);
+      allOk = false;
+    }
+  }
+
+  if (!allOk) {
+    console.log('[startup] 依赖模块加载失败，终止 runtime 启动');
+    return false;
+  }
+
+  return true;
+}
+
 function startRuntimeModules() {
   if (g_runtime_modules_started) {
     console.log('[startup] runtime modules already started');
-    return;
+    return true;
   }
 
   console.log('==================== frida runtime start ====================');
+
+  // dp_load 模式：先加载所有依赖子模块
+  // bundle 模式：dp_load 不存在时返回 true，不报错
+  if (!loadRuntimeDependencies()) {
+    return false;
+  }
 
   const addr = globalThis.PROJECT_ADDRESSES;
   const cfg = globalThis.PROJECT_JS_CONFIG;
@@ -5078,6 +5194,7 @@ function startRuntimeModules() {
 
   g_runtime_modules_started = true;
   console.log('==================== frida runtime started ====================');
+  return true;
 }
 
 // ---- 辅助函数：创建绑定 MySQL 句柄的便捷 DB 对象 ----
@@ -5171,12 +5288,12 @@ if (typeof globalThis !== 'undefined') {
   globalThis.disposeRuntimeModules = disposeRuntimeModules;
   globalThis.createBoundMysqlDb = createBoundMysqlDb;
 }
-
 // clean runtime project JS entry
-// 该文件只负责 Frida 生命周期和启动调度，不写具体业务逻辑。
+// 默认部署文件：df_game_r.js
+// 该文件通过 dp_load 动态加载 script/js 模块，不直接写业务逻辑。
 //
 // 职责：
-// - early 阶段：等待服务器初始化完成后延迟启动
+// - early 阶段：通过 dp_load 加载启动模块后，等待服务器初始化延迟启动
 // - 非 early 阶段（热重载）：直接启动
 // - dispose 阶段：调用统一清理函数
 //
@@ -5186,8 +5303,54 @@ if (typeof globalThis !== 'undefined') {
 // 所有 hook（包括本文件的 early hook）都通过 attachOnce 注册，
 // 防止热重载时重复 attach。
 //
-// 推荐部署产物：dist/df_game_r.bundle.js
-// 如果单独部署 df_game_r.js，script/js/ 下的模块不会被自动加载。
+// 部署说明：
+//   默认部署 df_game_r.js，通过 dp_load 动态加载 script/js 模块。
+//   dist/df_game_r.bundle.js 仅作为无 dp_load 环境的 fallback / 静态检查产物。
+
+var g_entry_started = false;
+
+function entryLog(msg) {
+  console.log('[entry] ' + msg);
+}
+
+// 使用 dp_load 加载模块
+function loadEntryModule(name) {
+  if (typeof dp_load !== 'function') {
+    entryLog('dp_load 不存在，无法加载模块: ' + name);
+    return false;
+  }
+
+  try {
+    var ok = dp_load(name);
+    if (ok !== true) {
+      entryLog('dp_load 返回失败: ' + name);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    entryLog('dp_load 异常: ' + name + ', error=' + e);
+    return false;
+  }
+}
+
+// 加载启动所需的最小依赖
+// 顺序不能乱：addresses/config -> hook_guard -> startup_helpers -> startup_modules
+function loadRuntimeBootstrapModules() {
+  var ok = true;
+
+  // 第 1 步：地址表和配置（所有模块依赖它们）
+  ok = loadEntryModule('runtime_addresses') && ok;
+  ok = loadEntryModule('runtime_config') && ok;
+
+  // 第 2 步：hook guard（early hook 需要 attachOnce）
+  ok = loadEntryModule('core/hook_guard') && ok;
+
+  // 第 3 步：启动辅助和调度（负责加载后续所有模块）
+  ok = loadEntryModule('startup_helpers') && ok;
+  ok = loadEntryModule('startup_modules') && ok;
+
+  return ok;
+}
 
 rpc.exports = {
   init: function (stage, parameters) {
@@ -5212,19 +5375,23 @@ rpc.exports = {
   },
 };
 
-// 延迟启动：等待 check_argv 执行完后启动
+// 延迟启动：加载引导模块，注册 check_argv hook
 function awake() {
-  const addr = globalThis.PROJECT_ADDRESSES;
+  // 先加载引导模块（addresses, config, hook_guard, helpers, modules）
+  // 必须在 attachOnce 前执行，否则 attachOnce 不可用
+  loadRuntimeBootstrapModules();
+
+  var addr = globalThis.PROJECT_ADDRESSES;
   if (!addr || !addr.check_argv) {
     // 地址不可用，直接启动
-    console.log('[entry] check_argv 地址不可用，直接启动');
+    entryLog('check_argv 地址不可用，直接启动');
     start();
     return;
   }
 
   if (typeof globalThis.attachOnce !== 'function') {
     // attachOnce 未加载，无法注册延迟启动 hook
-    console.log('[entry] attachOnce 不存在，无法注册 check_argv 延迟启动 hook，直接启动');
+    entryLog('attachOnce 不存在，无法注册 check_argv 延迟启动 hook，直接启动');
     start();
     return;
   }
@@ -5232,34 +5399,49 @@ function awake() {
   // 使用 attachOnce 防重复注册
   // attachOnce 返回 false 表示注册失败（地址异常、函数不可 hook 等），
   // 此时必须兜底直接启动，否则整个 runtime 静默不启动
-  const attached = globalThis.attachOnce('runtime_check_argv', addr.check_argv, {
-    onEnter: function (args) {
-    },
-    onLeave: function () {
+  var attached = globalThis.attachOnce('runtime_check_argv', addr.check_argv, {
+    onEnter: function (args) {},
+    onLeave: function (retval) {
       // check_argv 执行完毕=服务器初始化完成，开始加载
       start();
     }
   });
 
   if (!attached) {
-    console.log('[entry] check_argv hook 注册失败，直接启动');
+    entryLog('check_argv hook 注册失败，直接启动');
     start();
   }
 }
 
 // 启动函数
 function start() {
-  console.log('++++++++++++++++++++ frida init ++++++++++++++++++++');
-
-  // startRuntimeModules 只在 bundle 中存在
-  // 如果单独部署了 df_game_r.js，此函数不存在，必须明确提示
-  if (typeof globalThis.startRuntimeModules !== 'function') {
-    console.log('[entry] startRuntimeModules 不存在，请确认部署的是 dist/df_game_r.bundle.js，而不是单独的 df_game_r.js');
+  if (g_entry_started) {
+    entryLog('runtime already started, skip');
     return;
   }
 
-  globalThis.startRuntimeModules();
+  entryLog('frida init');
 
-  console.log('++++++++++++++++++++ frida started ++++++++++++++++++++');
+  // 加载引导模块（热重载路径可能还没加载）
+  loadRuntimeBootstrapModules();
+
+  // startRuntimeModules 在 startup_modules.js 中定义，
+  // 通过 dp_load 加载后挂载到 globalThis
+  if (typeof globalThis.startRuntimeModules !== 'function') {
+    entryLog('startRuntimeModules 不存在，请确认 df_game_r.js 已通过 dp_load 成功加载 startup_modules');
+    return;
+  }
+
+  try {
+    var started = globalThis.startRuntimeModules();
+    if (started === false) {
+      entryLog('runtime start failed，等待下次重试');
+      return;
+    }
+
+    g_entry_started = true;
+    entryLog('frida started');
+  } catch (e) {
+    entryLog('runtime start exception: ' + e);
+  }
 }
-

@@ -88,7 +88,15 @@ script/js/
 - `attachOnce(key, address, callbacks)` — 返回 `true`（已注册或注册成功）/ `false`（注册失败，已输出日志）
 - `replaceOnce(key, address, callback, retType, argTypes)` — 同上
 
+缓存挂在 `globalThis.__dp_hook_attached` / `globalThis.__dp_hook_replaced`，重复 `dp_load` 不会清空已注册 hook。
+
 调用方应在 `attachOnce` 返回 `false` 时做兜底处理（如 `df_game_r.js` 的 early hook 失败时直接启动）。
+
+### 启动返回值
+
+- `startRuntimeModules()` 返回 `true`（启动成功或已启动）/ `false`（依赖加载失败）
+- `df_game_r.js` 的 `start()` 在 `startRuntimeModules()` 返回 `false` 时不设置 `g_entry_started`，允许重试
+- bundle fallback 模式下 `dp_load` 不存在时不视为错误，跳过动态依赖加载
 
 为什么要必须使用：
 1. Frida 热重载时原有 hook 不会被自动清除

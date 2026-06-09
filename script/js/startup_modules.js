@@ -21,7 +21,21 @@ var g_runtime_modules_started = false;
 
 // 加载所有依赖子模块（dp_load 模式下必须主动加载）
 // 顺序必须与 tools/build_frida_bundle.js 中的拼接顺序一致
+//
+// 返回: true=全部加载成功或 bundle fallback 模式，false=有模块加载失败
 function loadRuntimeDependencies() {
+  // bundle fallback：如果 dp_load 不存在，说明可能是 dist/df_game_r.bundle.js 单文件模式
+  // 此时模块已经在拼接时加载完成，不需要动态加载依赖
+  if (typeof dp_load !== 'function') {
+    console.log('[startup] dp_load 不存在，按 bundle fallback 模式运行，跳过动态依赖加载');
+    return true;
+  }
+
+  if (typeof safeLoadModule !== 'function') {
+    console.log('[startup] safeLoadModule 不存在，无法加载依赖模块，终止 runtime 启动');
+    return false;
+  }
+
   var modules = [
     // 核心和 binding 已经在 df_game_r.js 中预加载：
     //   runtime_addresses, runtime_config, core/hook_guard,
@@ -67,28 +81,33 @@ function loadRuntimeDependencies() {
 
   var allOk = true;
   for (var i = 0; i < modules.length; i++) {
-    if (typeof safeLoadModule === 'function' && !safeLoadModule(modules[i])) {
+    if (!safeLoadModule(modules[i])) {
       console.log('[startup] 依赖模块加载失败: ' + modules[i]);
       allOk = false;
     }
   }
 
   if (!allOk) {
-    console.log('[startup] 部分依赖模块加载失败，后续模块启动可能受影响');
+    console.log('[startup] 依赖模块加载失败，终止 runtime 启动');
+    return false;
   }
+
+  return true;
 }
 
 function startRuntimeModules() {
   if (g_runtime_modules_started) {
     console.log('[startup] runtime modules already started');
-    return;
+    return true;
   }
 
   console.log('==================== frida runtime start ====================');
 
   // dp_load 模式：先加载所有依赖子模块
-  // bundle 模式：依赖已在拼接时加载，safeLoadModule 会因缓存跳过
-  loadRuntimeDependencies();
+  // bundle 模式：dp_load 不存在时返回 true，不报错
+  if (!loadRuntimeDependencies()) {
+    return false;
+  }
 
   const addr = globalThis.PROJECT_ADDRESSES;
   const cfg = globalThis.PROJECT_JS_CONFIG;
@@ -414,6 +433,7 @@ function startRuntimeModules() {
 
   g_runtime_modules_started = true;
   console.log('==================== frida runtime started ====================');
+  return true;
 }
 
 // ---- 辅助函数：创建绑定 MySQL 句柄的便捷 DB 对象 ----

@@ -142,8 +142,16 @@ function start() {
     return;
   }
 
-  g_entry_started = true;
-  globalThis.startRuntimeModules();
+  try {
+    var started = globalThis.startRuntimeModules();
+    if (started === false) {
+      entryLog('runtime start failed，等待下次重试');
+      return;
+    }
 
-  entryLog('frida started');
+    g_entry_started = true;
+    entryLog('frida started');
+  } catch (e) {
+    entryLog('runtime start exception: ' + e);
+  }
 }

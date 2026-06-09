@@ -7,9 +7,28 @@
 // 2. 重复 attach 会导致同一个函数被多次 hook，造成逻辑叠加
 // 3. 比如一个扣血 hook 重复 attach 3 次，角色受伤会翻 3 倍
 // 4. 统一管理能确保同一个 key 只 hook 一次
+//
+// 为什么缓存必须挂到 globalThis：
+// dp_load 每加载一次本文件，局部变量 `var g_hook_xxx = {}` 会被重新初始化。
+// 将缓存挂在 globalThis 上，确保重复 dp_load 不会清空已注册的 hook key。
 
-var g_hook_attached = {};
-var g_hook_replaced = {};
+// 从 globalThis 恢复持久化缓存，避免重复 dp_load 清空
+if (typeof globalThis !== 'undefined') {
+  if (typeof globalThis.__dp_hook_attached === 'undefined') {
+    globalThis.__dp_hook_attached = {};
+  }
+  if (typeof globalThis.__dp_hook_replaced === 'undefined') {
+    globalThis.__dp_hook_replaced = {};
+  }
+}
+
+var g_hook_attached = (typeof globalThis !== 'undefined')
+  ? globalThis.__dp_hook_attached
+  : {};
+
+var g_hook_replaced = (typeof globalThis !== 'undefined')
+  ? globalThis.__dp_hook_replaced
+  : {};
 
 // 防止重复 attach
 // key: 唯一标识，同一 key 多次调用只执行一次
@@ -61,10 +80,15 @@ function replaceOnce(key, address, callback, retType, argTypes) {
   }
 }
 
-// 重置状态（热重载时可能需要调用）
+// 重置状态（手动调用，会清除 globalThis 上的持久化缓存）
 function resetHookGuard() {
   g_hook_attached = {};
   g_hook_replaced = {};
+
+  if (typeof globalThis !== 'undefined') {
+    globalThis.__dp_hook_attached = g_hook_attached;
+    globalThis.__dp_hook_replaced = g_hook_replaced;
+  }
 }
 
 if (typeof globalThis !== 'undefined') {

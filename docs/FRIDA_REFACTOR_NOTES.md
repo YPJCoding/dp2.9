@@ -93,7 +93,15 @@
 3. 数据库连接信息硬编码 localhost:3306，生产环境需改为从配置文件读取
 4. `setTimeout` 依赖 Frida 运行环境提供，不是所有环境都支持
 
-## 第五轮重构 (refactor: use dp_load runtime module loading)
+## 第六轮修复 (fix: harden dp_load startup state handling)
+
+修复了以下启动稳定性问题：
+
+1. **hook_guard 缓存持久化**：`g_hook_attached` / `g_hook_replaced` 改为挂在 `globalThis.__dp_hook_attached` / `globalThis.__dp_hook_replaced`，重复 `dp_load` 不会清空已注册 key。
+2. **依赖加载失败中止启动**：`loadRuntimeDependencies()` 返回 boolean，失败时 `startRuntimeModules()` 返回 `false`，不继续启动。
+3. **g_entry_started 成功后置位**：只有 `startRuntimeModules()` 返回非 `false` 时才设置 `g_entry_started = true`，失败可重试。
+4. **bundle fallback 不误报**：`loadRuntimeDependencies()` 检测到 `dp_load` 不存在时按 bundle fallback 模式运行，不报依赖加载失败。
+5. **startRuntimeModules() 返回值语义**：`true`=启动成功/已启动，`false`=依赖加载失败。
 
 调整为 dp_load 动态加载模式：
 
