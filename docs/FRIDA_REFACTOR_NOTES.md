@@ -142,7 +142,7 @@ df_game_r.js + dp_load + script/js/**
 
 ## 检查结果
 
-- JS 语法检查：39 个文件全部通过（含 bundle）
+- JS 语法检查：仅检查 `df_game_r.js` 与 `script/js/**/*.js`；bundle 已移除，不再检查 `dist/`
 - Lua 语法检查：`luac` 未安装，无法执行
 - 裸地址检查：feature/bindings/core/entry 中不再有真实地址
 - ctx.log.xxx 误用检查：无实际调用，仅注释
@@ -155,3 +155,54 @@ df_game_r.js + dp_load + script/js/**
 - `tools/build_frida_bundle.sh` / `tools/build_frida_bundle.js` 构建工具已移除。
 - 所有文档中的 "备用方案" / "fallback" 描述已删除。
 - 项目**仅**支持 `df_game_r.js` + `dp_load` 动态加载 `script/js/**` 一种部署方式。
+
+## 第九轮：启动链硬化
+
+本轮增加启动前自检和 feature 启动汇总，目标是让测试服启动失败时能快速定位原因。
+
+### Environment check
+
+`startRuntimeModules()` 启动前会检查：
+
+- `PROJECT_ADDRESSES`
+- `PROJECT_JS_CONFIG`
+- `PROJECT_JS_CONFIG.features`
+- `RuntimeUtils`
+- `attachOnce`
+- `replaceOnce`
+- `safeLoadModule`
+
+任一缺失都会返回 `false`，`df_game_r.js` 不会设置 `g_entry_started`，允许后续重试。
+
+### Binding check
+
+创建 `ctx` 后、启动 feature 前会检查 required bindings：
+
+- `packet`
+- `mysql`
+- `user`
+- `inventory`
+- `item`
+- `mail`
+- `game_world`
+- `timer_dispatcher`
+- `quest`
+
+任一 required binding 创建失败，runtime 会中止启动，避免在 binding 缺失时继续启动 feature。
+
+### Feature summary
+
+每个 feature 启动结果会汇总输出：
+
+```text
+[startup] feature summary: timer_dispatcher=ok, database=ok, tod_fix=ok, ...
+```
+
+状态含义：
+
+- `ok`：feature 已启用并启动成功
+- `failed`：feature 已启用但启动失败或返回 `false`
+- `skipped`：feature 未启用
+
+普通 feature 启动失败不会阻断整个 runtime 启动，但会在 summary 中标记为 `failed`。
+环境自检、依赖加载、required bindings 缺失仍会阻断启动。

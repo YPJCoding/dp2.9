@@ -92,11 +92,32 @@ script/js/
 
 调用方应在 `attachOnce` 返回 `false` 时做兜底处理（如 `df_game_r.js` 的 early hook 失败时直接启动）。
 
-### 启动返回值
+### 启动返回值与自检
 
-- `startRuntimeModules()` 返回 `true`（启动成功或已启动）/ `false`（依赖加载失败）
-- `df_game_r.js` 的 `start()` 在 `startRuntimeModules()` 返回 `false` 时不设置 `g_entry_started`，允许重试
-- 部署仅支持 `dp_load` 动态加载，无 fallback
+- `startRuntimeModules()` 返回 `true`：runtime 启动成功，或此前已经启动。
+- `startRuntimeModules()` 返回 `false`：启动前检查失败、依赖加载失败、required binding 缺失，或其它阻断级错误。
+- `df_game_r.js` 的 `start()` 在 `startRuntimeModules()` 返回 `false` 时不设置 `g_entry_started`，允许后续重试。
+- 部署仅支持 `dp_load` 动态加载，无 fallback。
+
+启动链会做三层检查：
+
+1. environment check：检查 `PROJECT_ADDRESSES`、`PROJECT_JS_CONFIG`、`RuntimeUtils`、`attachOnce`、`replaceOnce`、`safeLoadModule` 等基础对象。
+2. dependency load：通过 `safeLoadModule()` 加载 `script/js/**` 依赖模块。
+3. binding check：创建 `ctx` 后检查 required bindings（packet/mysql/user/inventory/item/mail/gw/timer/quest），binding 缺失时中止启动。
+
+feature 启动结果会输出 summary：
+
+```text
+[startup] feature summary: timer_dispatcher=ok, database=ok, tod_fix=ok, ranking=failed, online_reward=skipped
+```
+
+状态含义：
+
+- `ok`：已启用并启动成功
+- `failed`：已启用但启动失败或返回 `false`
+- `skipped`：未启用
+
+普通 feature 失败不会阻断整个 runtime 启动；环境、依赖、required bindings 失败会阻断启动。
 
 为什么要必须使用：
 1. Frida 热重载时原有 hook 不会被自动清除
