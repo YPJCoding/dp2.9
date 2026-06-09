@@ -1,43 +1,50 @@
-# Local Checks
+# 本地检查
 
-This directory documents local validation scripts available in `tools/`.
+## JS 语法检查
 
-## JS Syntax Check
-
-Check `df_game_r.js` and all `script/js/*.js` files for syntax errors using `node --check`.
+运行：
 
 ```bash
 bash tools/check_js_syntax.sh
 ```
 
-## Lua Syntax Check
+检查范围：
 
-Check `df_game_r.lua` and all `script/**/*.lua` files for syntax errors using `luac -p`.
+- `df_game_r.js`
+- `script/js/**/*.js`
+
+依赖：Node.js
+
+## Lua 语法检查
+
+运行：
 
 ```bash
 bash tools/check_lua_syntax.sh
 ```
 
-Requires `luac` to be installed.
+检查范围：`df_game_r.lua`
 
-## JS Legacy Markers Check
+依赖：`luac`
 
-Verify that previously cleaned JS legacy functions no longer remain in `df_game_r.js`.
+如果本地没有 `luac`，需要先安装 Lua 编译器，或在具备 Lua 环境的机器上检查。
+
+## 新功能提交前检查
 
 ```bash
-bash tools/check_js_legacy_markers.sh
+bash tools/check_js_syntax.sh
+bash tools/check_lua_syntax.sh
 ```
 
-Checks for the following cleaned legacy function markers:
-- `set_return_user`
-- `hidden_option`
-- `start_hidden_option`
-- `getQuestIds1` (VIP login)
-- `Inspection_tasks` (VIP login)
-- `vip_Login` (VIP login)
+## Review 前自查
 
-Note: `ranking` legacy implementation has **not** been cleaned yet and is not part of this check.
+```bash
+git diff --name-only
+git diff --stat
+```
 
-## Legacy Cleanup Archive
+确认：
 
-The directory `tools/archive/legacy-cleanup/` contains one-time migration patch scripts that have already been executed. These scripts removed legacy inline implementations from `df_game_r.js` that were migrated to `script/js/*.js` modules. They are archived here for reference only and should not be re-run.
+- 没有误改入口文件
+- 没有把真实业务逻辑加入模板分支
+- 没有残留真实运行时地址、真实项目标识或真实业务配置

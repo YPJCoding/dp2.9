@@ -1,36 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-
 if ! command -v node >/dev/null 2>&1; then
-  echo "ERROR: node is not installed" >&2
+  echo "node not found"
   exit 1
 fi
 
-cd "$PROJECT_DIR"
-
-found=0
-checked=0
-
-if [ -f "df_game_r.js" ]; then
-  node --check df_game_r.js
-  checked=$((checked + 1))
-  found=1
+files=()
+if [ -f df_game_r.js ]; then
+  files+=("df_game_r.js")
 fi
 
-for f in script/js/*.js; do
-  if [ -f "$f" ]; then
-    node --check "$f"
-    checked=$((checked + 1))
-    found=1
-  fi
+if [ -d script/js ]; then
+  while IFS= read -r file; do
+    files+=("$file")
+  done < <(find script/js -name "*.js" -type f | sort)
+fi
+
+count=0
+for file in "${files[@]}"; do
+  echo "checking $file"
+  node --check "$file"
+  count=$((count + 1))
 done
 
-if [ $found -eq 0 ]; then
-  echo "No JS files found to check" >&2
-  exit 1
-fi
-
-echo "JS syntax OK: ${checked} file(s) checked"
+echo "checked $count JS files"
