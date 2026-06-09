@@ -130,7 +130,7 @@ function startRuntimeModules() {
   helpers.logModuleStart('config');
   if (!cfg || !cfg.features) {
     helpers.logModuleFailed('config', 'PROJECT_JS_CONFIG not found');
-    return;
+    return false;
   }
   helpers.logModuleDone('config');
 
