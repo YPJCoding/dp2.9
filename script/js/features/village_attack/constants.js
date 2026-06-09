@@ -2,7 +2,7 @@
 // 来源：从旧 frida.js VILLAGEATTACK_STATE_* / EVENT_VILLAGEATTACK_* 常量迁移
 // 用途：定义怪物攻城活动的所有常量，供模块内各文件共享
 
-var VILLAGE_ATTACK_CONSTANTS = {
+const VILLAGE_ATTACK_CONSTANTS = {
   // 活动阶段
   // 来源：从旧 frida.js 迁移
   STATE_P1: 0,  // 一阶段：小镇周围刷新怪物，击杀牛头统帅提升难度

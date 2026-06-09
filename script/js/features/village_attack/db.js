@@ -15,7 +15,7 @@ function createVillageAttackDb(fridaDb) {
       // 风险：JSON.stringify 可能产生包含单引号的字符串，
       // 如果包含会导致 SQL 语法错误
       // TODO: 后续统一使用参数化查询
-      var json = JSON.stringify(info);
+      const json = JSON.stringify(info);
       fridaDb.exec("replace into game_event (event_id, event_info) values ('villageattack', '" + json + "');");
     } catch (error) {
       console.log('[village_attack_db] save failed: ' + error);
@@ -29,7 +29,7 @@ function createVillageAttackDb(fridaDb) {
       if (fridaDb.exec("select event_info from game_event where event_id = 'villageattack';")) {
         if (fridaDb.getNRows() == 1) {
           fridaDb.fetch();
-          var info = fridaDb.getStr(0);
+          const info = fridaDb.getStr(0);
           if (info) {
             return JSON.parse(info);
           }

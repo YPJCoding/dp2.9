@@ -7,7 +7,7 @@
 // 2. 不同环境（测试服/正式服）可以用不同配置
 // 3. 新人接手时不用翻遍代码找开关
 
-var PROJECT_JS_CONFIG = {
+const PROJECT_JS_CONFIG = {
   features: {
     // 定时器调度（dispatcher 线程安全）
     // 几乎所有功能都依赖它，必须开启

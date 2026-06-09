@@ -5,12 +5,12 @@
 // 获取服务器环境配置
 // 来源：从旧 frida.js G_CEnvironment + CEnvironment_get_file_name 迁移
 function createStartupHelpers(addr) {
-  var _G_CEnvironment = nf(addr.g_cenvironment, 'pointer', []);
-  var _GetFileName = nf(addr.cenvironment_get_file_name, 'pointer', ['pointer']);
+  const _G_CEnvironment = nf(addr.g_cenvironment, 'pointer', []);
+  const _GetFileName = nf(addr.cenvironment_get_file_name, 'pointer', ['pointer']);
 
   function getChannelName() {
     try {
-      var filename = _GetFileName(_G_CEnvironment());
+      const filename = _GetFileName(_G_CEnvironment());
       return filename.readUtf8String(-1);
     } catch (e) {
       return 'unknown';

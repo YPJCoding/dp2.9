@@ -39,9 +39,9 @@ function createFileModule() {
       return null;
     }
 
-    var pathPtr = Memory.allocUtf8String(path);
-    var modePtr = Memory.allocUtf8String(mode);
-    var f = _fopen(pathPtr, modePtr);
+    const pathPtr = Memory.allocUtf8String(path);
+    const modePtr = Memory.allocUtf8String(mode);
+    const f = _fopen(pathPtr, modePtr);
 
     // 使用 .isNull() 判断 fopen 失败（pointer 类型）
     if (f.isNull()) {
@@ -49,8 +49,8 @@ function createFileModule() {
       return null;
     }
 
-    var data = Memory.alloc(len);
-    var freadRet = _fread(data, 1, len, f);
+    const data = Memory.alloc(len);
+    const freadRet = _fread(data, 1, len, f);
     _fclose(f);
 
     if (mode == 'r') {
@@ -61,7 +61,7 @@ function createFileModule() {
 
   // 加载本地 JSON 配置文件
   function loadConfig(path) {
-    var data = readFile(path, 'r', 10 * 1024 * 1024);
+    const data = readFile(path, 'r', 10 * 1024 * 1024);
     if (!data) {
       console.log('[file] 配置文件读取失败: ' + path);
       return null;

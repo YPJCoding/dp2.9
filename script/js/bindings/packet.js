@@ -6,36 +6,40 @@ function createPacketBinding(addr) {
   // ---- 客户端封包读取 ----
 
   // 从客户端封包中读取 1 字节（失败会抛异常，调用方必须做异常处理）
-  var _getByte = nf(addr.packetbuf_get_byte, 'int', ['pointer', 'pointer']);
+  const _getByte = nf(addr.packetbuf_get_byte, 'int', ['pointer', 'pointer']);
+
   function getByte(packetBuf) {
-    var data = Memory.alloc(1);
+    const data = Memory.alloc(1);
     if (_getByte(packetBuf, data)) {
       return data.readU8();
     }
     throw new Error('PacketBuf_get_byte Fail!');
   }
 
-  var _getShort = nf(addr.packetbuf_get_short, 'int', ['pointer', 'pointer']);
+  const _getShort = nf(addr.packetbuf_get_short, 'int', ['pointer', 'pointer']);
+
   function getShort(packetBuf) {
-    var data = Memory.alloc(2);
+    const data = Memory.alloc(2);
     if (_getShort(packetBuf, data)) {
       return data.readShort();
     }
     throw new Error('PacketBuf_get_short Fail!');
   }
 
-  var _getInt = nf(addr.packetbuf_get_int, 'int', ['pointer', 'pointer']);
+  const _getInt = nf(addr.packetbuf_get_int, 'int', ['pointer', 'pointer']);
+
   function getInt(packetBuf) {
-    var data = Memory.alloc(4);
+    const data = Memory.alloc(4);
     if (_getInt(packetBuf, data)) {
       return data.readInt();
     }
     throw new Error('PacketBuf_get_int Fail!');
   }
 
-  var _getBinary = nf(addr.packetbuf_get_binary, 'int', ['pointer', 'pointer', 'int']);
+  const _getBinary = nf(addr.packetbuf_get_binary, 'int', ['pointer', 'pointer', 'int']);
+
   function getBinary(packetBuf, len) {
-    var data = Memory.alloc(len);
+    const data = Memory.alloc(len);
     if (_getBinary(packetBuf, data, len)) {
       return data.readByteArray(len);
     }
@@ -50,18 +54,18 @@ function createPacketBinding(addr) {
 
   // ---- 服务器组包 ----
 
-  var _PacketGuardConstructor = nf(addr.packetguard_constructor, 'int', ['pointer']);
-  var _PutHeader = nf(addr.interfacepacketbuf_put_header, 'int', ['pointer', 'int', 'int']);
-  var _PutByte = nf(addr.interfacepacketbuf_put_byte, 'int', ['pointer', 'uint8']);
-  var _PutShort = nf(addr.interfacepacketbuf_put_short, 'int', ['pointer', 'uint16']);
-  var _PutInt = nf(addr.interfacepacketbuf_put_int, 'int', ['pointer', 'int']);
-  var _PutBinary = nf(addr.interfacepacketbuf_put_binary, 'int', ['pointer', 'pointer', 'int']);
-  var _Finalize = nf(addr.interfacepacketbuf_finalize, 'int', ['pointer', 'int']);
-  var _DestroyPacketGuard = nf(addr.destroy_packetguard, 'int', ['pointer']);
+  const _PacketGuardConstructor = nf(addr.packetguard_constructor, 'int', ['pointer']);
+  const _PutHeader = nf(addr.interfacepacketbuf_put_header, 'int', ['pointer', 'int', 'int']);
+  const _PutByte = nf(addr.interfacepacketbuf_put_byte, 'int', ['pointer', 'uint8']);
+  const _PutShort = nf(addr.interfacepacketbuf_put_short, 'int', ['pointer', 'uint16']);
+  const _PutInt = nf(addr.interfacepacketbuf_put_int, 'int', ['pointer', 'int']);
+  const _PutBinary = nf(addr.interfacepacketbuf_put_binary, 'int', ['pointer', 'pointer', 'int']);
+  const _Finalize = nf(addr.interfacepacketbuf_finalize, 'int', ['pointer', 'int']);
+  const _DestroyPacketGuard = nf(addr.destroy_packetguard, 'int', ['pointer']);
 
   // 初始化封包对象
   function createPacketGuard() {
-    var packetGuard = Memory.alloc(0x20000);
+    const packetGuard = Memory.alloc(0x20000);
     _PacketGuardConstructor(packetGuard);
     return packetGuard;
   }
@@ -95,11 +99,11 @@ function createPacketBinding(addr) {
   }
 
   // 向封包写入字符串（协议中字符串格式：4字节长度 + 内容）
-  var _strlen = nf(addr.strlen, 'int', ['pointer']);
+  const _strlen = nf(addr.strlen, 'int', ['pointer']);
 
   function putString(packetGuard, s) {
-    var p = Memory.allocUtf8String(s);
-    var len = _strlen(p);
+    const p = Memory.allocUtf8String(s);
+    const len = _strlen(p);
     _PutInt(packetGuard, len);
     _PutBinary(packetGuard, p, len);
   }

@@ -22,26 +22,26 @@ function startOnlineRewardFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
+  const addr = ctx.addresses;
 
   try {
     // 点券充值函数（来源：从旧 frida.js api_recharge_cash_cera 迁移）
     // 风险：禁止直接修改 billing 库所有表字段，点券相关操作务必调用数据库存储过程
-    var _IPGInput = globalThis.nf(addr.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
-    var _IPGQuery = globalThis.nf(addr.cipghelper_ipg_query, 'int', ['pointer', 'pointer']);
+    const _IPGInput = globalThis.nf(addr.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
+    const _IPGQuery = globalThis.nf(addr.cipghelper_ipg_query, 'int', ['pointer', 'pointer']);
 
     function rechargeCashCera(curUser, amount) {
       // 地址来源：runtime_addresses.js cipghelper_global
-      var ipgHelper = addr.cipghelper_global.readPointer();
+      const ipgHelper = addr.cipghelper_global.readPointer();
       // 地址来源：runtime_addresses.js ipg_empty_string
-      var emptyString = addr.ipg_empty_string;
+      const emptyString = addr.ipg_empty_string;
       _IPGInput(ipgHelper, curUser, 5, amount, emptyString, emptyString, Memory.allocUtf8String('GM'), ptr(0), ptr(0), ptr(0));
       // 通知客户端充值结果
       _IPGQuery(ipgHelper, curUser);
     }
 
     // 获取登录时间
-    var _GetLoginTick = globalThis.nf(addr.cusercharacinfo_get_login_tick, 'int', ['pointer']);
+    const _GetLoginTick = globalThis.nf(addr.cusercharacinfo_get_login_tick, 'int', ['pointer']);
 
     // Hook CUser::WorkPerFiveMin
     // 来源：从旧 frida.js enable_online_reward 迁移
@@ -49,16 +49,16 @@ function startOnlineRewardFeature(ctx) {
     // 风险：这是游戏自身的定时函数，hook 它可能会影响其他 5 分钟逻辑
     globalThis.attachOnce('online_reward_work_per_five_min', addr.cuser_work_per_five_min, {
       onEnter: function (args) {
-        var curUser = args[0];
+        const curUser = args[0];
 
         // 当前系统时间
-        var curTime = ctx.time.getCurSec();
+        const curTime = ctx.time.getCurSec();
         // 本次登录时间
-        var loginTick = _GetLoginTick(curUser);
+        const loginTick = _GetLoginTick(curUser);
 
         if (loginTick > 0) {
           // 在线时长（分钟）
-          var diffTime = Math.floor((curTime - loginTick) / 60);
+          const diffTime = Math.floor((curTime - loginTick) / 60);
 
           // 在线 30 分钟后才开始计算
           if (diffTime < 30) {
@@ -71,8 +71,8 @@ function startOnlineRewardFeature(ctx) {
           }
 
           // 奖励：每分钟 0.1 点券
-          var REWARD_CASH_CERA_PER_MIN = 0.1;
-          var rewardCashCera = Math.floor(diffTime * REWARD_CASH_CERA_PER_MIN);
+          const REWARD_CASH_CERA_PER_MIN = 0.1;
+          const rewardCashCera = Math.floor(diffTime * REWARD_CASH_CERA_PER_MIN);
 
           // 发放点券
           rechargeCashCera(curUser, rewardCashCera);

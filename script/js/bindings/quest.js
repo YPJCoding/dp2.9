@@ -5,8 +5,8 @@
 // 风险：直接操作任务状态和奖励领取，错误使用可能导致任务卡死或重复领奖
 
 function createQuestBinding(addr) {
-  var _IsClearedQuest = nf(addr.cquestclear_is_cleared_quest, 'int', ['pointer', 'int']);
-  var _GetUserQuestInfo = nf(addr.userquest_get_quest_info, 'int', ['pointer', 'pointer']);
+  const _IsClearedQuest = nf(addr.cquestclear_is_cleared_quest, 'int', ['pointer', 'int']);
+  const _GetUserQuestInfo = nf(addr.userquest_get_quest_info, 'int', ['pointer', 'pointer']);
 
   // 检查任务是否已完成
   function isClearedQuest(questClear, questId) {

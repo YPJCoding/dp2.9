@@ -6,7 +6,7 @@
 // 不要在其他文件中直接修改 villageAttackEventInfo 的字段。
 // 所有状态修改都通过本文件的函数进行，便于追踪和调试。
 
-var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
 
 // 怪物攻城活动数据（全局单例）
 // 来源：从旧 frida.js villageAttackEventInfo 迁移
@@ -176,7 +176,7 @@ function clearUserPtInfo() {
 // systemTime: 当前系统 UTC 时间
 // totalTime: 活动总时长
 function getRemainTime(systemTime, totalTime) {
-  var eventEndTime = g_info.start_time + totalTime;
+  const eventEndTime = g_info.start_time + totalTime;
   return eventEndTime - systemTime;
 }
 

@@ -3,14 +3,14 @@
 // 用途：控制活动开启、计时、阶段流转、活动结束
 
 function createVillageAttackFlow(ctx) {
-  var st = globalThis.village_attack_state;
-  var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
-  var notify = ctx.va_notify;
-  var db = ctx.va_db;
+  const st = globalThis.village_attack_state;
+  const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+  const notify = ctx.va_notify;
+  const db = ctx.va_db;
 
-  var _InterVillageAttackedStart = globalThis.nf(ctx.addresses.inter_village_attacked_start_dispatch, 'pointer', ['pointer', 'pointer', 'pointer']);
-  var _OnDestroyVillageMonster = globalThis.nf(ctx.addresses.cvillagemonstermgr_on_destroy_village_monster, 'pointer', ['pointer', 'int']);
-  var _GlobalVillageMonsterMgr = ctx.addresses.globaldata_villagemonstermgr;
+  const _InterVillageAttackedStart = globalThis.nf(ctx.addresses.inter_village_attacked_start_dispatch, 'pointer', ['pointer', 'pointer', 'pointer']);
+  const _OnDestroyVillageMonster = globalThis.nf(ctx.addresses.cvillagemonstermgr_on_destroy_village_monster, 'pointer', ['pointer', 'int']);
+  const _GlobalVillageMonsterMgr = ctx.addresses.globaldata_villagemonstermgr;
 
   // 设置怪物攻城副本难度
   // 来源：从旧 frida.js set_villageattack_dungeon_difficult 迁移
@@ -24,7 +24,7 @@ function createVillageAttackFlow(ctx) {
   // 开启怪物攻城活动（调用游戏原生函数）
   // 来源：从旧 frida.js start_villageattack 迁移
   function startGameEvent(totalTime, score, targetScore) {
-    var a3 = Memory.alloc(100);
+    const a3 = Memory.alloc(100);
     a3.add(10).writeInt(totalTime);    // 活动剩余时间
     a3.add(14).writeInt(score);        // 当前频道 PT 点数
     a3.add(18).writeInt(targetScore);  // 成功防守所需点数
@@ -40,7 +40,7 @@ function createVillageAttackFlow(ctx) {
   // 开启活动（入口函数）
   // 来源：从旧 frida.js on_start_event_villageattack 迁移
   function onStart() {
-    var curTime = ctx.time.getCurSec();
+    const curTime = ctx.time.getCurSec();
     // 重置活动状态
     st.reset(curTime);
     setDungeonDifficult(st.getDifficult());
@@ -72,7 +72,7 @@ function createVillageAttackFlow(ctx) {
     }
 
     // 活动结束检测
-    var remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
+    const remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
     if (remainTime <= 0) {
       onEnd();
       return;
@@ -100,7 +100,7 @@ function createVillageAttackFlow(ctx) {
     // 扣除 PT（不低于当前阶段最低值）
     if (damage > 0) {
       var currentScore = st.getScore() - damage;
-      var minScore = ctx.villageAttackConfig.target_score[st.getState() - 1];
+      const minScore = ctx.villageAttackConfig.target_score[st.getState() - 1];
       if (currentScore < minScore) {
         currentScore = minScore;
       }
@@ -123,8 +123,8 @@ function createVillageAttackFlow(ctx) {
     }
 
     // 保存状态
-    var wasDefendSuccess = st.getDefendSuccess();
-    var wasState = st.getState();
+    const wasDefendSuccess = st.getDefendSuccess();
+    const wasState = st.getState();
 
     // 设置活动结束
     st.setState(C.STATE_END);
@@ -147,8 +147,8 @@ function createVillageAttackFlow(ctx) {
   // 安排下一轮活动
   // 来源：从旧 frida.js start_event_villageattack_timer 迁移
   function scheduleNextEvent() {
-    var curTime = ctx.time.getCurSec();
-    var startHour = ctx.villageAttackConfig.start_hour || C.DEFAULT_START_HOUR;
+    const curTime = ctx.time.getCurSec();
+    const startHour = ctx.villageAttackConfig.start_hour || C.DEFAULT_START_HOUR;
     // 计算距离下次开启的时间
     var delayTime = (3600 * startHour) - (curTime % (3600 * 24));
     if (delayTime <= 0) {

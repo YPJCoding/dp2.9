@@ -10,14 +10,14 @@
 // 5. replace hook 异常时必须兜底调用原函数
 
 function createVillageAttackHooks(ctx) {
-  var st = globalThis.village_attack_state;
-  var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
-  var notify = ctx.va_notify;
-  var addr = ctx.addresses;
+  const st = globalThis.village_attack_state;
+  const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+  const notify = ctx.va_notify;
+  const addr = ctx.addresses;
 
   // 辅助：获取队伍中所有在线玩家
-  var _GetParty = globalThis.nf(addr.cuser_get_party, 'pointer', ['pointer']);
-  var _GetPartyUser = globalThis.nf(addr.cparty_get_user, 'pointer', ['pointer', 'int']);
+  const _GetParty = globalThis.nf(addr.cuser_get_party, 'pointer', ['pointer']);
+  const _GetPartyUser = globalThis.nf(addr.cparty_get_user, 'pointer', ['pointer', 'int']);
 
   // =====================================================
   // Hook 1: 攻城副本回调（队友击杀奖励）
@@ -71,12 +71,12 @@ function createVillageAttackHooks(ctx) {
         }
 
         // 当前杀死的攻城怪物 ID
-        var villageMonsterId = this.villageMonster.add(2).readUShort();
+        const villageMonsterId = this.villageMonster.add(2).readUShort();
         // 当前阶段击杀每只攻城怪物 PT 点数奖励: (1, 2, 4, 8, 16)
-        var bonusPt = Math.pow(2, st.getDifficult());
+        const bonusPt = Math.pow(2, st.getDifficult());
 
         // 获取玩家所在队伍
-        var party = _GetParty(this.user);
+        const party = _GetParty(this.user);
         if (party.isNull()) {
           return;
         }
@@ -85,7 +85,7 @@ function createVillageAttackHooks(ctx) {
         for (var i = 0; i < 4; ++i) {
           var user = _GetPartyUser(party, i);
           if (!user.isNull()) {
-            var characNo = ctx.user.getCurCharacNo(user).toString();
+            const characNo = ctx.user.getCurCharacNo(user).toString();
             // 记录角色 accid（方便离线充值）
             st.addUserPt(characNo, ctx.user.getAccId(user), bonusPt);
 
@@ -122,8 +122,8 @@ function createVillageAttackHooks(ctx) {
         }
         // ---- P2 阶段处理 ----
         else if (st.getState() == C.STATE_P2) {
-          var curTime = ctx.time.getCurSec();
-          var diffTime = curTime - st.getP2LastKilledTime();
+          const curTime = ctx.time.getCurSec();
+          const diffTime = curTime - st.getP2LastKilledTime();
 
           // 1 分钟内连续击杀相同攻城怪物
           if ((diffTime < 60) && (villageMonsterId == st.getLastKilledMonsterId())) {
@@ -209,8 +209,8 @@ function createVillageAttackHooks(ctx) {
           return;
         }
 
-        var nextMonster = ptr(retval);
-        var nextMonsterId = nextMonster.readUShort();
+        const nextMonster = ptr(retval);
+        const nextMonsterId = nextMonster.readUShort();
 
         // 当前刷新的怪物为机制怪物（牛头统帅或机械牛）
         // 替换为随机普通怪物，避免机制怪物被刷在错误阶段
@@ -283,7 +283,7 @@ function createVillageAttackHooks(ctx) {
     onEnter: function (args) {
       try {
         if (g_va_fighting_state) {
-          var villageMonster = args[0];
+          const villageMonster = args[0];
           g_va_fighting_monster_id = villageMonster.add(2).readU16();
         }
       } catch (err) {
@@ -307,7 +307,7 @@ function createVillageAttackHooks(ctx) {
   // 风险：
   //   1. 直接修改怪物对象内存，如果结构体布局变化会导致崩溃
   //   2. 难度 3/4 额外刷怪逻辑涉及 index/uid 重新分配，需要确保唯一性
-  var _OriginalAddMob = globalThis.nf(addr.mapinfo_add_mob, 'int', ['pointer', 'pointer']);
+  const _OriginalAddMob = globalThis.nf(addr.mapinfo_add_mob, 'int', ['pointer', 'pointer']);
 
   replaceOnce('va_add_mob', addr.mapinfo_add_mob, function (mapInfo, monster) {
     try {
@@ -316,13 +316,13 @@ function createVillageAttackHooks(ctx) {
         // 正在挑战世界 BOSS 时副本内有几率刷出世界 BOSS
         if (g_va_fighting_monster_id == C.MONSTER_TAU_META_COW &&
             st.getState() == C.STATE_P3) {
-          var p3Chance = (st.getScore() - ctx.villageAttackConfig.target_score[1]) + (6 * st.getDifficult());
+          const p3Chance = (st.getScore() - ctx.villageAttackConfig.target_score[1]) + (6 * st.getDifficult());
           if (globalThis.getRandomInt(0, 100) < p3Chance) {
             monster.add(0xc).writeUInt(C.MONSTER_TAU_META_COW);
           }
         }
 
-        var diff = st.getDifficult();
+        const diff = st.getDifficult();
 
         if (diff == 0) {
           // 难度 0: 无变化
@@ -350,7 +350,7 @@ function createVillageAttackHooks(ctx) {
           }
           _OriginalAddMob(mapInfo, monster);
 
-          var uidOffset = 1000;
+          const uidOffset = 1000;
           monster.writeUInt(monster.readUInt() + uidOffset);
           monster.add(4).writeUInt(monster.add(4).readUInt() + uidOffset);
           return _OriginalAddMob(mapInfo, monster);
@@ -362,7 +362,7 @@ function createVillageAttackHooks(ctx) {
           }
           _OriginalAddMob(mapInfo, monster);
 
-          var uidOffset2 = 1000;
+          const uidOffset2 = 1000;
           var ret = 0;
           for (var cnt = 3; cnt > 0; cnt--) {
             monster.writeUInt(monster.readUInt() + uidOffset2);
@@ -397,15 +397,15 @@ function createVillageAttackHooks(ctx) {
     onLeave: function (retval) {
       try {
         if (retval == 0 && this.result) {
-          var party = _GetParty(this.user);
+          const party = _GetParty(this.user);
 
           // 给队伍所有成员发额外经验
           for (var i = 0; i < 4; ++i) {
-            var user = _GetPartyUser(party, i);
+            const user = _GetPartyUser(party, i);
             if (!user.isNull()) {
-              var curLevel = ctx.user.getCharacLevel(user);
+              const curLevel = ctx.user.getCharacLevel(user);
               // 随机经验奖励：当前等级升级所需经验的 0%-0.1%
-              var rewardExp = Math.floor(
+              const rewardExp = Math.floor(
                 ctx.user.getLevelUpExp(user, curLevel) * globalThis.getRandomInt(0, 1000) / 1000000
               );
               ctx.user.gainExpSp(user, rewardExp);

@@ -15,8 +15,8 @@ function startTodFixFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
-  var cfg = ctx.config.tod_fix;
+  const addr = ctx.addresses;
+  const cfg = ctx.config.tod_fix;
 
   try {
     // ---- 修复1：挑战成功后可以继续使用门票 ----
@@ -45,7 +45,7 @@ function startTodFixFeature(ctx) {
       attachOnce('tod_skip_user_apc', addr.tod_get_today_enter_layer, {
         onEnter: function (args) {
           // 绝望之塔当前层数（偏移 0x14 来源：游戏逆向分析）
-          var todayEnterLayer = args[1].add(0x14).readShort();
+          const todayEnterLayer = args[1].add(0x14).readShort();
 
           // 当下层是 10 的倍数（即 9, 19, 29, ... 99-1=98, 但最后一层=99 需要处理）
           if (((todayEnterLayer % 10) == 9) && (todayEnterLayer > 0) && (todayEnterLayer < 99)) {
@@ -68,8 +68,8 @@ function startTodFixFeature(ctx) {
     //   只在副本 ID 是绝望之塔（11008-11107）时跳过，
     //   其他副本仍然执行原始逻辑
     // 风险：如果绝望之塔副本 ID 范围变更，需要更新判断条件
-    var CDungeonGetIndex = nf(addr.cdungeon_get_index, 'int', ['pointer']);
-    var originalUseAncientDungeonItems = nf(
+    const CDungeonGetIndex = nf(addr.cdungeon_get_index, 'int', ['pointer']);
+    const originalUseAncientDungeonItems = nf(
       addr.cparty_use_ancient_dungeon_items,
       'int',
       ['pointer', 'pointer', 'pointer', 'pointer']
@@ -77,7 +77,7 @@ function startTodFixFeature(ctx) {
 
     replaceOnce('tod_no_gold', addr.cparty_use_ancient_dungeon_items, function (party, dungeon, invenItem, a4) {
       // 当前进入的地下城 ID
-      var dungeonIndex = CDungeonGetIndex(dungeon);
+      const dungeonIndex = CDungeonGetIndex(dungeon);
       // 根据地下城 ID 判断是否为绝望之塔（范围 11008-11107）
       if ((dungeonIndex >= 11008) && (dungeonIndex <= 11107)) {
         // 绝望之塔 不再扣除金币

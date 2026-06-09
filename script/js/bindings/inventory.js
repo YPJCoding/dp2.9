@@ -5,22 +5,22 @@
 // 风险：直接操作玩家背包，错误操作可能导致道具丢失
 
 function createInventoryBinding(addr) {
-  var _GetInvenRef = nf(addr.cinventory_get_inven_ref, 'pointer', ['pointer', 'int', 'int']);
-  var _IsEquipable = nf(addr.inven_item_is_equipable_item_type, 'int', ['pointer']);
-  var _IsEmpty = nf(addr.inven_item_is_empty, 'int', ['pointer']);
-  var _GetKey = nf(addr.inven_item_get_key, 'int', ['pointer']);
-  var _GetAddInfo = nf(addr.inven_item_get_add_info, 'int', ['pointer']);
-  var _InvenItemConstructor = nf(addr.inven_item_constructor, 'pointer', ['pointer']);
-  var _Reset = nf(addr.inven_item_reset, 'int', ['pointer']);
-  var _UseMoney = nf(addr.cinventory_use_money, 'int', ['pointer', 'int', 'int', 'int']);
-  var _DeleteItem = nf(addr.cinventory_delete_item, 'int', ['pointer', 'int', 'int', 'int', 'int', 'int']);
-  var _GetMoney = nf(addr.cinventory_get_money, 'int', ['pointer']);
-  var _GetAvatarItemMgrR = nf(addr.cinventory_get_avatar_item_mgr_r, 'pointer', ['pointer']);
+  const _GetInvenRef = nf(addr.cinventory_get_inven_ref, 'pointer', ['pointer', 'int', 'int']);
+  const _IsEquipable = nf(addr.inven_item_is_equipable_item_type, 'int', ['pointer']);
+  const _IsEmpty = nf(addr.inven_item_is_empty, 'int', ['pointer']);
+  const _GetKey = nf(addr.inven_item_get_key, 'int', ['pointer']);
+  const _GetAddInfo = nf(addr.inven_item_get_add_info, 'int', ['pointer']);
+  const _InvenItemConstructor = nf(addr.inven_item_constructor, 'pointer', ['pointer']);
+  const _Reset = nf(addr.inven_item_reset, 'int', ['pointer']);
+  const _UseMoney = nf(addr.cinventory_use_money, 'int', ['pointer', 'int', 'int', 'int']);
+  const _DeleteItem = nf(addr.cinventory_delete_item, 'int', ['pointer', 'int', 'int', 'int', 'int', 'int']);
+  const _GetMoney = nf(addr.cinventory_get_money, 'int', ['pointer']);
+  const _GetAvatarItemMgrR = nf(addr.cinventory_get_avatar_item_mgr_r, 'pointer', ['pointer']);
 
   // 背包类型常量（来源：从旧 frida.js 迁移）
-  var TYPE_BODY = 0;   // 身上穿的装备
-  var TYPE_ITEM = 1;   // 物品栏
-  var TYPE_AVARTAR = 2; // 时装栏
+  const TYPE_BODY = 0;   // 身上穿的装备
+  const TYPE_ITEM = 1;   // 物品栏
+  const TYPE_AVARTAR = 2; // 时装栏
 
   // 获取背包指定槽位的道具
   function getInvenRef(inven, invenType, slot) {

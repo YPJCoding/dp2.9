@@ -9,19 +9,19 @@
 // 4. 所有真实地址已迁移到 runtime_addresses.js
 
 function createVillageAttackSettlement(ctx) {
-  var st = globalThis.village_attack_state;
-  var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+  const st = globalThis.village_attack_state;
+  const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
 
   // 点券充值（来源：从旧 frida.js api_recharge_cash_cera 迁移）
   // 风险：禁止直接修改 billing 库所有表字段，点券相关操作务必调用数据库存储过程
-  var _IPGInput = globalThis.nf(ctx.addresses.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
-  var _IPGQuery = globalThis.nf(ctx.addresses.cipghelper_ipg_query, 'int', ['pointer', 'pointer']);
+  const _IPGInput = globalThis.nf(ctx.addresses.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
+  const _IPGQuery = globalThis.nf(ctx.addresses.cipghelper_ipg_query, 'int', ['pointer', 'pointer']);
 
   function rechargeCashCera(curUser, amount) {
     // 地址来源：runtime_addresses.js cipghelper_global
-    var ipgHelper = ctx.addresses.cipghelper_global.readPointer();
+    const ipgHelper = ctx.addresses.cipghelper_global.readPointer();
     // 地址来源：runtime_addresses.js ipg_empty_string
-    var emptyString = ctx.addresses.ipg_empty_string;
+    const emptyString = ctx.addresses.ipg_empty_string;
     _IPGInput(ipgHelper, curUser, 5, amount, emptyString, emptyString, Memory.allocUtf8String('GM'), ptr(0), ptr(0), ptr(0));
     _IPGQuery(ipgHelper, curUser);
   }
@@ -45,46 +45,46 @@ function createVillageAttackSettlement(ctx) {
   // 来源：从旧 frida.js on_end_event_villageattack 防守成功分支迁移
   // 包括：全服发信奖励、装备强化、点券奖励、排名第一额外奖励
   function settleSuccess() {
-    var diff = st.getDifficult();
-    var multiplier = 1 + diff;
+    const diff = st.getDifficult();
+    const multiplier = 1 + diff;
 
     // 1. 全服在线玩家发信：金币 + 道具
-    var rewardGold = 1000000 * multiplier;
-    var rewardItemList = [];
-    var baseItems = C.DEFEND_SUCCESS_REWARD_ITEMS;
+    const rewardGold = 1000000 * multiplier;
+    const rewardItemList = [];
+    const baseItems = C.DEFEND_SUCCESS_REWARD_ITEMS;
     for (var i = 0; i < baseItems.length; i++) {
       rewardItemList.push([baseItems[i][0], baseItems[i][1] * multiplier]);
     }
 
     // 遍历所有在线玩家发信
     ctx.gw.forEachUser(function (curUser, args) {
-      var characNo = ctx.user.getCurCharacNo(curUser);
+      const characNo = ctx.user.getCurCharacNo(curUser);
       ctx.mail.sendMultiMail(characNo, '<怪物攻城活动>', '恭喜勇士! 防守成功!', rewardGold, rewardItemList);
     }, null);
 
     // 2. 特殊奖励：绝望之塔推至 100 层 + 随机强化一件装备
     // 来源：从旧 frida.js 移植
-    var _TODLayerConstructor = globalThis.nf(ctx.addresses.tod_layer_constructor, 'pointer', ['pointer', 'int']);
-    var _TODSetEnterLayer = globalThis.nf(ctx.addresses.tod_userstate_set_enter_layer, 'pointer', ['pointer', 'pointer']);
+    const _TODLayerConstructor = globalThis.nf(ctx.addresses.tod_layer_constructor, 'pointer', ['pointer', 'int']);
+    const _TODSetEnterLayer = globalThis.nf(ctx.addresses.tod_userstate_set_enter_layer, 'pointer', ['pointer', 'pointer']);
 
     ctx.gw.forEachUser(function (curUser, args) {
       // 设置绝望之塔层数为 99（对应游戏内 100 层）
-      var todLayer = Memory.alloc(100);
+      const todLayer = Memory.alloc(100);
       _TODLayerConstructor(todLayer, 99);
-      var expandData = ctx.user.getCharacExpandData(curUser, 13);
+      const expandData = ctx.user.getCharacExpandData(curUser, 13);
       _TODSetEnterLayer(expandData, todLayer);
 
       // 随机选择一件穿戴中的装备提升强化/增幅等级
-      var inven = ctx.user.getCurCharacInvenW(curUser);
-      var slot = globalThis.getRandomInt(10, 21); // 12 件装备 slot 范围 10-21
-      var equ = ctx.inventory.getInvenRef(inven, ctx.inventory.TYPE_BODY, slot);
+      const inven = ctx.user.getCurCharacInvenW(curUser);
+      const slot = globalThis.getRandomInt(10, 21); // 12 件装备 slot 范围 10-21
+      const equ = ctx.inventory.getInvenRef(inven, ctx.inventory.TYPE_BODY, slot);
 
       if (ctx.inventory.getItemKey(equ)) {
         // 读取装备强化等级（偏移 6，来源：游戏逆向分析）
         var upgradeLevel = equ.add(6).readU8();
         if (upgradeLevel < 31) {
           // 提升强化/增幅等级（随机 1 到 1+difficult）
-          var bonusLevel = globalThis.getRandomInt(1, 1 + diff);
+          const bonusLevel = globalThis.getRandomInt(1, 1 + diff);
           upgradeLevel += bonusLevel;
           if (upgradeLevel >= 31) {
             upgradeLevel = 31;
@@ -104,8 +104,8 @@ function createVillageAttackSettlement(ctx) {
     var maxPt = 0;
 
     st.forEachUserPt(function (characNo, accountId, pt) {
-      var rewardCera = pt * 10;
-      var userPr = ctx.gw.findUserFromWorldByAccid(ctx.gw.getGameWorld(), accountId);
+      const rewardCera = pt * 10;
+      const userPr = ctx.gw.findUserFromWorldByAccid(ctx.gw.getGameWorld(), accountId);
       if (!userPr || userPr.isNull()) {
         return;
       }
@@ -130,7 +130,7 @@ function createVillageAttackSettlement(ctx) {
       }
 
       // 广播排行榜第一名
-      var rankFirstName = ctx.va_getCharacNameByNo(rankFirstCharacNo);
+      const rankFirstName = ctx.va_getCharacNameByNo(rankFirstCharacNo);
       ctx.va_notify.broadcastMessage('<怪物攻城活动> 恭喜勇士 【' + rankFirstName + '】 成为个人积分排行榜第一名(' + maxPt + 'pt)!');
     }
   }
@@ -141,12 +141,12 @@ function createVillageAttackSettlement(ctx) {
   // 风险：随机删除装备对玩家影响很大，需确认这个玩法是否被接受
   function settleFailure() {
     ctx.gw.forEachUser(function (curUser, args) {
-      var inven = ctx.user.getCurCharacInvenW(curUser);
+      const inven = ctx.user.getCurCharacInvenW(curUser);
 
       // 7% 概率被掠夺一件穿戴中的装备
       if (globalThis.getRandomInt(0, 100) < 7) {
-        var slot = globalThis.getRandomInt(10, 21);
-        var equ = ctx.inventory.getInvenRef(inven, ctx.inventory.TYPE_BODY, slot);
+        const slot = globalThis.getRandomInt(10, 21);
+        const equ = ctx.inventory.getInvenRef(inven, ctx.inventory.TYPE_BODY, slot);
 
         if (ctx.inventory.getItemKey(equ)) {
           ctx.inventory.resetItem(equ);
@@ -155,9 +155,9 @@ function createVillageAttackSettlement(ctx) {
       }
 
       // 随机掠夺 1%-10% 所持金币
-      var rate = globalThis.getRandomInt(1, 11);
-      var curGold = ctx.inventory.getMoney(inven);
-      var tax = Math.floor((rate / 100) * curGold);
+      const rate = globalThis.getRandomInt(1, 11);
+      const curGold = ctx.inventory.getMoney(inven);
+      const tax = Math.floor((rate / 100) * curGold);
       ctx.inventory.useMoney(inven, tax, 0, 0);
       ctx.user.sendUpdateItemList(curUser, 1, 0, 0);
     }, null);

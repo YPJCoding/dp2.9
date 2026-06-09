@@ -22,7 +22,7 @@ function startUserInoutFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
+  const addr = ctx.addresses;
 
   try {
     // ---- Hook 1: GameWorld::reach_game_world（玩家进入游戏世界） ----
@@ -36,7 +36,7 @@ function startUserInoutFeature(ctx) {
         this.user = args[1];
       },
       onLeave: function (retval) {
-        var curUser = this.user;
+        const curUser = this.user;
 
         // 战力排行榜下发（全体）
         // 通过 ctx 的事件回调触发，不直接写排行榜逻辑
@@ -53,7 +53,7 @@ function startUserInoutFeature(ctx) {
         // 问候消息
         // 来源：从旧 frida.js 移植，向进入游戏的玩家发送问候
         if (ctx.user) {
-          var characName = ctx.user.getCurCharacName(curUser);
+          const characName = ctx.user.getCurCharacName(curUser);
           ctx.user.sendNotiPacketMessage(curUser, 'Hello : ' + characName, 2);
         }
       }
@@ -65,7 +65,7 @@ function startUserInoutFeature(ctx) {
     // Hook 点：onEnter 时更新排行榜排名
     attachOnce('user_inout_leave', addr.gameworld_leave_game_world, {
       onEnter: function (args) {
-        var curUser = args[1];
+        const curUser = args[1];
 
         // 通过 ctx 的事件回调触发排行榜更新
         if (ctx.onUserLeave) {

@@ -73,7 +73,7 @@ function getRankNumber(fridaDb, characNo) {
     return 0;
   }
   // SQL 拼接未做转义，characNo 为数字类型是安全的
-  var sql = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
+  const sql = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
   if (fridaDb.exec(sql)) {
     if (fridaDb.getNRows() == 1) {
       fridaDb.fetch();
@@ -86,7 +86,7 @@ function getRankNumber(fridaDb, characNo) {
 // 来源：从旧 frida.js GetMyEquInfo 迁移
 // 注意：角色名处多加空格用于屏蔽客户端内排行榜对显示框的修改
 function getMyEquInfo(ctx, curUser) {
-  var MyRanklist = {
+  const MyRanklist = {
     'rank': 0,
     'characname': '',
     'job': 0,
@@ -98,7 +98,7 @@ function getMyEquInfo(ctx, curUser) {
     'equip': []
   };
 
-  var characNo = ctx.user.getCurCharacNo(curUser);
+  const characNo = ctx.user.getCurCharacNo(curUser);
   MyRanklist.rank = getRankNumber(ctx.fridaDb, characNo) || 0;
   // 名字后加空格用于屏蔽客户端自定义显示字符串
   MyRanklist.characname = ctx.user.getCurCharacName(curUser) + ' ';
@@ -112,10 +112,10 @@ function getMyEquInfo(ctx, curUser) {
   }
 
   // 读取角色身上穿的装备
-  var InvenW = ctx.user.getCurCharacInvenW(curUser);
+  const InvenW = ctx.user.getCurCharacInvenW(curUser);
   for (var i = 0; i <= 10; i++) {
     if (i != 9) {
-      var invenItem = ctx.inventory.getInvenRef(InvenW, ctx.inventory.TYPE_BODY, i);
+      const invenItem = ctx.inventory.getInvenRef(InvenW, ctx.inventory.TYPE_BODY, i);
       MyRanklist.equip.push(ctx.inventory.getItemKey(invenItem));
     } else {
       MyRanklist.equip.push(-1);
@@ -129,11 +129,11 @@ function getMyEquInfo(ctx, curUser) {
 // 来源：从旧 frida.js SetRanking 迁移
 // 原理：获取角色战力值，与现有排行榜比较，只保留前三名
 function setRanking(ctx, curUser) {
-  var MyRanklist = getMyEquInfo(ctx, curUser);
+  const MyRanklist = getMyEquInfo(ctx, curUser);
 
   // findIndex 可能为 ES6+ 语法，使用循环代替
   var existingIndex = -1;
-  var rankKeys = [];
+  const rankKeys = [];
   for (var key in g_ranklist) {
     if (g_ranklist.hasOwnProperty(key)) {
       rankKeys.push(key);
@@ -153,7 +153,7 @@ function setRanking(ctx, curUser) {
     }
 
     // 排序（按战力值降序）
-    var rankArray = [];
+    const rankArray = [];
     for (var key in g_ranklist) {
       if (g_ranklist.hasOwnProperty(key)) {
         rankArray.push(g_ranklist[key]);
@@ -162,9 +162,9 @@ function setRanking(ctx, curUser) {
     rankArray.sort(function (a, b) { return b.rank - a.rank; });
 
     // 只保留前三名
-    var topThree = rankArray.slice(0, 3);
+    const topThree = rankArray.slice(0, 3);
 
-    var tmp = {};
+    const tmp = {};
     for (var i = 0; i < topThree.length; i++) {
       tmp[(i + 1).toString()] = topThree[i];
     }
@@ -180,21 +180,21 @@ function setRanking(ctx, curUser) {
 // user: CUser 指针
 // all: true=全体下发, false=单体下发
 function sendRankLits(ctx, curUser, all) {
-  var packetGuard = ctx.packet.createPacketGuard();
+  const packetGuard = ctx.packet.createPacketGuard();
   // 协议 ENUM_NOTIPACKET_STATUE_POSITION (182)
   ctx.packet.putHeader(packetGuard, 0, 182);
   ctx.packet.putByte(packetGuard, Object.keys(g_ranklist).length);
 
   for (var key in g_ranklist) {
     if (g_ranklist.hasOwnProperty(key)) {
-      var data = g_ranklist[key];
-      var characName = data.characname;
-      var characLevel = data.lev;
-      var characJob = data.job;
-      var characGrowType = data.Grow;
-      var characGuilname = data.Guilname;
-      var characGuilkey = data.Guilkey;
-      var equip = data.equip;
+      const data = g_ranklist[key];
+      const characName = data.characname;
+      const characLevel = data.lev;
+      const characJob = data.job;
+      const characGrowType = data.Grow;
+      const characGuilname = data.Guilname;
+      const characGuilkey = data.Guilkey;
+      const equip = data.equip;
 
       ctx.packet.putString(packetGuard, characName);
       ctx.packet.putByte(packetGuard, characLevel);
@@ -204,7 +204,7 @@ function sendRankLits(ctx, curUser, all) {
       ctx.packet.putInt(packetGuard, characGuilkey);
 
       for (var i = 0; i < equip.length; i++) {
-        var itemId = (i != 9) ? equip[i] : -1;
+        const itemId = (i != 9) ? equip[i] : -1;
         ctx.packet.putInt(packetGuard, itemId);
       }
     }
@@ -229,7 +229,7 @@ function loadRankInfoFromDb(fridaDb) {
   if (fridaDb.exec("select event_info from game_event where event_id = 'rankinfo';")) {
     if (fridaDb.getNRows() == 1) {
       fridaDb.fetch();
-      var info = fridaDb.getStr(0);
+      const info = fridaDb.getStr(0);
       if (info) {
         try {
           g_ranklist = JSON.parse(info);

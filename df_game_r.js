@@ -40,7 +40,7 @@ rpc.exports = {
 
 // 延迟启动：等待 check_argv 执行完后启动
 function awake() {
-  var addr = globalThis.PROJECT_ADDRESSES;
+  const addr = globalThis.PROJECT_ADDRESSES;
   if (!addr || !addr.check_argv) {
     // 地址不可用，直接启动
     console.log('[entry] check_argv 地址不可用，直接启动');
@@ -58,9 +58,10 @@ function awake() {
   // 使用 attachOnce 防重复注册
   // attachOnce 返回 false 表示注册失败（地址异常、函数不可 hook 等），
   // 此时必须兜底直接启动，否则整个 runtime 静默不启动
-  var attached = globalThis.attachOnce('runtime_check_argv', addr.check_argv, {
-    onEnter: function (args) {},
-    onLeave: function (retval) {
+  const attached = globalThis.attachOnce('runtime_check_argv', addr.check_argv, {
+    onEnter: function (args) {
+    },
+    onLeave: function () {
       // check_argv 执行完毕=服务器初始化完成，开始加载
       start();
     }

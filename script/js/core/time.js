@@ -8,7 +8,7 @@ function createTimeModule(addr) {
   // 用途：读取游戏服务器的系统 UTC 时间（秒）
   // 风险：地址依赖特定游戏版本，升级后需确认是否仍然有效
   // 注意：地址由调用方从 runtime_addresses.js 传入，不使用裸地址回退
-  var systemTimePtr = addr.system_time || null;
+  const systemTimePtr = addr.system_time || null;
 
   if (!systemTimePtr) {
     console.log('[time] system_time 地址未提供，时间模块将返回 0');

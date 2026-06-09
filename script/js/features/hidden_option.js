@@ -19,7 +19,7 @@ function startHiddenOptionFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
+  const addr = ctx.addresses;
 
   try {
     // ---- 内存修改：关闭系统分配 + 写入随机属性 ----

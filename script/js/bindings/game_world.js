@@ -7,11 +7,11 @@
 // 2. 除非必须使用广播，否则建议用 CParty::send_to_party 或 GameWorld::send_to_area
 
 function createGameWorldBinding(addr) {
-  var _G_GameWorld = nf(addr.g_gameworld, 'pointer', []);
-  var _SendAll = nf(addr.gameworld_send_all, 'int', ['pointer', 'pointer']);
-  var _SendAllWithState = nf(addr.gameworld_send_all_with_state, 'int', ['pointer', 'pointer', 'int']);
-  var _GetUserCountInWorld = nf(addr.gameworld_get_user_count_in_world, 'int', ['pointer']);
-  var _FindUserFromWorldByAccid = nf(addr.gameworld_find_user_from_world_byaccid, 'pointer', ['pointer', 'int']);
+  const _G_GameWorld = nf(addr.g_gameworld, 'pointer', []);
+  const _SendAll = nf(addr.gameworld_send_all, 'int', ['pointer', 'pointer']);
+  const _SendAllWithState = nf(addr.gameworld_send_all_with_state, 'int', ['pointer', 'pointer', 'int']);
+  const _GetUserCountInWorld = nf(addr.gameworld_get_user_count_in_world, 'int', ['pointer']);
+  const _FindUserFromWorldByAccid = nf(addr.gameworld_find_user_from_world_byaccid, 'pointer', ['pointer', 'int']);
 
   // 世界广播消息（底层实现）
   // 来源：从旧 frida.js api_GameWorld_SendNotiPacketMessage 迁移
@@ -19,25 +19,25 @@ function createGameWorldBinding(addr) {
   // 为什么在 gw binding 中提供：
   // notify.js 和 settlement.js 都需要世界广播能力，集中在此处
   // 风险：广播类接口必须限制调用频率，防止刷屏
-  var _PacketGuardConstructor = nf(addr.packetguard_constructor, 'int', ['pointer']);
-  var _PutHeader = nf(addr.interfacepacketbuf_put_header, 'int', ['pointer', 'int', 'int']);
-  var _PutByte = nf(addr.interfacepacketbuf_put_byte, 'int', ['pointer', 'uint8']);
-  var _PutShort = nf(addr.interfacepacketbuf_put_short, 'int', ['pointer', 'uint16']);
-  var _PutInt = nf(addr.interfacepacketbuf_put_int, 'int', ['pointer', 'int']);
-  var _PutBinary = nf(addr.interfacepacketbuf_put_binary, 'int', ['pointer', 'pointer', 'int']);
-  var _Finalize = nf(addr.interfacepacketbuf_finalize, 'int', ['pointer', 'int']);
-  var _DestroyPacketGuard = nf(addr.destroy_packetguard, 'int', ['pointer']);
-  var _Strlen = nf(addr.strlen, 'int', ['pointer']);
+  const _PacketGuardConstructor = nf(addr.packetguard_constructor, 'int', ['pointer']);
+  const _PutHeader = nf(addr.interfacepacketbuf_put_header, 'int', ['pointer', 'int', 'int']);
+  const _PutByte = nf(addr.interfacepacketbuf_put_byte, 'int', ['pointer', 'uint8']);
+  const _PutShort = nf(addr.interfacepacketbuf_put_short, 'int', ['pointer', 'uint16']);
+  const _PutInt = nf(addr.interfacepacketbuf_put_int, 'int', ['pointer', 'int']);
+  const _PutBinary = nf(addr.interfacepacketbuf_put_binary, 'int', ['pointer', 'pointer', 'int']);
+  const _Finalize = nf(addr.interfacepacketbuf_finalize, 'int', ['pointer', 'int']);
+  const _DestroyPacketGuard = nf(addr.destroy_packetguard, 'int', ['pointer']);
+  const _Strlen = nf(addr.strlen, 'int', ['pointer']);
 
   // 在线玩家遍历（底层 std::map 迭代器）
-  var _MapBegin = nf(addr.gameworld_user_map_begin, 'int', ['pointer', 'pointer']);
-  var _MapEnd = nf(addr.gameworld_user_map_end, 'int', ['pointer', 'pointer']);
-  var _MapNotEqual = nf(addr.gameworld_user_map_not_equal, 'bool', ['pointer', 'pointer']);
-  var _MapGet = nf(addr.gameworld_user_map_get, 'pointer', ['pointer']);
-  var _MapNext = nf(addr.gameworld_user_map_next, 'pointer', ['pointer', 'pointer']);
+  const _MapBegin = nf(addr.gameworld_user_map_begin, 'int', ['pointer', 'pointer']);
+  const _MapEnd = nf(addr.gameworld_user_map_end, 'int', ['pointer', 'pointer']);
+  const _MapNotEqual = nf(addr.gameworld_user_map_not_equal, 'bool', ['pointer', 'pointer']);
+  const _MapGet = nf(addr.gameworld_user_map_get, 'pointer', ['pointer']);
+  const _MapNext = nf(addr.gameworld_user_map_next, 'pointer', ['pointer', 'pointer']);
 
   // 获取 CUser 状态（用于遍历时筛选已登录角色）
-  var _GetState = nf(addr.cuser_get_state, 'int', ['pointer']);
+  const _GetState = nf(addr.cuser_get_state, 'int', ['pointer']);
 
   // 获取 GameWorld 单例
   function getGameWorld() {
@@ -70,7 +70,7 @@ function createGameWorldBinding(addr) {
   // msg: 消息字符串
   // msgType: 消息类型（14=系统公告）
   function sendNotiPacketMessage(msg, msgType) {
-    var packetGuard = Memory.alloc(0x20000);
+    const packetGuard = Memory.alloc(0x20000);
     _PacketGuardConstructor(packetGuard);
 
     _PutHeader(packetGuard, 0, 12);
@@ -79,8 +79,8 @@ function createGameWorldBinding(addr) {
     _PutByte(packetGuard, 0);
 
     // 写入字符串（协议格式：4字节长度 + 内容）
-    var p = Memory.allocUtf8String(msg);
-    var len = _Strlen(p);
+    const p = Memory.allocUtf8String(msg);
+    const len = _Strlen(p);
     _PutInt(packetGuard, len);
     _PutBinary(packetGuard, p, len);
 
@@ -93,14 +93,14 @@ function createGameWorldBinding(addr) {
 
   // 获取在线玩家列表遍历起始迭代器
   function mapBegin() {
-    var begin = Memory.alloc(4);
+    const begin = Memory.alloc(4);
     _MapBegin(begin, _G_GameWorld().add(308));
     return begin;
   }
 
   // 获取在线玩家列表遍历结束迭代器
   function mapEnd() {
-    var end = Memory.alloc(4);
+    const end = Memory.alloc(4);
     _MapEnd(end, _G_GameWorld().add(308));
     return end;
   }
@@ -120,7 +120,7 @@ function createGameWorldBinding(addr) {
   // 如果底层 mapNext 不是原地修改（即返回新迭代器），
   // 忽略返回值会导致死循环
   function mapNext(it) {
-    var next = Memory.alloc(4);
+    const next = Memory.alloc(4);
     _MapNext(next, it);
     return next;
   }
@@ -134,13 +134,13 @@ function createGameWorldBinding(addr) {
   // 如果迭代器逻辑异常或在线玩家数异常增长，避免无限循环
   function forEachUser(f, args) {
     var it = mapBegin();
-    var end = mapEnd();
+    const end = mapEnd();
     var guardCount = 0;
-    var maxCount = 10000;
+    const maxCount = 10000;
 
     while (mapNotEqual(it, end) && guardCount < maxCount) {
       guardCount++;
-      var user = mapGet(it);
+      const user = mapGet(it);
 
       // 只处理已登录角色 (state >= 3)
       if (_GetState(user) >= 3) {

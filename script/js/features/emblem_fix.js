@@ -24,11 +24,11 @@ function startEmblemFixFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
-  var packet = ctx.packet;
-  var user = ctx.user;
-  var inventory = ctx.inventory;
-  var item = ctx.item;
+  const addr = ctx.addresses;
+  const packet = ctx.packet;
+  const user = ctx.user;
+  const inventory = ctx.inventory;
+  const item = ctx.item;
 
   // ---- 辅助函数：获取时装数据库 UI ID ----
   // 来源：从旧 frida.js api_get_avartar_ui_id 迁移
@@ -52,7 +52,7 @@ function startEmblemFixFeature(ctx) {
 
   // ---- 时装插槽数据存盘 ----
   // 来源：从旧 frida.js DB_UpdateAvatarJewelSlot_makeRequest 迁移
-  var _UpdateAvatarJewelSlot = nf(addr.db_update_avatar_jewel_slot_make_request, 'pointer', ['int', 'int', 'pointer']);
+  const _UpdateAvatarJewelSlot = nf(addr.db_update_avatar_jewel_slot_make_request, 'pointer', ['int', 'int', 'pointer']);
 
   function saveJewelSlotData(characNo, avatarUiId, jewelSocketData) {
     _UpdateAvatarJewelSlot(characNo, avatarUiId, jewelSocketData);
@@ -67,12 +67,12 @@ function startEmblemFixFeature(ctx) {
   attachOnce('emblem_fix_dispatch', addr.use_jewel_dispatch, {
     onEnter: function (args) {
       try {
-        var curUser = args[1];
-        var packetBuf = args[2];
+        const curUser = args[1];
+        const packetBuf = args[2];
 
         // 步骤1：校验角色状态是否允许镶嵌
         // 只在玩家已进入游戏（state == 3）时处理
-        var state = user.getState(curUser);
+        const state = user.getState(curUser);
         if (state != 3) {
           return;
         }
@@ -85,15 +85,15 @@ function startEmblemFixFeature(ctx) {
         //   对每个徽章: short(背包槽) + int(item_id) + byte(目标插槽)
 
         // 时装所在的背包槽
-        var avartarInvenSlot = packet.getShort(packetBuf);
+        const avartarInvenSlot = packet.getShort(packetBuf);
         // 时装 item_id
-        var avartarItemId = packet.getInt(packetBuf);
+        const avartarItemId = packet.getInt(packetBuf);
         // 本次镶嵌徽章数量
-        var emblemCnt = packet.getByte(packetBuf);
+        const emblemCnt = packet.getByte(packetBuf);
 
         // 步骤3：获取并校验时装道具
-        var inven = user.getCurCharacInvenW(curUser);
-        var avartar = inventory.getInvenRef(inven, inventory.TYPE_AVARTAR, avartarInvenSlot);
+        const inven = user.getCurCharacInvenW(curUser);
+        const avartar = inventory.getInvenRef(inven, inventory.TYPE_AVARTAR, avartarInvenSlot);
 
         // 时装必须存在、ID 匹配、未被锁定
         if (inventory.isItemEmpty(avartar) ||
@@ -103,12 +103,12 @@ function startEmblemFixFeature(ctx) {
         }
 
         // 步骤4：获取时装插槽数据
-        var avartarAddInfo = inventory.getAddInfo(avartar);
-        var invenAvartarMgr = inventory.getAvatarItemMgrR(inven);
+        const avartarAddInfo = inventory.getAddInfo(avartar);
+        const invenAvartarMgr = inventory.getAvatarItemMgrR(inven);
 
         // CAvatarItemMgr::getJewelSocketData
-        var _GetJewelSocketData = nf(addr.cavataritemmgr_get_jewel_socket_data, 'pointer', ['pointer', 'int']);
-        var jewelSocketData = _GetJewelSocketData(invenAvartarMgr, avartarAddInfo);
+        const _GetJewelSocketData = nf(addr.cavataritemmgr_get_jewel_socket_data, 'pointer', ['pointer', 'int']);
+        const jewelSocketData = _GetJewelSocketData(invenAvartarMgr, avartarAddInfo);
 
         if (jewelSocketData.isNull()) {
           return;
@@ -116,7 +116,7 @@ function startEmblemFixFeature(ctx) {
 
         // 步骤5：最多只支持 3 个插槽
         if (emblemCnt <= 3) {
-          var emblems = {};
+          const emblems = {};
           for (var i = 0; i < emblemCnt; i++) {
             // 徽章所在的背包槽
             var emblemInvenSlot = packet.getShort(packetBuf);
@@ -126,7 +126,7 @@ function startEmblemFixFeature(ctx) {
             var avartarSocketSlot = packet.getByte(packetBuf);
 
             // 步骤6：校验徽章道具
-            var emblem = inventory.getInvenRef(inven, inventory.TYPE_ITEM, emblemInvenSlot);
+            const emblem = inventory.getInvenRef(inven, inventory.TYPE_ITEM, emblemInvenSlot);
             if (inventory.isItemEmpty(emblem) ||
                 inventory.getItemKey(emblem) != emblemItemId ||
                 avartarSocketSlot >= 3) {
@@ -134,7 +134,7 @@ function startEmblemFixFeature(ctx) {
             }
 
             // 步骤7：校验徽章类型（必须是消耗品且类型为 20 = 徽章）
-            var citem = item.findItem(emblemItemId);
+            const citem = item.findItem(emblemItemId);
             if (citem.isNull()) {
               return;
             }
@@ -144,9 +144,9 @@ function startEmblemFixFeature(ctx) {
 
             // 步骤8：校验徽章插槽颜色是否匹配
             // 获取徽章支持的插槽类型
-            var emblemSocketType = item.getJewelTargetSocket(citem);
+            const emblemSocketType = item.getJewelTargetSocket(citem);
             // 获取时装插槽类型（从插槽数据中读取）
-            var avartarSocketType = jewelSocketData.add(avartarSocketSlot * 6).readShort();
+            const avartarSocketType = jewelSocketData.add(avartarSocketSlot * 6).readShort();
             if (!(emblemSocketType & avartarSocketType)) {
               // 插槽类型不匹配，跳过
               return;
@@ -177,7 +177,7 @@ function startEmblemFixFeature(ctx) {
           user.sendUpdateItemList(curUser, 1, 1, avartarInvenSlot);
 
           // 步骤12：回包给客户端通知镶嵌成功
-          var packetGuard = packet.createPacketGuard();
+          const packetGuard = packet.createPacketGuard();
           packet.putHeader(packetGuard, 1, 204);
           packet.putInt(packetGuard, 1);
           packet.finalize(packetGuard, 1);

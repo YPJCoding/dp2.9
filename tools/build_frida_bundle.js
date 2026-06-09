@@ -5,12 +5,12 @@
 // 用法：node tools/build_frida_bundle.js
 // 输出：dist/df_game_r.bundle.js
 
-var fs = require('fs');
-var path = require('path');
+const fs = require('fs');
+const path = require('path');
 
-var projectDir = path.resolve(__dirname, '..');
-var outputDir = path.join(projectDir, 'dist');
-var output = path.join(outputDir, 'df_game_r.bundle.js');
+const projectDir = path.resolve(__dirname, '..');
+const outputDir = path.join(projectDir, 'dist');
+const output = path.join(outputDir, 'df_game_r.bundle.js');
 
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true });
@@ -18,7 +18,7 @@ if (!fs.existsSync(outputDir)) {
 
 // 拼接顺序（必须按此顺序，不可随意调整）
 // 顺序原因：模块依赖的拓扑排序
-var files = [
+const files = [
   'script/js/runtime_addresses.js',
   'script/js/runtime_config.js',
 
@@ -67,12 +67,12 @@ var files = [
 var bundleContent = '';
 
 files.forEach(function (file) {
-  var filePath = path.join(projectDir, file);
+  const filePath = path.join(projectDir, file);
   if (!fs.existsSync(filePath)) {
     console.error('file not found: ' + filePath);
     process.exit(1);
   }
-  var content = fs.readFileSync(filePath, 'utf-8');
+  const content = fs.readFileSync(filePath, 'utf-8');
   bundleContent += content + '\n';
 });
 

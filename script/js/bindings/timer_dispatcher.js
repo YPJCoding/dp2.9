@@ -10,18 +10,18 @@
 // 5. 热重载时 dispatcher 线程中的任务队列会被清空
 
 function createTimerDispatcherBinding(addr) {
-  var _GuardMutex = nf(addr.guard_mutex_guard, 'int', ['pointer', 'pointer']);
-  var _DestroyGuardMutex = nf(addr.destroy_guard_mutex_guard, 'int', ['pointer']);
-  var _G_TimerQueue = nf(addr.g_timer_queue, 'pointer', []);
+  const _GuardMutex = nf(addr.guard_mutex_guard, 'int', ['pointer', 'pointer']);
+  const _DestroyGuardMutex = nf(addr.destroy_guard_mutex_guard, 'int', ['pointer']);
+  const _G_TimerQueue = nf(addr.g_timer_queue, 'pointer', []);
 
   // 需要在 dispatcher 线程执行的任务队列
   // 热加载后会被清空
-  var taskList = [];
+  const taskList = [];
 
   // 获取线程锁
   // 风险：申请后必须手动释放，否则会导致死锁
   function lock() {
-    var a1 = Memory.alloc(100);
+    const a1 = Memory.alloc(100);
     _GuardMutex(a1, _G_TimerQueue().add(16));
     return a1;
   }
@@ -35,7 +35,7 @@ function createTimerDispatcherBinding(addr) {
   // f: 回调函数
   // args: 传给 f 的参数数组（如果 f 无参数可为 null）
   function schedule(f, args) {
-    var guard = lock();
+    const guard = lock();
     taskList.push([f, args]);
     unlock(guard);
   }
@@ -49,9 +49,9 @@ function createTimerDispatcherBinding(addr) {
   // 处理到期的任务队列
   // 此函数在 TimerDispatcher::dispatch 的 onLeave 中调用
   function dispatch() {
-    var activeList = [];
+    const activeList = [];
 
-    var guard = lock();
+    const guard = lock();
     while (taskList.length > 0) {
       var task = taskList.shift();
       activeList.push(task);
@@ -60,8 +60,8 @@ function createTimerDispatcherBinding(addr) {
 
     for (var i = 0; i < activeList.length; ++i) {
       var task = activeList[i];
-      var f = task[0];
-      var args = task[1];
+      const f = task[0];
+      const args = task[1];
       f.apply(null, args);
     }
   }

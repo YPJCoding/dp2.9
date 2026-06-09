@@ -3,8 +3,8 @@
 // 用途：向玩家发送怪物攻城活动进度和状态通知
 
 function createVillageAttackNotify(ctx) {
-  var st = globalThis.village_attack_state;
-  var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+  const st = globalThis.village_attack_state;
+  const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
 
   // 世界广播活动当前阶段和难度
   // 来源：从旧 frida.js event_villageattack_broadcast_diffcult 迁移
@@ -29,12 +29,12 @@ function createVillageAttackNotify(ctx) {
   // 来源：从旧 frida.js gameworld_update_villageattack_score 迁移
   // 协议: ENUM_NOTIPACKET_UPDATE_VILLAGE_ATTACKED (247)
   function updateScoreBroadcast() {
-    var remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
+    const remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
     if ((remainTime <= 0) || (st.getState() == C.STATE_END)) {
       return;
     }
 
-    var pkt = ctx.packet.createPacketGuard();
+    const pkt = ctx.packet.createPacketGuard();
     ctx.packet.putHeader(pkt, 0, 247);
     ctx.packet.putInt(pkt, remainTime);                                   // 活动剩余时间
     ctx.packet.putInt(pkt, st.getScore());                                // 当前频道 PT 点数
@@ -50,15 +50,15 @@ function createVillageAttackNotify(ctx) {
   // 协议: ENUM_NOTIPACKET_STARTED_VILLAGE_ATTACKED (248)
   // 用途：在玩家进入游戏时调用，打开怪物攻城 UI 并更新当前进度
   function notifyPlayerScore(curUser) {
-    var characNo = ctx.user.getCurCharacNo(curUser).toString();
-    var pt = st.getUserPt(characNo);
+    const characNo = ctx.user.getCurCharacNo(curUser).toString();
+    const pt = st.getUserPt(characNo);
 
-    var remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
+    const remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
     if ((remainTime <= 0) || (st.getState() == C.STATE_END)) {
       return;
     }
 
-    var pkt = ctx.packet.createPacketGuard();
+    const pkt = ctx.packet.createPacketGuard();
     ctx.packet.putHeader(pkt, 0, 248);
     ctx.packet.putInt(pkt, remainTime);                                   // 活动剩余时间
     ctx.packet.putInt(pkt, st.getScore());                                // 当前频道 PT 点数

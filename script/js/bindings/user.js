@@ -5,34 +5,34 @@
 // 风险：这些函数直接操作角色对象，参数需确保是有效的 CUser 指针
 
 function createUserBinding(addr) {
-  var _GetState = nf(addr.cuser_get_state, 'int', ['pointer']);
-  var _GetAccId = nf(addr.cuser_get_acc_id, 'int', ['pointer']);
-  var _GetCurCharacNo = nf(addr.cusercharacinfo_get_cur_charac_no, 'int', ['pointer']);
-  var _GetCharacLevel = nf(addr.cusercharacinfo_get_charac_level, 'int', ['pointer']);
-  var _GetCurCharacName = nf(addr.cusercharacinfo_get_cur_charac_name, 'pointer', ['pointer']);
-  var _GetLevelUpExp = nf(addr.cusercharacinfo_get_level_up_exp, 'int', ['pointer', 'int']);
-  var _GetCurCharacInvenW = nf(addr.cusercharacinfo_get_cur_charac_inven_w, 'pointer', ['pointer']);
-  var _GetCharacJob = nf(addr.cusercharacinfo_get_charac_job, 'int', ['pointer']);
-  var _GetCurCharacGrowType = nf(addr.cusercharacinfo_get_cur_charac_grow_type, 'int', ['pointer']);
-  var _GetCharacGuildkey = nf(addr.cusercharacinfo_get_charac_guildkey, 'int', ['pointer']);
-  var _GetGuildName = nf(addr.cuser_get_guild_name, 'pointer', ['pointer']);
-  var _GetLoginTick = nf(addr.cusercharacinfo_get_login_tick, 'int', ['pointer']);
-  var _GetParty = nf(addr.cuser_get_party, 'pointer', ['pointer']);
-  var _GetCharacExpandData = nf(addr.cuser_get_charac_expand_data, 'pointer', ['pointer', 'int']);
-  var _GetCera = nf(addr.cuser_get_cera, 'int', ['pointer']);
-  var _GetCurCharacQuestW = nf(addr.cuser_get_cur_charac_quest_w, 'pointer', ['pointer']);
-  var _CheckItemLock = nf(addr.cuser_check_item_lock, 'int', ['pointer', 'int', 'int']);
-  var _Send = nf(addr.cuser_send, 'int', ['pointer', 'pointer']);
-  var _SendNotiPacketMessage = nf(addr.cuser_send_noti_packet_message, 'int', ['pointer', 'pointer', 'int']);
-  var _SendUpdateItemList = nf(addr.cuser_send_update_item_list, 'int', ['pointer', 'int', 'int', 'int']);
-  var _SendClearQuestList = nf(addr.cuser_send_clear_quest_list, 'int', ['pointer']);
-  var _QuestAction = nf(addr.cuser_quest_action, 'int', ['pointer', 'int', 'int', 'int', 'int']);
-  var _SetGmQuestFlag = nf(addr.cuser_set_gm_quest_flag, 'int', ['pointer', 'int']);
-  var _GainExpSp = nf(addr.cuser_gain_exp_sp, 'int', ['pointer', 'int', 'pointer', 'pointer', 'int', 'int', 'int']);
-  var _SendNotiPacket = nf(addr.cuser_send_noti_packet, 'int', ['pointer', 'int', 'int', 'int']);
-  var _GetServerGroup = nf(addr.cuser_get_server_group, 'int', ['pointer']);
-  var _GetCurVAttackCount = nf(addr.cuser_get_cur_vattack_count, 'int', ['pointer']);
-  var _EnableSaveCharacStat = nf(addr.cusercharacinfo_enable_save_charac_stat, 'int', ['pointer']);
+  const _GetState = nf(addr.cuser_get_state, 'int', ['pointer']);
+  const _GetAccId = nf(addr.cuser_get_acc_id, 'int', ['pointer']);
+  const _GetCurCharacNo = nf(addr.cusercharacinfo_get_cur_charac_no, 'int', ['pointer']);
+  const _GetCharacLevel = nf(addr.cusercharacinfo_get_charac_level, 'int', ['pointer']);
+  const _GetCurCharacName = nf(addr.cusercharacinfo_get_cur_charac_name, 'pointer', ['pointer']);
+  const _GetLevelUpExp = nf(addr.cusercharacinfo_get_level_up_exp, 'int', ['pointer', 'int']);
+  const _GetCurCharacInvenW = nf(addr.cusercharacinfo_get_cur_charac_inven_w, 'pointer', ['pointer']);
+  const _GetCharacJob = nf(addr.cusercharacinfo_get_charac_job, 'int', ['pointer']);
+  const _GetCurCharacGrowType = nf(addr.cusercharacinfo_get_cur_charac_grow_type, 'int', ['pointer']);
+  const _GetCharacGuildkey = nf(addr.cusercharacinfo_get_charac_guildkey, 'int', ['pointer']);
+  const _GetGuildName = nf(addr.cuser_get_guild_name, 'pointer', ['pointer']);
+  const _GetLoginTick = nf(addr.cusercharacinfo_get_login_tick, 'int', ['pointer']);
+  const _GetParty = nf(addr.cuser_get_party, 'pointer', ['pointer']);
+  const _GetCharacExpandData = nf(addr.cuser_get_charac_expand_data, 'pointer', ['pointer', 'int']);
+  const _GetCera = nf(addr.cuser_get_cera, 'int', ['pointer']);
+  const _GetCurCharacQuestW = nf(addr.cuser_get_cur_charac_quest_w, 'pointer', ['pointer']);
+  const _CheckItemLock = nf(addr.cuser_check_item_lock, 'int', ['pointer', 'int', 'int']);
+  const _Send = nf(addr.cuser_send, 'int', ['pointer', 'pointer']);
+  const _SendNotiPacketMessage = nf(addr.cuser_send_noti_packet_message, 'int', ['pointer', 'pointer', 'int']);
+  const _SendUpdateItemList = nf(addr.cuser_send_update_item_list, 'int', ['pointer', 'int', 'int', 'int']);
+  const _SendClearQuestList = nf(addr.cuser_send_clear_quest_list, 'int', ['pointer']);
+  const _QuestAction = nf(addr.cuser_quest_action, 'int', ['pointer', 'int', 'int', 'int', 'int']);
+  const _SetGmQuestFlag = nf(addr.cuser_set_gm_quest_flag, 'int', ['pointer', 'int']);
+  const _GainExpSp = nf(addr.cuser_gain_exp_sp, 'int', ['pointer', 'int', 'pointer', 'pointer', 'int', 'int', 'int']);
+  const _SendNotiPacket = nf(addr.cuser_send_noti_packet, 'int', ['pointer', 'int', 'int', 'int']);
+  const _GetServerGroup = nf(addr.cuser_get_server_group, 'int', ['pointer']);
+  const _GetCurVAttackCount = nf(addr.cuser_get_cur_vattack_count, 'int', ['pointer']);
+  const _EnableSaveCharacStat = nf(addr.cusercharacinfo_enable_save_charac_stat, 'int', ['pointer']);
 
   // 获取角色状态
   // 返回：0=未登录, 1=创建角色, 2=选择角色, 3=已进入游戏
@@ -57,7 +57,7 @@ function createUserBinding(addr) {
 
   // 获取角色名字
   function getCurCharacName(user) {
-    var p = _GetCurCharacName(user);
+    const p = _GetCurCharacName(user);
     if (p.isNull()) {
       return '';
     }
@@ -91,7 +91,7 @@ function createUserBinding(addr) {
 
   // 获取角色公会名称
   function getGuildName(user) {
-    var p = _GetGuildName(user);
+    const p = _GetGuildName(user);
     if (p.isNull()) {
       return '';
     }
@@ -135,7 +135,7 @@ function createUserBinding(addr) {
 
   // 给角色发消息
   function sendNotiPacketMessage(user, msg, msgType) {
-    var p = Memory.allocUtf8String(msg);
+    const p = Memory.allocUtf8String(msg);
     _SendNotiPacketMessage(user, p, msgType);
   }
 
@@ -162,8 +162,8 @@ function createUserBinding(addr) {
 
   // 给角色增加经验
   function gainExpSp(user, exp) {
-    var a2 = Memory.alloc(4);
-    var a3 = Memory.alloc(4);
+    const a2 = Memory.alloc(4);
+    const a3 = Memory.alloc(4);
     return _GainExpSp(user, exp, a2, a3, 0, 0, 0);
   }
 

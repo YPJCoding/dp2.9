@@ -5,16 +5,16 @@
 
 var g_log_file = null;
 var g_log_day = null;
-var g_log_dir_path = './frida_log/';
+const g_log_dir_path = './frida_log/';
 
 // 日志对象，挂载到 globalThis 供所有模块使用
 function createLogger(ctx) {
   // 打开目录
-  var opendir = new NativeFunction(Module.getGlobalExportByName('opendir'), 'int', ['pointer'], {'abi': 'sysv'});
-  var mkdir = new NativeFunction(Module.getGlobalExportByName('mkdir'), 'int', ['pointer', 'int'], {'abi': 'sysv'});
+  const opendir = new NativeFunction(Module.getGlobalExportByName('opendir'), 'int', ['pointer'], {'abi': 'sysv'});
+  const mkdir = new NativeFunction(Module.getGlobalExportByName('mkdir'), 'int', ['pointer', 'int'], {'abi': 'sysv'});
 
   function ensureDir(path) {
-    var pathPtr = Memory.allocUtf8String(path);
+    const pathPtr = Memory.allocUtf8String(path);
     if (opendir(pathPtr)) {
       return true;
     }
@@ -25,13 +25,13 @@ function createLogger(ctx) {
   function getTimestamp() {
     var date = new Date();
     date = new Date(date.setHours(date.getHours() + 0));
-    var year = date.getFullYear().toString();
-    var month = (date.getMonth() + 1).toString();
-    var day = date.getDate().toString();
-    var hour = date.getHours().toString();
-    var minute = date.getMinutes().toString();
-    var second = date.getSeconds().toString();
-    var ms = date.getMilliseconds().toString();
+    const year = date.getFullYear().toString();
+    const month = (date.getMonth() + 1).toString();
+    const day = date.getDate().toString();
+    const hour = date.getHours().toString();
+    const minute = date.getMinutes().toString();
+    const second = date.getSeconds().toString();
+    const ms = date.getMilliseconds().toString();
     return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
   }
 
@@ -49,13 +49,13 @@ function createLogger(ctx) {
   function log(msg) {
     var date = new Date();
     date = new Date(date.setHours(date.getHours() + 0));
-    var year = date.getFullYear().toString();
-    var month = (date.getMonth() + 1).toString();
-    var day = date.getDate().toString();
-    var hour = date.getHours().toString();
-    var minute = date.getMinutes().toString();
-    var second = date.getSeconds().toString();
-    var ms = date.getMilliseconds().toString();
+    const year = date.getFullYear().toString();
+    const month = (date.getMonth() + 1).toString();
+    const day = date.getDate().toString();
+    const hour = date.getHours().toString();
+    const minute = date.getMinutes().toString();
+    const second = date.getSeconds().toString();
+    const ms = date.getMilliseconds().toString();
 
     // 按日期轮转日志文件
     if ((g_log_file === null) || (g_log_day != day)) {
@@ -67,7 +67,7 @@ function createLogger(ctx) {
       g_log_day = day;
     }
 
-    var timestamp = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
+    const timestamp = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
 
     // 控制台日志
     console.log('[' + timestamp + '] ' + msg + '\n');

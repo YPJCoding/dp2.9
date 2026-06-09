@@ -23,9 +23,9 @@ function startRuntimeModules() {
 
   console.log('==================== frida runtime start ====================');
 
-  var addr = globalThis.PROJECT_ADDRESSES;
-  var cfg = globalThis.PROJECT_JS_CONFIG;
-  var helpers = globalThis.createStartupHelpers(addr);
+  const addr = globalThis.PROJECT_ADDRESSES;
+  const cfg = globalThis.PROJECT_JS_CONFIG;
+  const helpers = globalThis.createStartupHelpers(addr);
 
   helpers.logStartup('initializing runtime...');
 
@@ -121,7 +121,7 @@ function startRuntimeModules() {
   // 日志上下文说明：
   //   ctx.logger   = logger 完整对象（有 .log() 和 .getTimestamp()）
   //   ctx.log      = 便捷日志函数 logger.log(msg)
-  var ctx = {
+  const ctx = {
     addresses: addr,
     config: cfg,
     logger: logger,
@@ -170,30 +170,30 @@ function startRuntimeModules() {
     helpers.logModuleStart('database');
     try {
       // 加载本地配置文件（数据库连接信息）
-      var fileMod = globalThis.createFileModule();
-      var globalConfig = fileMod.loadConfig('frida_config.json');
+      const fileMod = globalThis.createFileModule();
+      const globalConfig = fileMod.loadConfig('frida_config.json');
 
       if (!globalConfig) {
         // 配置文件读取失败，无法获取数据库账号
         console.log('[database] frida_config.json 读取失败，数据库账号为空，跳过数据库初始化');
       } else {
-        var dbConfig = globalConfig['db_config'] || {};
+        const dbConfig = globalConfig['db_config'] || {};
 
         if (!dbConfig['account'] || !dbConfig['password']) {
           console.log('[database] frida_config.json 中 db_config.account/password 为空，跳过数据库初始化');
         } else if (mysqlBind) {
           // 初始化数据库连接
           // 风险：数据库连接信息使用 localhost:3306，生产环境需从配置读取
-          var mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
-          var mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
-          var mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          const mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          const mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          const mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
           // 建库 frida
           if (mysqlTaiwanCain) {
             mysqlBind.exec(mysqlTaiwanCain, 'create database if not exists frida default charset utf8;');
           }
 
-          var mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          const mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
           if (mysqlFrida) {
             // 建表 game_event（存储活动数据和排行榜）
@@ -396,7 +396,7 @@ function createBoundMysqlDb(mysqlBind, mysqlHandle) {
 function disposeRuntimeModules() {
   console.log('-------------------- frida dispose --------------------');
 
-  var ctx = globalThis._runtimeCtx;
+  const ctx = globalThis._runtimeCtx;
   if (!ctx) {
     return;
   }
@@ -414,7 +414,7 @@ function disposeRuntimeModules() {
 
     // 关闭数据库连接（使用 ctx.mysql binding 的 close 函数）
     if (ctx.db && ctx.mysql) {
-      var db = ctx.db;
+      const db = ctx.db;
       if (db.frida) {
         ctx.mysql.close(db.frida);
       }

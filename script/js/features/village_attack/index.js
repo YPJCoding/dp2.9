@@ -41,7 +41,7 @@ function startVillageAttackFeature(ctx) {
 
     // 从数据库加载活动状态
     if (vaDb) {
-      var savedInfo = vaDb.load();
+      const savedInfo = vaDb.load();
       if (savedInfo) {
         globalThis.village_attack_state.setInfo(savedInfo);
       }
@@ -51,14 +51,14 @@ function startVillageAttackFeature(ctx) {
     ctx.va_notify = globalThis.createVillageAttackNotify(ctx);
 
     // 初始化流程模块（先创建，因为 hooks 和 settlement 需要引用它）
-    var vaFlow = globalThis.createVillageAttackFlow(ctx);
+    const vaFlow = globalThis.createVillageAttackFlow(ctx);
     ctx.va_flow = vaFlow;
 
     // 初始化奖励模块
     ctx.va_reward = globalThis.createVillageAttackReward(ctx);
 
     // 初始化结算模块
-    var vaSettlement = globalThis.createVillageAttackSettlement(ctx);
+    const vaSettlement = globalThis.createVillageAttackSettlement(ctx);
     ctx.va_settlement = vaSettlement.settle;
 
     // 根据角色 charac_no 查询角色名（结算时广播用）
@@ -66,14 +66,14 @@ function startVillageAttackFeature(ctx) {
     ctx.va_getCharacNameByNo = function (characNo) {
       // 从数据库查询角色名
       // 风险：直接拼接 SQL，characNo 为数字类型是安全的
-      var fridaDb = ctx.fridaDb;
+      const fridaDb = ctx.fridaDb;
       if (!fridaDb) {
         return characNo.toString();
       }
       if (fridaDb.exec("select charac_name from charac_info where charac_no=" + characNo + ";")) {
         if (fridaDb.getNRows() == 1) {
           fridaDb.fetch();
-          var name = fridaDb.getStr(0);
+          const name = fridaDb.getStr(0);
           if (name) {
             return name;
           }
