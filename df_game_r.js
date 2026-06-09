@@ -14,8 +14,8 @@
 // 防止热重载时重复 attach。
 //
 // 部署说明：
-//   默认部署 df_game_r.js，通过 dp_load 动态加载 script/js 模块。
-//   dist/df_game_r.bundle.js 仅作为无 dp_load 环境的 fallback / 静态检查产物。
+//   部署 df_game_r.js + script/js/**，通过 dp_load 动态加载 script/js 模块。
+//   目标环境必须提供 dp_load。
 
 var g_entry_started = false;
 

@@ -96,7 +96,7 @@ script/js/
 
 - `startRuntimeModules()` 返回 `true`（启动成功或已启动）/ `false`（依赖加载失败）
 - `df_game_r.js` 的 `start()` 在 `startRuntimeModules()` 返回 `false` 时不设置 `g_entry_started`，允许重试
-- bundle fallback 模式下 `dp_load` 不存在时不视为错误，跳过动态依赖加载
+- 部署仅支持 `dp_load` 动态加载，无 fallback
 
 为什么要必须使用：
 1. Frida 热重载时原有 hook 不会被自动清除
@@ -177,9 +177,7 @@ var ctx = {
 
 ## 部署
 
-### 默认部署方式：dp_load 动态加载
-
-默认部署 `df_game_r.js`，通过 `dp_load` 动态加载 `script/js` 下的模块：
+唯一部署方式：`df_game_r.js` + `dp_load` 动态加载 `script/js/**`
 
 ```text
 df_game_r.js -> dp_load('runtime_addresses') / dp_load('runtime_config')
@@ -190,23 +188,12 @@ df_game_r.js -> dp_load('runtime_addresses') / dp_load('runtime_config')
               -> 按配置启动各功能模块
 ```
 
-### Fallback：bundle 单文件
-
-如果目标环境没有 `dp_load`，可以使用构建产物：
-
-```bash
-bash tools/build_frida_bundle.sh
-# 输出：dist/df_game_r.bundle.js（备用）
-```
-
-`dist/df_game_r.bundle.js` 仅作为 fallback / 静态检查产物 / 无 `dp_load` 环境备用，不作为默认部署文件。
-
 ## 新增模块时
 
 1. 在 `script/js/` 新建模块文件
 2. 在 `startup_modules.js` 的 `loadRuntimeDependencies()` 数组末尾添加模块名
 3. 在 `startup_modules.js` 的 `startRuntimeModules()` 中按配置启动
-4. 模块拼接顺序必须和 `tools/build_frida_bundle.js` 一致
+4. 模块通过 `dp_load` 动态加载，无拼接顺序要求
 
 ## 数据库上下文说明
 

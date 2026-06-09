@@ -20,15 +20,14 @@
 var g_runtime_modules_started = false;
 
 // 加载所有依赖子模块（dp_load 模式下必须主动加载）
-// 顺序必须与 tools/build_frida_bundle.js 中的拼接顺序一致
+// 顺序与各模块的依赖拓扑一致，不可随意调整
 //
-// 返回: true=全部加载成功或 bundle fallback 模式，false=有模块加载失败
+// 返回: true=全部加载成功，false=有模块加载失败或 dp_load 不存在
+// 返回: true=全部加载成功，false=有模块加载失败或 dp_load 不存在
 function loadRuntimeDependencies() {
-  // bundle fallback：如果 dp_load 不存在，说明可能是 dist/df_game_r.bundle.js 单文件模式
-  // 此时模块已经在拼接时加载完成，不需要动态加载依赖
   if (typeof dp_load !== 'function') {
-    console.log('[startup] dp_load 不存在，按 bundle fallback 模式运行，跳过动态依赖加载');
-    return true;
+    console.log('[startup] dp_load 不存在，无法加载依赖模块，终止 runtime 启动');
+    return false;
   }
 
   if (typeof safeLoadModule !== 'function') {
@@ -103,8 +102,7 @@ function startRuntimeModules() {
 
   console.log('==================== frida runtime start ====================');
 
-  // dp_load 模式：先加载所有依赖子模块
-  // bundle 模式：dp_load 不存在时返回 true，不报错
+  // 加载所有依赖子模块
   if (!loadRuntimeDependencies()) {
     return false;
   }

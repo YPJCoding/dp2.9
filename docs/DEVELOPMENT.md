@@ -63,7 +63,7 @@ script/js/runtime_config.js
 
 ## 部署说明
 
-### 默认部署：df_game_r.js + dp_load
+唯一部署方式：`df_game_r.js` + `dp_load` 动态加载 `script/js/**`
 
 ```text
 部署文件：df_game_r.js
@@ -72,15 +72,6 @@ script/js/runtime_config.js
 
 `df_game_r.js` 通过 `dp_load('runtime_addresses')`、`dp_load('startup_modules')` 等加载引导模块，
 `startup_modules.js` 通过 `loadRuntimeDependencies()` 加载其余所有子模块。
-
-### Fallback：bundle
-
-```bash
-bash tools/build_frida_bundle.sh
-# 输出：dist/df_game_r.bundle.js（无 dp_load 环境备用）
-```
-
-## 构建 bundle
 
 ## 本地检查
 

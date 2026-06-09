@@ -17,10 +17,6 @@ if [ -d script/js ]; then
   done < <(find script/js -name "*.js" -type f | sort)
 fi
 
-if [ -f dist/df_game_r.bundle.js ]; then
-  files+=("dist/df_game_r.bundle.js")
-fi
-
 count=0
 for file in "${files[@]}"; do
   echo "checking $file"

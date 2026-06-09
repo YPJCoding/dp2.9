@@ -122,16 +122,10 @@
 
 ## 部署方式
 
+唯一部署方式：`df_game_r.js` + `dp_load` 动态加载 `script/js/**`
+
 ```text
-默认：df_game_r.js + dp_load 动态加载 script/js 模块
-备用：dist/df_game_r.bundle.js（无 dp_load 环境）
-```
-
-构建 bundle（仍可用）：
-
-```bash
-bash tools/build_frida_bundle.sh   # shell
-node tools/build_frida_bundle.js   # Node
+df_game_r.js + dp_load + script/js/**
 ```
 
 ## DB 不可用时的模块行为
@@ -152,3 +146,12 @@ node tools/build_frida_bundle.js   # Node
 - Lua 语法检查：`luac` 未安装，无法执行
 - 裸地址检查：feature/bindings/core/entry 中不再有真实地址
 - ctx.log.xxx 误用检查：无实际调用，仅注释
+
+## 第八轮清理：移除 bundle fallback
+
+移除了所有 bundle 单文件相关的内容：
+
+- `dist/df_game_r.bundle.js` 构建产物不再生成。
+- `tools/build_frida_bundle.sh` / `tools/build_frida_bundle.js` 构建工具已移除。
+- 所有文档中的 "备用方案" / "fallback" 描述已删除。
+- 项目**仅**支持 `df_game_r.js` + `dp_load` 动态加载 `script/js/**` 一种部署方式。
