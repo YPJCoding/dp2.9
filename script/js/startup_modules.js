@@ -2,6 +2,10 @@
 // 来源：从旧 frida.js start() 迁移并重构
 // 用途：按配置和顺序启动所有 JS 模块
 //
+// 在 dp_load 模式下，本文件被 df_game_r.js 通过 dp_load('startup_modules') 加载。
+// 加载后会先通过 safeLoadModule() 加载所有依赖子模块，
+// 再按 ctx 模式创建 bindings 并启动各功能模块。
+//
 // 启动顺序推荐（来源：模块依赖关系）：
 // 1. Logger/Config（任何模块都依赖日志和配置）
 // 2. Runtime Addresses（bindings 依赖地址）
@@ -15,6 +19,65 @@
 
 var g_runtime_modules_started = false;
 
+// 加载所有依赖子模块（dp_load 模式下必须主动加载）
+// 顺序必须与 tools/build_frida_bundle.js 中的拼接顺序一致
+function loadRuntimeDependencies() {
+  var modules = [
+    // 核心和 binding 已经在 df_game_r.js 中预加载：
+    //   runtime_addresses, runtime_config, core/hook_guard,
+    //   startup_helpers, startup_modules（本文件）
+    // 以下加载其余所有依赖：
+
+    'bindings/native_functions',
+
+    'core/logger',
+    'core/time',
+    'core/random',
+    'core/memory',
+    'core/file',
+
+    'bindings/packet',
+    'bindings/mysql',
+    'bindings/user',
+    'bindings/inventory',
+    'bindings/item',
+    'bindings/mail',
+    'bindings/game_world',
+    'bindings/timer_dispatcher',
+    'bindings/quest',
+
+    'features/tod_fix',
+    'features/emblem_fix',
+    'features/hidden_option',
+    'features/return_user',
+    'features/online_reward',
+    'features/ranking',
+    'features/user_inout',
+
+    'features/village_attack/constants',
+    'features/village_attack/state',
+    'features/village_attack/db',
+    'features/village_attack/notify',
+    'features/village_attack/reward',
+    'features/village_attack/settlement',
+    'features/village_attack/flow',
+    'features/village_attack/hooks',
+    'features/village_attack/index',
+  ];
+
+  var allOk = true;
+  for (var i = 0; i < modules.length; i++) {
+    if (typeof safeLoadModule === 'function' && !safeLoadModule(modules[i])) {
+      console.log('[startup] 依赖模块加载失败: ' + modules[i]);
+      allOk = false;
+    }
+  }
+
+  if (!allOk) {
+    console.log('[startup] 部分依赖模块加载失败，后续模块启动可能受影响');
+  }
+}
+
 function startRuntimeModules() {
   if (g_runtime_modules_started) {
     console.log('[startup] runtime modules already started');
@@ -22,6 +85,10 @@ function startRuntimeModules() {
   }
 
   console.log('==================== frida runtime start ====================');
+
+  // dp_load 模式：先加载所有依赖子模块
+  // bundle 模式：依赖已在拼接时加载，safeLoadModule 会因缓存跳过
+  loadRuntimeDependencies();
 
   const addr = globalThis.PROJECT_ADDRESSES;
   const cfg = globalThis.PROJECT_JS_CONFIG;

@@ -58,6 +58,27 @@ docs/
   LOCAL_CHECKS.md
 ```
 
+## 部署说明
+
+### 默认部署：df_game_r.js + dp_load 动态加载
+
+```text
+部署文件：df_game_r.js
+加载方式：dp_load 动态加载 script/js 模块
+```
+
+`df_game_r.js` 通过 `dp_load` 加载 `runtime_addresses`、`runtime_config`、`startup_modules` 等引导模块。
+`startup_modules.js` 的 `loadRuntimeDependencies()` 加载其余所有子模块。
+
+### 备用方案：bundle 单文件
+
+如果目标环境不支持 `dp_load`，可以构建 bundle：
+
+```bash
+bash tools/build_frida_bundle.sh
+# 输出：dist/df_game_r.bundle.js（备用）
+```
+
 ## 文档入口
 
 - [总体开发说明](docs/DEVELOPMENT.md)

@@ -169,15 +169,36 @@ var ctx = {
 
 ## 部署
 
-当前使用 bundle 运行方式。因 Frida 环境不会自动加载 `script/js/` 下的拆分子模块，部署时必须先构建 bundle：
+### 默认部署方式：dp_load 动态加载
+
+默认部署 `df_game_r.js`，通过 `dp_load` 动态加载 `script/js` 下的模块：
+
+```text
+df_game_r.js -> dp_load('runtime_addresses') / dp_load('runtime_config')
+            -> dp_load('core/hook_guard')
+            -> dp_load('startup_helpers') / dp_load('startup_modules')
+            -> startRuntimeModules()
+              -> loadRuntimeDependencies()  # 加载所有子模块
+              -> 按配置启动各功能模块
+```
+
+### Fallback：bundle 单文件
+
+如果目标环境没有 `dp_load`，可以使用构建产物：
 
 ```bash
 bash tools/build_frida_bundle.sh
+# 输出：dist/df_game_r.bundle.js（备用）
 ```
 
-生成的 `dist/df_game_r.bundle.js` 包含所有模块，可直接部署。
+`dist/df_game_r.bundle.js` 仅作为 fallback / 静态检查产物 / 无 `dp_load` 环境备用，不作为默认部署文件。
 
-模块拼接顺序不可随意更改，每个模块间存在依赖关系。
+## 新增模块时
+
+1. 在 `script/js/` 新建模块文件
+2. 在 `startup_modules.js` 的 `loadRuntimeDependencies()` 数组末尾添加模块名
+3. 在 `startup_modules.js` 的 `startRuntimeModules()` 中按配置启动
+4. 模块拼接顺序必须和 `tools/build_frida_bundle.js` 一致
 
 ## 数据库上下文说明
 

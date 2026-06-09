@@ -61,14 +61,26 @@ script/js/runtime_config.js
 
 位置：`script/js/core/hook_guard.js`
 
-## 构建 bundle
+## 部署说明
 
-部署时需要使用 bundle 而非单个源文件：
+### 默认部署：df_game_r.js + dp_load
+
+```text
+部署文件：df_game_r.js
+加载方式：dp_load 动态加载 script/js 模块
+```
+
+`df_game_r.js` 通过 `dp_load('runtime_addresses')`、`dp_load('startup_modules')` 等加载引导模块，
+`startup_modules.js` 通过 `loadRuntimeDependencies()` 加载其余所有子模块。
+
+### Fallback：bundle
 
 ```bash
 bash tools/build_frida_bundle.sh
-# 输出：dist/df_game_r.bundle.js
+# 输出：dist/df_game_r.bundle.js（无 dp_load 环境备用）
 ```
+
+## 构建 bundle
 
 ## 本地检查
 

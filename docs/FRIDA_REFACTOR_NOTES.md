@@ -93,33 +93,29 @@
 3. 数据库连接信息硬编码 localhost:3306，生产环境需改为从配置文件读取
 4. `setTimeout` 依赖 Frida 运行环境提供，不是所有环境都支持
 
-## 第四轮修复 (fix: add startup fallback for failed early hook)
+## 第五轮重构 (refactor: use dp_load runtime module loading)
 
-修复了以下问题：
+调整为 dp_load 动态加载模式：
 
-1. **hook_guard 返回 boolean**：`attachOnce()` 和 `replaceOnce()` 现在返回 `true`（成功/已注册）或 `false`（失败），调用方可感知 hook 注册结果。
-2. **df_game_r.js early hook 失败兜底**：`attachOnce('runtime_check_argv', ...)` 返回 `false` 时兜底调用 `start()`，避免 runtime 静默不启动。
-3. **误部署检测**：`start()` 中 `startRuntimeModules` 不存在时输出 `请确认部署的是 dist/df_game_r.bundle.js`，不再误打印 `frida started`。
+1. **默认部署文件改为 df_game_r.js**：通过 `dp_load` 加载引导模块，再由 `startRuntimeModules()` → `loadRuntimeDependencies()` 加载其余所有模块。
+2. **startup_helpers.js 新增 safeLoadModule()**：通过 `dp_load` 加载模块，带 `g_startup_loaded_modules` 缓存。
+3. **startup_modules.js 新增 loadRuntimeDependencies()**：在 `startRuntimeModules()` 开头主动加载所有依赖子模块。
+4. **bundle 改为 fallback**：`dist/df_game_r.bundle.js` 不再作为默认部署文件，仅作为无 `dp_load` 环境备用 / 静态检查产物。
+5. **dp_load 支持子目录**：确认 `dp_load('core/hook_guard')` → `/dp2/script/js/core/hook_guard.js`，无需 shim 文件。
 
-修复了以下问题：
+## 部署方式
 
-1. **Node 构建脚本输出路径错误**：`tools/build_frida_bundle.js` 输出路径从 `dist/dist/df_game_r.bundle.js` 修正为 `dist/df_game_r.bundle.js`。
-2. **ranking.js DB 不可用时崩溃**：`getRankNumber()` 增加 `!fridaDb` 返回 0 的防御；`onUserLeaveRanking()` 增加 curUser 空检查和 fridaDb 空检查，并输出中文日志。
-3. **MySQL exec() 语义统一**：`createBoundMysqlDb()` 中 `exec(sql)` 返回布尔值（true=成功），新增 `execRaw(sql)` 返回底层原始码。`mysql.js` 注释修正为「底层非零=成功」。
-4. **df_game_r.js early hook**：改用 `attachOnce('runtime_check_argv', ...)` 注册，增加 `attachOnce` 不存在的降级处理。
-5. **文档过期 TODO 清理**：移除已解决的「File API 依赖」、「ES6+兼容性」等过期条目；补充 `exec/execRaw` 语义和 DB 不可用时行为说明。
-
-## 部署说明
-
-两种构建方式等效，输出同一个文件：
-
-```bash
-bash tools/build_frida_bundle.sh   # shell 版本
-node tools/build_frida_bundle.js   # Node 版本
-# 输出：dist/df_game_r.bundle.js
+```text
+默认：df_game_r.js + dp_load 动态加载 script/js 模块
+备用：dist/df_game_r.bundle.js（无 dp_load 环境）
 ```
 
-部署时使用 `dist/df_game_r.bundle.js` 替代 `df_game_r.js`。
+构建 bundle（仍可用）：
+
+```bash
+bash tools/build_frida_bundle.sh   # shell
+node tools/build_frida_bundle.js   # Node
+```
 
 ## DB 不可用时的模块行为
 

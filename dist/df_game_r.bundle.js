@@ -9,7 +9,7 @@
 //
 // 每个地址至少需要注释：作用、对应原函数或 hook 点、来源、风险点
 
-var PROJECT_ADDRESSES = {
+const PROJECT_ADDRESSES = {
 
   // ==================== 系统/环境相关地址 ====================
 
@@ -795,7 +795,7 @@ if (typeof globalThis !== 'undefined') {
 // 2. 不同环境（测试服/正式服）可以用不同配置
 // 3. 新人接手时不用翻遍代码找开关
 
-var PROJECT_JS_CONFIG = {
+const PROJECT_JS_CONFIG = {
   features: {
     // 定时器调度（dispatcher 线程安全）
     // 几乎所有功能都依赖它，必须开启
@@ -903,16 +903,16 @@ if (typeof globalThis !== 'undefined') {
 
 var g_log_file = null;
 var g_log_day = null;
-var g_log_dir_path = './frida_log/';
+const g_log_dir_path = './frida_log/';
 
 // 日志对象，挂载到 globalThis 供所有模块使用
 function createLogger(ctx) {
   // 打开目录
-  var opendir = new NativeFunction(Module.getGlobalExportByName('opendir'), 'int', ['pointer'], {'abi': 'sysv'});
-  var mkdir = new NativeFunction(Module.getGlobalExportByName('mkdir'), 'int', ['pointer', 'int'], {'abi': 'sysv'});
+  const opendir = new NativeFunction(Module.getGlobalExportByName('opendir'), 'int', ['pointer'], {'abi': 'sysv'});
+  const mkdir = new NativeFunction(Module.getGlobalExportByName('mkdir'), 'int', ['pointer', 'int'], {'abi': 'sysv'});
 
   function ensureDir(path) {
-    var pathPtr = Memory.allocUtf8String(path);
+    const pathPtr = Memory.allocUtf8String(path);
     if (opendir(pathPtr)) {
       return true;
     }
@@ -923,13 +923,13 @@ function createLogger(ctx) {
   function getTimestamp() {
     var date = new Date();
     date = new Date(date.setHours(date.getHours() + 0));
-    var year = date.getFullYear().toString();
-    var month = (date.getMonth() + 1).toString();
-    var day = date.getDate().toString();
-    var hour = date.getHours().toString();
-    var minute = date.getMinutes().toString();
-    var second = date.getSeconds().toString();
-    var ms = date.getMilliseconds().toString();
+    const year = date.getFullYear().toString();
+    const month = (date.getMonth() + 1).toString();
+    const day = date.getDate().toString();
+    const hour = date.getHours().toString();
+    const minute = date.getMinutes().toString();
+    const second = date.getSeconds().toString();
+    const ms = date.getMilliseconds().toString();
     return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
   }
 
@@ -947,13 +947,13 @@ function createLogger(ctx) {
   function log(msg) {
     var date = new Date();
     date = new Date(date.setHours(date.getHours() + 0));
-    var year = date.getFullYear().toString();
-    var month = (date.getMonth() + 1).toString();
-    var day = date.getDate().toString();
-    var hour = date.getHours().toString();
-    var minute = date.getMinutes().toString();
-    var second = date.getSeconds().toString();
-    var ms = date.getMilliseconds().toString();
+    const year = date.getFullYear().toString();
+    const month = (date.getMonth() + 1).toString();
+    const day = date.getDate().toString();
+    const hour = date.getHours().toString();
+    const minute = date.getMinutes().toString();
+    const second = date.getSeconds().toString();
+    const ms = date.getMilliseconds().toString();
 
     // 按日期轮转日志文件
     if ((g_log_file === null) || (g_log_day != day)) {
@@ -965,7 +965,7 @@ function createLogger(ctx) {
       g_log_day = day;
     }
 
-    var timestamp = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
+    const timestamp = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
 
     // 控制台日志
     console.log('[' + timestamp + '] ' + msg + '\n');
@@ -998,7 +998,7 @@ function createTimeModule(addr) {
   // 用途：读取游戏服务器的系统 UTC 时间（秒）
   // 风险：地址依赖特定游戏版本，升级后需确认是否仍然有效
   // 注意：地址由调用方从 runtime_addresses.js 传入，不使用裸地址回退
-  var systemTimePtr = addr.system_time || null;
+  const systemTimePtr = addr.system_time || null;
 
   if (!systemTimePtr) {
     console.log('[time] system_time 地址未提供，时间模块将返回 0');
@@ -1127,9 +1127,9 @@ function createFileModule() {
       return null;
     }
 
-    var pathPtr = Memory.allocUtf8String(path);
-    var modePtr = Memory.allocUtf8String(mode);
-    var f = _fopen(pathPtr, modePtr);
+    const pathPtr = Memory.allocUtf8String(path);
+    const modePtr = Memory.allocUtf8String(mode);
+    const f = _fopen(pathPtr, modePtr);
 
     // 使用 .isNull() 判断 fopen 失败（pointer 类型）
     if (f.isNull()) {
@@ -1137,8 +1137,8 @@ function createFileModule() {
       return null;
     }
 
-    var data = Memory.alloc(len);
-    var freadRet = _fread(data, 1, len, f);
+    const data = Memory.alloc(len);
+    const freadRet = _fread(data, 1, len, f);
     _fclose(f);
 
     if (mode == 'r') {
@@ -1149,7 +1149,7 @@ function createFileModule() {
 
   // 加载本地 JSON 配置文件
   function loadConfig(path) {
-    var data = readFile(path, 'r', 10 * 1024 * 1024);
+    const data = readFile(path, 'r', 10 * 1024 * 1024);
     if (!data) {
       console.log('[file] 配置文件读取失败: ' + path);
       return null;
@@ -1252,36 +1252,40 @@ function createPacketBinding(addr) {
   // ---- 客户端封包读取 ----
 
   // 从客户端封包中读取 1 字节（失败会抛异常，调用方必须做异常处理）
-  var _getByte = nf(addr.packetbuf_get_byte, 'int', ['pointer', 'pointer']);
+  const _getByte = nf(addr.packetbuf_get_byte, 'int', ['pointer', 'pointer']);
+
   function getByte(packetBuf) {
-    var data = Memory.alloc(1);
+    const data = Memory.alloc(1);
     if (_getByte(packetBuf, data)) {
       return data.readU8();
     }
     throw new Error('PacketBuf_get_byte Fail!');
   }
 
-  var _getShort = nf(addr.packetbuf_get_short, 'int', ['pointer', 'pointer']);
+  const _getShort = nf(addr.packetbuf_get_short, 'int', ['pointer', 'pointer']);
+
   function getShort(packetBuf) {
-    var data = Memory.alloc(2);
+    const data = Memory.alloc(2);
     if (_getShort(packetBuf, data)) {
       return data.readShort();
     }
     throw new Error('PacketBuf_get_short Fail!');
   }
 
-  var _getInt = nf(addr.packetbuf_get_int, 'int', ['pointer', 'pointer']);
+  const _getInt = nf(addr.packetbuf_get_int, 'int', ['pointer', 'pointer']);
+
   function getInt(packetBuf) {
-    var data = Memory.alloc(4);
+    const data = Memory.alloc(4);
     if (_getInt(packetBuf, data)) {
       return data.readInt();
     }
     throw new Error('PacketBuf_get_int Fail!');
   }
 
-  var _getBinary = nf(addr.packetbuf_get_binary, 'int', ['pointer', 'pointer', 'int']);
+  const _getBinary = nf(addr.packetbuf_get_binary, 'int', ['pointer', 'pointer', 'int']);
+
   function getBinary(packetBuf, len) {
-    var data = Memory.alloc(len);
+    const data = Memory.alloc(len);
     if (_getBinary(packetBuf, data, len)) {
       return data.readByteArray(len);
     }
@@ -1296,18 +1300,18 @@ function createPacketBinding(addr) {
 
   // ---- 服务器组包 ----
 
-  var _PacketGuardConstructor = nf(addr.packetguard_constructor, 'int', ['pointer']);
-  var _PutHeader = nf(addr.interfacepacketbuf_put_header, 'int', ['pointer', 'int', 'int']);
-  var _PutByte = nf(addr.interfacepacketbuf_put_byte, 'int', ['pointer', 'uint8']);
-  var _PutShort = nf(addr.interfacepacketbuf_put_short, 'int', ['pointer', 'uint16']);
-  var _PutInt = nf(addr.interfacepacketbuf_put_int, 'int', ['pointer', 'int']);
-  var _PutBinary = nf(addr.interfacepacketbuf_put_binary, 'int', ['pointer', 'pointer', 'int']);
-  var _Finalize = nf(addr.interfacepacketbuf_finalize, 'int', ['pointer', 'int']);
-  var _DestroyPacketGuard = nf(addr.destroy_packetguard, 'int', ['pointer']);
+  const _PacketGuardConstructor = nf(addr.packetguard_constructor, 'int', ['pointer']);
+  const _PutHeader = nf(addr.interfacepacketbuf_put_header, 'int', ['pointer', 'int', 'int']);
+  const _PutByte = nf(addr.interfacepacketbuf_put_byte, 'int', ['pointer', 'uint8']);
+  const _PutShort = nf(addr.interfacepacketbuf_put_short, 'int', ['pointer', 'uint16']);
+  const _PutInt = nf(addr.interfacepacketbuf_put_int, 'int', ['pointer', 'int']);
+  const _PutBinary = nf(addr.interfacepacketbuf_put_binary, 'int', ['pointer', 'pointer', 'int']);
+  const _Finalize = nf(addr.interfacepacketbuf_finalize, 'int', ['pointer', 'int']);
+  const _DestroyPacketGuard = nf(addr.destroy_packetguard, 'int', ['pointer']);
 
   // 初始化封包对象
   function createPacketGuard() {
-    var packetGuard = Memory.alloc(0x20000);
+    const packetGuard = Memory.alloc(0x20000);
     _PacketGuardConstructor(packetGuard);
     return packetGuard;
   }
@@ -1341,11 +1345,11 @@ function createPacketBinding(addr) {
   }
 
   // 向封包写入字符串（协议中字符串格式：4字节长度 + 内容）
-  var _strlen = nf(addr.strlen, 'int', ['pointer']);
+  const _strlen = nf(addr.strlen, 'int', ['pointer']);
 
   function putString(packetGuard, s) {
-    var p = Memory.allocUtf8String(s);
-    var len = _strlen(p);
+    const p = Memory.allocUtf8String(s);
+    const len = _strlen(p);
     _PutInt(packetGuard, len);
     _PutBinary(packetGuard, p, len);
   }
@@ -1383,35 +1387,35 @@ if (typeof globalThis !== 'undefined') {
 
 function createMysqlBinding(addr) {
   // MySQL 底层函数
-  var _MySQLConstructor = nf(addr.mysql_constructor, 'pointer', ['pointer']);
-  var _MySQLInit = nf(addr.mysql_init, 'int', ['pointer']);
-  var _MySQLOpen = nf(addr.mysql_open, 'int', ['pointer', 'pointer', 'int', 'pointer', 'pointer', 'pointer']);
-  var _MySQLClose = nf(addr.mysql_close, 'int', ['pointer']);
-  var _MySQLSetQuery2 = nf(addr.mysql_set_query, 'int', ['pointer', 'pointer']);
-  var _MySQLExec = nf(addr.mysql_exec, 'int', ['pointer', 'int']);
-  var _MySQLGetNRows = nf(addr.mysql_get_n_rows, 'int', ['pointer']);
-  var _MySQLFetch = nf(addr.mysql_fetch, 'int', ['pointer']);
-  var _MySQLGetInt = nf(addr.mysql_get_int, 'int', ['pointer', 'int', 'pointer']);
-  var _MySQLGetUint = nf(addr.mysql_get_uint, 'int', ['pointer', 'int', 'pointer']);
-  var _MySQLGetShort = nf(addr.mysql_get_short, 'int', ['pointer', 'int', 'pointer']);
-  var _MySQLGetFloat = nf(addr.mysql_get_float, 'int', ['pointer', 'int', 'pointer']);
-  var _MySQLGetBinaryLength = nf(addr.mysql_get_binary_length, 'int', ['pointer', 'int']);
-  var _MySQLGetBinary = nf(addr.mysql_get_binary, 'int', ['pointer', 'int', 'pointer', 'int']);
+  const _MySQLConstructor = nf(addr.mysql_constructor, 'pointer', ['pointer']);
+  const _MySQLInit = nf(addr.mysql_init, 'int', ['pointer']);
+  const _MySQLOpen = nf(addr.mysql_open, 'int', ['pointer', 'pointer', 'int', 'pointer', 'pointer', 'pointer']);
+  const _MySQLClose = nf(addr.mysql_close, 'int', ['pointer']);
+  const _MySQLSetQuery2 = nf(addr.mysql_set_query, 'int', ['pointer', 'pointer']);
+  const _MySQLExec = nf(addr.mysql_exec, 'int', ['pointer', 'int']);
+  const _MySQLGetNRows = nf(addr.mysql_get_n_rows, 'int', ['pointer']);
+  const _MySQLFetch = nf(addr.mysql_fetch, 'int', ['pointer']);
+  const _MySQLGetInt = nf(addr.mysql_get_int, 'int', ['pointer', 'int', 'pointer']);
+  const _MySQLGetUint = nf(addr.mysql_get_uint, 'int', ['pointer', 'int', 'pointer']);
+  const _MySQLGetShort = nf(addr.mysql_get_short, 'int', ['pointer', 'int', 'pointer']);
+  const _MySQLGetFloat = nf(addr.mysql_get_float, 'int', ['pointer', 'int', 'pointer']);
+  const _MySQLGetBinaryLength = nf(addr.mysql_get_binary_length, 'int', ['pointer', 'int']);
+  const _MySQLGetBinary = nf(addr.mysql_get_binary, 'int', ['pointer', 'int', 'pointer', 'int']);
 
   // 打开数据库连接
   // 来源：从旧 frida.js api_MYSQL_open 迁移
   // 风险：连接失败返回 null，调用方必须检查
   function open(dbName, dbIp, dbPort, dbAccount, dbPassword) {
-    var mysql = Memory.alloc(0x80000);
+    const mysql = Memory.alloc(0x80000);
     _MySQLConstructor(mysql);
     _MySQLInit(mysql);
 
-    var dbIpPtr = Memory.allocUtf8String(dbIp);
-    var dbNamePtr = Memory.allocUtf8String(dbName);
-    var dbAccountPtr = Memory.allocUtf8String(dbAccount);
-    var dbPasswordPtr = Memory.allocUtf8String(dbPassword);
+    const dbIpPtr = Memory.allocUtf8String(dbIp);
+    const dbNamePtr = Memory.allocUtf8String(dbName);
+    const dbAccountPtr = Memory.allocUtf8String(dbAccount);
+    const dbPasswordPtr = Memory.allocUtf8String(dbPassword);
 
-    var ret = _MySQLOpen(mysql, dbIpPtr, dbPort, dbNamePtr, dbAccountPtr, dbPasswordPtr);
+    const ret = _MySQLOpen(mysql, dbIpPtr, dbPort, dbNamePtr, dbAccountPtr, dbPasswordPtr);
     if (ret) {
       return mysql;
     }
@@ -1430,7 +1434,7 @@ function createMysqlBinding(addr) {
   // 根据旧 frida.js 实际使用经验，非零值表示成功，零值表示失败。
   // 业务层请使用 ctx.fridaDb.exec(sql)（已封装为布尔语义），不要直接依赖本函数的 raw 返回码。
   function exec(mysql, sql) {
-    var sqlPtr = Memory.allocUtf8String(sql);
+    const sqlPtr = Memory.allocUtf8String(sql);
     _MySQLSetQuery2(mysql, sqlPtr);
     return _MySQLExec(mysql, 1);
   }
@@ -1447,7 +1451,7 @@ function createMysqlBinding(addr) {
 
   // 读取整数字段
   function getInt(mysql, fieldIndex) {
-    var v = Memory.alloc(4);
+    const v = Memory.alloc(4);
     if (1 == _MySQLGetInt(mysql, fieldIndex, v)) {
       return v.readInt();
     }
@@ -1455,7 +1459,7 @@ function createMysqlBinding(addr) {
   }
 
   function getUint(mysql, fieldIndex) {
-    var v = Memory.alloc(4);
+    const v = Memory.alloc(4);
     if (1 == _MySQLGetUint(mysql, fieldIndex, v)) {
       return v.readUInt();
     }
@@ -1463,7 +1467,7 @@ function createMysqlBinding(addr) {
   }
 
   function getShort(mysql, fieldIndex) {
-    var v = Memory.alloc(4);
+    const v = Memory.alloc(4);
     if (1 == _MySQLGetShort(mysql, fieldIndex, v)) {
       return v.readShort();
     }
@@ -1471,7 +1475,7 @@ function createMysqlBinding(addr) {
   }
 
   function getFloat(mysql, fieldIndex) {
-    var v = Memory.alloc(4);
+    const v = Memory.alloc(4);
     if (1 == _MySQLGetFloat(mysql, fieldIndex, v)) {
       return v.readFloat();
     }
@@ -1480,9 +1484,9 @@ function createMysqlBinding(addr) {
 
   // 读取字符串字段
   function getStr(mysql, fieldIndex) {
-    var binaryLength = _MySQLGetBinaryLength(mysql, fieldIndex);
+    const binaryLength = _MySQLGetBinaryLength(mysql, fieldIndex);
     if (binaryLength > 0) {
-      var v = Memory.alloc(binaryLength);
+      const v = Memory.alloc(binaryLength);
       if (1 == _MySQLGetBinary(mysql, fieldIndex, v, binaryLength)) {
         return v.readUtf8String(binaryLength);
       }
@@ -1492,9 +1496,9 @@ function createMysqlBinding(addr) {
 
   // 读取二进制字段
   function getBinary(mysql, fieldIndex) {
-    var binaryLength = _MySQLGetBinaryLength(mysql, fieldIndex);
+    const binaryLength = _MySQLGetBinaryLength(mysql, fieldIndex);
     if (binaryLength > 0) {
-      var v = Memory.alloc(binaryLength);
+      const v = Memory.alloc(binaryLength);
       if (1 == _MySQLGetBinary(mysql, fieldIndex, v, binaryLength)) {
         return v.readByteArray(binaryLength);
       }
@@ -1528,34 +1532,34 @@ if (typeof globalThis !== 'undefined') {
 // 风险：这些函数直接操作角色对象，参数需确保是有效的 CUser 指针
 
 function createUserBinding(addr) {
-  var _GetState = nf(addr.cuser_get_state, 'int', ['pointer']);
-  var _GetAccId = nf(addr.cuser_get_acc_id, 'int', ['pointer']);
-  var _GetCurCharacNo = nf(addr.cusercharacinfo_get_cur_charac_no, 'int', ['pointer']);
-  var _GetCharacLevel = nf(addr.cusercharacinfo_get_charac_level, 'int', ['pointer']);
-  var _GetCurCharacName = nf(addr.cusercharacinfo_get_cur_charac_name, 'pointer', ['pointer']);
-  var _GetLevelUpExp = nf(addr.cusercharacinfo_get_level_up_exp, 'int', ['pointer', 'int']);
-  var _GetCurCharacInvenW = nf(addr.cusercharacinfo_get_cur_charac_inven_w, 'pointer', ['pointer']);
-  var _GetCharacJob = nf(addr.cusercharacinfo_get_charac_job, 'int', ['pointer']);
-  var _GetCurCharacGrowType = nf(addr.cusercharacinfo_get_cur_charac_grow_type, 'int', ['pointer']);
-  var _GetCharacGuildkey = nf(addr.cusercharacinfo_get_charac_guildkey, 'int', ['pointer']);
-  var _GetGuildName = nf(addr.cuser_get_guild_name, 'pointer', ['pointer']);
-  var _GetLoginTick = nf(addr.cusercharacinfo_get_login_tick, 'int', ['pointer']);
-  var _GetParty = nf(addr.cuser_get_party, 'pointer', ['pointer']);
-  var _GetCharacExpandData = nf(addr.cuser_get_charac_expand_data, 'pointer', ['pointer', 'int']);
-  var _GetCera = nf(addr.cuser_get_cera, 'int', ['pointer']);
-  var _GetCurCharacQuestW = nf(addr.cuser_get_cur_charac_quest_w, 'pointer', ['pointer']);
-  var _CheckItemLock = nf(addr.cuser_check_item_lock, 'int', ['pointer', 'int', 'int']);
-  var _Send = nf(addr.cuser_send, 'int', ['pointer', 'pointer']);
-  var _SendNotiPacketMessage = nf(addr.cuser_send_noti_packet_message, 'int', ['pointer', 'pointer', 'int']);
-  var _SendUpdateItemList = nf(addr.cuser_send_update_item_list, 'int', ['pointer', 'int', 'int', 'int']);
-  var _SendClearQuestList = nf(addr.cuser_send_clear_quest_list, 'int', ['pointer']);
-  var _QuestAction = nf(addr.cuser_quest_action, 'int', ['pointer', 'int', 'int', 'int', 'int']);
-  var _SetGmQuestFlag = nf(addr.cuser_set_gm_quest_flag, 'int', ['pointer', 'int']);
-  var _GainExpSp = nf(addr.cuser_gain_exp_sp, 'int', ['pointer', 'int', 'pointer', 'pointer', 'int', 'int', 'int']);
-  var _SendNotiPacket = nf(addr.cuser_send_noti_packet, 'int', ['pointer', 'int', 'int', 'int']);
-  var _GetServerGroup = nf(addr.cuser_get_server_group, 'int', ['pointer']);
-  var _GetCurVAttackCount = nf(addr.cuser_get_cur_vattack_count, 'int', ['pointer']);
-  var _EnableSaveCharacStat = nf(addr.cusercharacinfo_enable_save_charac_stat, 'int', ['pointer']);
+  const _GetState = nf(addr.cuser_get_state, 'int', ['pointer']);
+  const _GetAccId = nf(addr.cuser_get_acc_id, 'int', ['pointer']);
+  const _GetCurCharacNo = nf(addr.cusercharacinfo_get_cur_charac_no, 'int', ['pointer']);
+  const _GetCharacLevel = nf(addr.cusercharacinfo_get_charac_level, 'int', ['pointer']);
+  const _GetCurCharacName = nf(addr.cusercharacinfo_get_cur_charac_name, 'pointer', ['pointer']);
+  const _GetLevelUpExp = nf(addr.cusercharacinfo_get_level_up_exp, 'int', ['pointer', 'int']);
+  const _GetCurCharacInvenW = nf(addr.cusercharacinfo_get_cur_charac_inven_w, 'pointer', ['pointer']);
+  const _GetCharacJob = nf(addr.cusercharacinfo_get_charac_job, 'int', ['pointer']);
+  const _GetCurCharacGrowType = nf(addr.cusercharacinfo_get_cur_charac_grow_type, 'int', ['pointer']);
+  const _GetCharacGuildkey = nf(addr.cusercharacinfo_get_charac_guildkey, 'int', ['pointer']);
+  const _GetGuildName = nf(addr.cuser_get_guild_name, 'pointer', ['pointer']);
+  const _GetLoginTick = nf(addr.cusercharacinfo_get_login_tick, 'int', ['pointer']);
+  const _GetParty = nf(addr.cuser_get_party, 'pointer', ['pointer']);
+  const _GetCharacExpandData = nf(addr.cuser_get_charac_expand_data, 'pointer', ['pointer', 'int']);
+  const _GetCera = nf(addr.cuser_get_cera, 'int', ['pointer']);
+  const _GetCurCharacQuestW = nf(addr.cuser_get_cur_charac_quest_w, 'pointer', ['pointer']);
+  const _CheckItemLock = nf(addr.cuser_check_item_lock, 'int', ['pointer', 'int', 'int']);
+  const _Send = nf(addr.cuser_send, 'int', ['pointer', 'pointer']);
+  const _SendNotiPacketMessage = nf(addr.cuser_send_noti_packet_message, 'int', ['pointer', 'pointer', 'int']);
+  const _SendUpdateItemList = nf(addr.cuser_send_update_item_list, 'int', ['pointer', 'int', 'int', 'int']);
+  const _SendClearQuestList = nf(addr.cuser_send_clear_quest_list, 'int', ['pointer']);
+  const _QuestAction = nf(addr.cuser_quest_action, 'int', ['pointer', 'int', 'int', 'int', 'int']);
+  const _SetGmQuestFlag = nf(addr.cuser_set_gm_quest_flag, 'int', ['pointer', 'int']);
+  const _GainExpSp = nf(addr.cuser_gain_exp_sp, 'int', ['pointer', 'int', 'pointer', 'pointer', 'int', 'int', 'int']);
+  const _SendNotiPacket = nf(addr.cuser_send_noti_packet, 'int', ['pointer', 'int', 'int', 'int']);
+  const _GetServerGroup = nf(addr.cuser_get_server_group, 'int', ['pointer']);
+  const _GetCurVAttackCount = nf(addr.cuser_get_cur_vattack_count, 'int', ['pointer']);
+  const _EnableSaveCharacStat = nf(addr.cusercharacinfo_enable_save_charac_stat, 'int', ['pointer']);
 
   // 获取角色状态
   // 返回：0=未登录, 1=创建角色, 2=选择角色, 3=已进入游戏
@@ -1580,7 +1584,7 @@ function createUserBinding(addr) {
 
   // 获取角色名字
   function getCurCharacName(user) {
-    var p = _GetCurCharacName(user);
+    const p = _GetCurCharacName(user);
     if (p.isNull()) {
       return '';
     }
@@ -1614,7 +1618,7 @@ function createUserBinding(addr) {
 
   // 获取角色公会名称
   function getGuildName(user) {
-    var p = _GetGuildName(user);
+    const p = _GetGuildName(user);
     if (p.isNull()) {
       return '';
     }
@@ -1658,7 +1662,7 @@ function createUserBinding(addr) {
 
   // 给角色发消息
   function sendNotiPacketMessage(user, msg, msgType) {
-    var p = Memory.allocUtf8String(msg);
+    const p = Memory.allocUtf8String(msg);
     _SendNotiPacketMessage(user, p, msgType);
   }
 
@@ -1685,8 +1689,8 @@ function createUserBinding(addr) {
 
   // 给角色增加经验
   function gainExpSp(user, exp) {
-    var a2 = Memory.alloc(4);
-    var a3 = Memory.alloc(4);
+    const a2 = Memory.alloc(4);
+    const a3 = Memory.alloc(4);
     return _GainExpSp(user, exp, a2, a3, 0, 0, 0);
   }
 
@@ -1755,22 +1759,22 @@ if (typeof globalThis !== 'undefined') {
 // 风险：直接操作玩家背包，错误操作可能导致道具丢失
 
 function createInventoryBinding(addr) {
-  var _GetInvenRef = nf(addr.cinventory_get_inven_ref, 'pointer', ['pointer', 'int', 'int']);
-  var _IsEquipable = nf(addr.inven_item_is_equipable_item_type, 'int', ['pointer']);
-  var _IsEmpty = nf(addr.inven_item_is_empty, 'int', ['pointer']);
-  var _GetKey = nf(addr.inven_item_get_key, 'int', ['pointer']);
-  var _GetAddInfo = nf(addr.inven_item_get_add_info, 'int', ['pointer']);
-  var _InvenItemConstructor = nf(addr.inven_item_constructor, 'pointer', ['pointer']);
-  var _Reset = nf(addr.inven_item_reset, 'int', ['pointer']);
-  var _UseMoney = nf(addr.cinventory_use_money, 'int', ['pointer', 'int', 'int', 'int']);
-  var _DeleteItem = nf(addr.cinventory_delete_item, 'int', ['pointer', 'int', 'int', 'int', 'int', 'int']);
-  var _GetMoney = nf(addr.cinventory_get_money, 'int', ['pointer']);
-  var _GetAvatarItemMgrR = nf(addr.cinventory_get_avatar_item_mgr_r, 'pointer', ['pointer']);
+  const _GetInvenRef = nf(addr.cinventory_get_inven_ref, 'pointer', ['pointer', 'int', 'int']);
+  const _IsEquipable = nf(addr.inven_item_is_equipable_item_type, 'int', ['pointer']);
+  const _IsEmpty = nf(addr.inven_item_is_empty, 'int', ['pointer']);
+  const _GetKey = nf(addr.inven_item_get_key, 'int', ['pointer']);
+  const _GetAddInfo = nf(addr.inven_item_get_add_info, 'int', ['pointer']);
+  const _InvenItemConstructor = nf(addr.inven_item_constructor, 'pointer', ['pointer']);
+  const _Reset = nf(addr.inven_item_reset, 'int', ['pointer']);
+  const _UseMoney = nf(addr.cinventory_use_money, 'int', ['pointer', 'int', 'int', 'int']);
+  const _DeleteItem = nf(addr.cinventory_delete_item, 'int', ['pointer', 'int', 'int', 'int', 'int', 'int']);
+  const _GetMoney = nf(addr.cinventory_get_money, 'int', ['pointer']);
+  const _GetAvatarItemMgrR = nf(addr.cinventory_get_avatar_item_mgr_r, 'pointer', ['pointer']);
 
   // 背包类型常量（来源：从旧 frida.js 迁移）
-  var TYPE_BODY = 0;   // 身上穿的装备
-  var TYPE_ITEM = 1;   // 物品栏
-  var TYPE_AVARTAR = 2; // 时装栏
+  const TYPE_BODY = 0;   // 身上穿的装备
+  const TYPE_ITEM = 1;   // 物品栏
+  const TYPE_AVARTAR = 2; // 时装栏
 
   // 获取背包指定槽位的道具
   function getInvenRef(inven, invenType, slot) {
@@ -1858,18 +1862,18 @@ if (typeof globalThis !== 'undefined') {
 // 用途：封装道具属性查询、PVF 数据查询等
 
 function createItemBinding(addr) {
-  var _GetRarity = nf(addr.citem_get_rarity, 'int', ['pointer']);
-  var _GetUsableLevel = nf(addr.citem_get_usable_level, 'int', ['pointer']);
-  var _GetItemGroupName = nf(addr.citem_get_item_group_name, 'int', ['pointer']);
-  var _IsStackable = nf(addr.citem_is_stackable, 'int', ['pointer']);
-  var _GetItemIndex = nf(addr.getitem_index, 'int', ['pointer']);
-  var _GetStackableItemType = nf(addr.cstackableitem_get_item_type, 'int', ['pointer']);
-  var _GetJewelTargetSocket = nf(addr.cstackableitem_get_jewel_target_socket, 'int', ['pointer']);
+  const _GetRarity = nf(addr.citem_get_rarity, 'int', ['pointer']);
+  const _GetUsableLevel = nf(addr.citem_get_usable_level, 'int', ['pointer']);
+  const _GetItemGroupName = nf(addr.citem_get_item_group_name, 'int', ['pointer']);
+  const _IsStackable = nf(addr.citem_is_stackable, 'int', ['pointer']);
+  const _GetItemIndex = nf(addr.getitem_index, 'int', ['pointer']);
+  const _GetStackableItemType = nf(addr.cstackableitem_get_item_type, 'int', ['pointer']);
+  const _GetJewelTargetSocket = nf(addr.cstackableitem_get_jewel_target_socket, 'int', ['pointer']);
 
   // PVF 数据查询
-  var _G_CDataManager = nf(addr.g_cdata_manager, 'pointer', []);
-  var _FindItem = nf(addr.cdata_manager_find_item, 'pointer', ['pointer', 'int']);
-  var _FindQuest = nf(addr.cdata_manager_find_quest, 'pointer', ['pointer', 'int']);
+  const _G_CDataManager = nf(addr.g_cdata_manager, 'pointer', []);
+  const _FindItem = nf(addr.cdata_manager_find_item, 'pointer', ['pointer', 'int']);
+  const _FindQuest = nf(addr.cdata_manager_find_quest, 'pointer', ['pointer', 'int']);
 
   // 获取装备品级
   function getRarity(item) {
@@ -1941,23 +1945,23 @@ if (typeof globalThis !== 'undefined') {
 // 风险：邮件发送会写入数据库，发送前务必确认目标角色存在且在线
 
 function createMailBinding(addr) {
-  var _MakeMultiMailPostal = nf(addr.cmailboxhelper_make_system_multi_mail_postal, 'int', ['pointer', 'pointer', 'int']);
-  var _SendMultiMail = nf(addr.cmailboxhelper_req_db_send_new_system_multi_mail, 'int', ['pointer', 'pointer', 'int', 'int', 'int', 'pointer', 'int', 'int', 'int', 'int']);
-  var _SendAvatarMail = nf(addr.cmailboxhelper_req_db_send_new_avatar_mail, 'pointer', ['pointer', 'int', 'int', 'int', 'int', 'int', 'int', 'pointer', 'int']);
-  var _SendSingleMail = nf(addr.req_db_send_new_system_mail, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'int', 'int', 'int', 'char', 'char']);
+  const _MakeMultiMailPostal = nf(addr.cmailboxhelper_make_system_multi_mail_postal, 'int', ['pointer', 'pointer', 'int']);
+  const _SendMultiMail = nf(addr.cmailboxhelper_req_db_send_new_system_multi_mail, 'int', ['pointer', 'pointer', 'int', 'int', 'int', 'pointer', 'int', 'int', 'int', 'int']);
+  const _SendAvatarMail = nf(addr.cmailboxhelper_req_db_send_new_avatar_mail, 'pointer', ['pointer', 'int', 'int', 'int', 'int', 'int', 'int', 'pointer', 'int']);
+  const _SendSingleMail = nf(addr.req_db_send_new_system_mail, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'int', 'int', 'int', 'char', 'char']);
 
   // Vector 操作（用于邮件附件列表）
-  var _VectorConstructor = nf(addr.std_vector_pair_int_int_constructor, 'pointer', ['pointer']);
-  var _VectorClear = nf(addr.std_vector_pair_int_int_clear, 'pointer', ['pointer']);
-  var _MakePair = nf(addr.std_make_pair_int_int, 'pointer', ['pointer', 'pointer', 'pointer']);
-  var _VectorPushBack = nf(addr.std_vector_pair_int_int_push_back, 'pointer', ['pointer', 'pointer']);
+  const _VectorConstructor = nf(addr.std_vector_pair_int_int_constructor, 'pointer', ['pointer']);
+  const _VectorClear = nf(addr.std_vector_pair_int_int_clear, 'pointer', ['pointer']);
+  const _MakePair = nf(addr.std_make_pair_int_int, 'pointer', ['pointer', 'pointer', 'pointer']);
+  const _VectorPushBack = nf(addr.std_vector_pair_int_int_push_back, 'pointer', ['pointer', 'pointer']);
 
   // 道具构造（用于邮件附件）
-  var _InvenItemConstructor = nf(addr.inven_item_constructor, 'pointer', ['pointer']);
-  var _GetItemIndex = nf(addr.getitem_index, 'int', ['pointer']);
+  const _InvenItemConstructor = nf(addr.inven_item_constructor, 'pointer', ['pointer']);
+  const _GetItemIndex = nf(addr.getitem_index, 'int', ['pointer']);
 
   // 获取 strlen
-  var _strlen = nf(addr.strlen, 'int', ['pointer']);
+  const _strlen = nf(addr.strlen, 'int', ['pointer']);
 
   // 发送多道具系统邮件
   // targetCharacNo: 目标角色 charac_no
@@ -1967,30 +1971,30 @@ function createMailBinding(addr) {
   // itemList: 道具列表 [[item_id, count], ...]
   function sendMultiMail(targetCharacNo, title, text, gold, itemList) {
     // 构造道具附件 vector
-    var vector = Memory.alloc(100);
+    const vector = Memory.alloc(100);
     _VectorConstructor(vector);
     _VectorClear(vector);
 
     for (var i = 0; i < itemList.length; ++i) {
-      var itemId = Memory.alloc(4);
-      var itemCnt = Memory.alloc(4);
+      const itemId = Memory.alloc(4);
+      const itemCnt = Memory.alloc(4);
       itemId.writeInt(itemList[i][0]);
       itemCnt.writeInt(itemList[i][1]);
-      var pair = Memory.alloc(100);
+      const pair = Memory.alloc(100);
       _MakePair(pair, itemId, itemCnt);
       _VectorPushBack(vector, pair);
     }
 
     // 邮件支持 10 个道具附件格子
-    var additionSlots = Memory.alloc(1000);
+    const additionSlots = Memory.alloc(1000);
     for (var i = 0; i < 10; ++i) {
       _InvenItemConstructor(additionSlots.add(i * 61));
     }
     _MakeMultiMailPostal(vector, additionSlots, 10);
 
-    var titlePtr = Memory.allocUtf8String(title);
-    var textPtr = Memory.allocUtf8String(text);
-    var textLen = _strlen(textPtr);
+    const titlePtr = Memory.allocUtf8String(title);
+    const textPtr = Memory.allocUtf8String(text);
+    const textLen = _strlen(textPtr);
 
     _SendMultiMail(titlePtr, additionSlots, itemList.length, gold, targetCharacNo, textPtr, textLen, 0, 99, 1);
   }
@@ -2020,11 +2024,11 @@ if (typeof globalThis !== 'undefined') {
 // 2. 除非必须使用广播，否则建议用 CParty::send_to_party 或 GameWorld::send_to_area
 
 function createGameWorldBinding(addr) {
-  var _G_GameWorld = nf(addr.g_gameworld, 'pointer', []);
-  var _SendAll = nf(addr.gameworld_send_all, 'int', ['pointer', 'pointer']);
-  var _SendAllWithState = nf(addr.gameworld_send_all_with_state, 'int', ['pointer', 'pointer', 'int']);
-  var _GetUserCountInWorld = nf(addr.gameworld_get_user_count_in_world, 'int', ['pointer']);
-  var _FindUserFromWorldByAccid = nf(addr.gameworld_find_user_from_world_byaccid, 'pointer', ['pointer', 'int']);
+  const _G_GameWorld = nf(addr.g_gameworld, 'pointer', []);
+  const _SendAll = nf(addr.gameworld_send_all, 'int', ['pointer', 'pointer']);
+  const _SendAllWithState = nf(addr.gameworld_send_all_with_state, 'int', ['pointer', 'pointer', 'int']);
+  const _GetUserCountInWorld = nf(addr.gameworld_get_user_count_in_world, 'int', ['pointer']);
+  const _FindUserFromWorldByAccid = nf(addr.gameworld_find_user_from_world_byaccid, 'pointer', ['pointer', 'int']);
 
   // 世界广播消息（底层实现）
   // 来源：从旧 frida.js api_GameWorld_SendNotiPacketMessage 迁移
@@ -2032,25 +2036,25 @@ function createGameWorldBinding(addr) {
   // 为什么在 gw binding 中提供：
   // notify.js 和 settlement.js 都需要世界广播能力，集中在此处
   // 风险：广播类接口必须限制调用频率，防止刷屏
-  var _PacketGuardConstructor = nf(addr.packetguard_constructor, 'int', ['pointer']);
-  var _PutHeader = nf(addr.interfacepacketbuf_put_header, 'int', ['pointer', 'int', 'int']);
-  var _PutByte = nf(addr.interfacepacketbuf_put_byte, 'int', ['pointer', 'uint8']);
-  var _PutShort = nf(addr.interfacepacketbuf_put_short, 'int', ['pointer', 'uint16']);
-  var _PutInt = nf(addr.interfacepacketbuf_put_int, 'int', ['pointer', 'int']);
-  var _PutBinary = nf(addr.interfacepacketbuf_put_binary, 'int', ['pointer', 'pointer', 'int']);
-  var _Finalize = nf(addr.interfacepacketbuf_finalize, 'int', ['pointer', 'int']);
-  var _DestroyPacketGuard = nf(addr.destroy_packetguard, 'int', ['pointer']);
-  var _Strlen = nf(addr.strlen, 'int', ['pointer']);
+  const _PacketGuardConstructor = nf(addr.packetguard_constructor, 'int', ['pointer']);
+  const _PutHeader = nf(addr.interfacepacketbuf_put_header, 'int', ['pointer', 'int', 'int']);
+  const _PutByte = nf(addr.interfacepacketbuf_put_byte, 'int', ['pointer', 'uint8']);
+  const _PutShort = nf(addr.interfacepacketbuf_put_short, 'int', ['pointer', 'uint16']);
+  const _PutInt = nf(addr.interfacepacketbuf_put_int, 'int', ['pointer', 'int']);
+  const _PutBinary = nf(addr.interfacepacketbuf_put_binary, 'int', ['pointer', 'pointer', 'int']);
+  const _Finalize = nf(addr.interfacepacketbuf_finalize, 'int', ['pointer', 'int']);
+  const _DestroyPacketGuard = nf(addr.destroy_packetguard, 'int', ['pointer']);
+  const _Strlen = nf(addr.strlen, 'int', ['pointer']);
 
   // 在线玩家遍历（底层 std::map 迭代器）
-  var _MapBegin = nf(addr.gameworld_user_map_begin, 'int', ['pointer', 'pointer']);
-  var _MapEnd = nf(addr.gameworld_user_map_end, 'int', ['pointer', 'pointer']);
-  var _MapNotEqual = nf(addr.gameworld_user_map_not_equal, 'bool', ['pointer', 'pointer']);
-  var _MapGet = nf(addr.gameworld_user_map_get, 'pointer', ['pointer']);
-  var _MapNext = nf(addr.gameworld_user_map_next, 'pointer', ['pointer', 'pointer']);
+  const _MapBegin = nf(addr.gameworld_user_map_begin, 'int', ['pointer', 'pointer']);
+  const _MapEnd = nf(addr.gameworld_user_map_end, 'int', ['pointer', 'pointer']);
+  const _MapNotEqual = nf(addr.gameworld_user_map_not_equal, 'bool', ['pointer', 'pointer']);
+  const _MapGet = nf(addr.gameworld_user_map_get, 'pointer', ['pointer']);
+  const _MapNext = nf(addr.gameworld_user_map_next, 'pointer', ['pointer', 'pointer']);
 
   // 获取 CUser 状态（用于遍历时筛选已登录角色）
-  var _GetState = nf(addr.cuser_get_state, 'int', ['pointer']);
+  const _GetState = nf(addr.cuser_get_state, 'int', ['pointer']);
 
   // 获取 GameWorld 单例
   function getGameWorld() {
@@ -2083,7 +2087,7 @@ function createGameWorldBinding(addr) {
   // msg: 消息字符串
   // msgType: 消息类型（14=系统公告）
   function sendNotiPacketMessage(msg, msgType) {
-    var packetGuard = Memory.alloc(0x20000);
+    const packetGuard = Memory.alloc(0x20000);
     _PacketGuardConstructor(packetGuard);
 
     _PutHeader(packetGuard, 0, 12);
@@ -2092,8 +2096,8 @@ function createGameWorldBinding(addr) {
     _PutByte(packetGuard, 0);
 
     // 写入字符串（协议格式：4字节长度 + 内容）
-    var p = Memory.allocUtf8String(msg);
-    var len = _Strlen(p);
+    const p = Memory.allocUtf8String(msg);
+    const len = _Strlen(p);
     _PutInt(packetGuard, len);
     _PutBinary(packetGuard, p, len);
 
@@ -2106,14 +2110,14 @@ function createGameWorldBinding(addr) {
 
   // 获取在线玩家列表遍历起始迭代器
   function mapBegin() {
-    var begin = Memory.alloc(4);
+    const begin = Memory.alloc(4);
     _MapBegin(begin, _G_GameWorld().add(308));
     return begin;
   }
 
   // 获取在线玩家列表遍历结束迭代器
   function mapEnd() {
-    var end = Memory.alloc(4);
+    const end = Memory.alloc(4);
     _MapEnd(end, _G_GameWorld().add(308));
     return end;
   }
@@ -2133,7 +2137,7 @@ function createGameWorldBinding(addr) {
   // 如果底层 mapNext 不是原地修改（即返回新迭代器），
   // 忽略返回值会导致死循环
   function mapNext(it) {
-    var next = Memory.alloc(4);
+    const next = Memory.alloc(4);
     _MapNext(next, it);
     return next;
   }
@@ -2147,13 +2151,13 @@ function createGameWorldBinding(addr) {
   // 如果迭代器逻辑异常或在线玩家数异常增长，避免无限循环
   function forEachUser(f, args) {
     var it = mapBegin();
-    var end = mapEnd();
+    const end = mapEnd();
     var guardCount = 0;
-    var maxCount = 10000;
+    const maxCount = 10000;
 
     while (mapNotEqual(it, end) && guardCount < maxCount) {
       guardCount++;
-      var user = mapGet(it);
+      const user = mapGet(it);
 
       // 只处理已登录角色 (state >= 3)
       if (_GetState(user) >= 3) {
@@ -2195,18 +2199,18 @@ if (typeof globalThis !== 'undefined') {
 // 5. 热重载时 dispatcher 线程中的任务队列会被清空
 
 function createTimerDispatcherBinding(addr) {
-  var _GuardMutex = nf(addr.guard_mutex_guard, 'int', ['pointer', 'pointer']);
-  var _DestroyGuardMutex = nf(addr.destroy_guard_mutex_guard, 'int', ['pointer']);
-  var _G_TimerQueue = nf(addr.g_timer_queue, 'pointer', []);
+  const _GuardMutex = nf(addr.guard_mutex_guard, 'int', ['pointer', 'pointer']);
+  const _DestroyGuardMutex = nf(addr.destroy_guard_mutex_guard, 'int', ['pointer']);
+  const _G_TimerQueue = nf(addr.g_timer_queue, 'pointer', []);
 
   // 需要在 dispatcher 线程执行的任务队列
   // 热加载后会被清空
-  var taskList = [];
+  const taskList = [];
 
   // 获取线程锁
   // 风险：申请后必须手动释放，否则会导致死锁
   function lock() {
-    var a1 = Memory.alloc(100);
+    const a1 = Memory.alloc(100);
     _GuardMutex(a1, _G_TimerQueue().add(16));
     return a1;
   }
@@ -2220,7 +2224,7 @@ function createTimerDispatcherBinding(addr) {
   // f: 回调函数
   // args: 传给 f 的参数数组（如果 f 无参数可为 null）
   function schedule(f, args) {
-    var guard = lock();
+    const guard = lock();
     taskList.push([f, args]);
     unlock(guard);
   }
@@ -2234,9 +2238,9 @@ function createTimerDispatcherBinding(addr) {
   // 处理到期的任务队列
   // 此函数在 TimerDispatcher::dispatch 的 onLeave 中调用
   function dispatch() {
-    var activeList = [];
+    const activeList = [];
 
-    var guard = lock();
+    const guard = lock();
     while (taskList.length > 0) {
       var task = taskList.shift();
       activeList.push(task);
@@ -2245,8 +2249,8 @@ function createTimerDispatcherBinding(addr) {
 
     for (var i = 0; i < activeList.length; ++i) {
       var task = activeList[i];
-      var f = task[0];
-      var args = task[1];
+      const f = task[0];
+      const args = task[1];
       f.apply(null, args);
     }
   }
@@ -2269,8 +2273,8 @@ if (typeof globalThis !== 'undefined') {
 // 风险：直接操作任务状态和奖励领取，错误使用可能导致任务卡死或重复领奖
 
 function createQuestBinding(addr) {
-  var _IsClearedQuest = nf(addr.cquestclear_is_cleared_quest, 'int', ['pointer', 'int']);
-  var _GetUserQuestInfo = nf(addr.userquest_get_quest_info, 'int', ['pointer', 'pointer']);
+  const _IsClearedQuest = nf(addr.cquestclear_is_cleared_quest, 'int', ['pointer', 'int']);
+  const _GetUserQuestInfo = nf(addr.userquest_get_quest_info, 'int', ['pointer', 'pointer']);
 
   // 检查任务是否已完成
   function isClearedQuest(questClear, questId) {
@@ -2340,8 +2344,8 @@ function startTodFixFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
-  var cfg = ctx.config.tod_fix;
+  const addr = ctx.addresses;
+  const cfg = ctx.config.tod_fix;
 
   try {
     // ---- 修复1：挑战成功后可以继续使用门票 ----
@@ -2370,7 +2374,7 @@ function startTodFixFeature(ctx) {
       attachOnce('tod_skip_user_apc', addr.tod_get_today_enter_layer, {
         onEnter: function (args) {
           // 绝望之塔当前层数（偏移 0x14 来源：游戏逆向分析）
-          var todayEnterLayer = args[1].add(0x14).readShort();
+          const todayEnterLayer = args[1].add(0x14).readShort();
 
           // 当下层是 10 的倍数（即 9, 19, 29, ... 99-1=98, 但最后一层=99 需要处理）
           if (((todayEnterLayer % 10) == 9) && (todayEnterLayer > 0) && (todayEnterLayer < 99)) {
@@ -2393,8 +2397,8 @@ function startTodFixFeature(ctx) {
     //   只在副本 ID 是绝望之塔（11008-11107）时跳过，
     //   其他副本仍然执行原始逻辑
     // 风险：如果绝望之塔副本 ID 范围变更，需要更新判断条件
-    var CDungeonGetIndex = nf(addr.cdungeon_get_index, 'int', ['pointer']);
-    var originalUseAncientDungeonItems = nf(
+    const CDungeonGetIndex = nf(addr.cdungeon_get_index, 'int', ['pointer']);
+    const originalUseAncientDungeonItems = nf(
       addr.cparty_use_ancient_dungeon_items,
       'int',
       ['pointer', 'pointer', 'pointer', 'pointer']
@@ -2402,7 +2406,7 @@ function startTodFixFeature(ctx) {
 
     replaceOnce('tod_no_gold', addr.cparty_use_ancient_dungeon_items, function (party, dungeon, invenItem, a4) {
       // 当前进入的地下城 ID
-      var dungeonIndex = CDungeonGetIndex(dungeon);
+      const dungeonIndex = CDungeonGetIndex(dungeon);
       // 根据地下城 ID 判断是否为绝望之塔（范围 11008-11107）
       if ((dungeonIndex >= 11008) && (dungeonIndex <= 11107)) {
         // 绝望之塔 不再扣除金币
@@ -2449,11 +2453,11 @@ function startEmblemFixFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
-  var packet = ctx.packet;
-  var user = ctx.user;
-  var inventory = ctx.inventory;
-  var item = ctx.item;
+  const addr = ctx.addresses;
+  const packet = ctx.packet;
+  const user = ctx.user;
+  const inventory = ctx.inventory;
+  const item = ctx.item;
 
   // ---- 辅助函数：获取时装数据库 UI ID ----
   // 来源：从旧 frida.js api_get_avartar_ui_id 迁移
@@ -2477,7 +2481,7 @@ function startEmblemFixFeature(ctx) {
 
   // ---- 时装插槽数据存盘 ----
   // 来源：从旧 frida.js DB_UpdateAvatarJewelSlot_makeRequest 迁移
-  var _UpdateAvatarJewelSlot = nf(addr.db_update_avatar_jewel_slot_make_request, 'pointer', ['int', 'int', 'pointer']);
+  const _UpdateAvatarJewelSlot = nf(addr.db_update_avatar_jewel_slot_make_request, 'pointer', ['int', 'int', 'pointer']);
 
   function saveJewelSlotData(characNo, avatarUiId, jewelSocketData) {
     _UpdateAvatarJewelSlot(characNo, avatarUiId, jewelSocketData);
@@ -2492,12 +2496,12 @@ function startEmblemFixFeature(ctx) {
   attachOnce('emblem_fix_dispatch', addr.use_jewel_dispatch, {
     onEnter: function (args) {
       try {
-        var curUser = args[1];
-        var packetBuf = args[2];
+        const curUser = args[1];
+        const packetBuf = args[2];
 
         // 步骤1：校验角色状态是否允许镶嵌
         // 只在玩家已进入游戏（state == 3）时处理
-        var state = user.getState(curUser);
+        const state = user.getState(curUser);
         if (state != 3) {
           return;
         }
@@ -2510,15 +2514,15 @@ function startEmblemFixFeature(ctx) {
         //   对每个徽章: short(背包槽) + int(item_id) + byte(目标插槽)
 
         // 时装所在的背包槽
-        var avartarInvenSlot = packet.getShort(packetBuf);
+        const avartarInvenSlot = packet.getShort(packetBuf);
         // 时装 item_id
-        var avartarItemId = packet.getInt(packetBuf);
+        const avartarItemId = packet.getInt(packetBuf);
         // 本次镶嵌徽章数量
-        var emblemCnt = packet.getByte(packetBuf);
+        const emblemCnt = packet.getByte(packetBuf);
 
         // 步骤3：获取并校验时装道具
-        var inven = user.getCurCharacInvenW(curUser);
-        var avartar = inventory.getInvenRef(inven, inventory.TYPE_AVARTAR, avartarInvenSlot);
+        const inven = user.getCurCharacInvenW(curUser);
+        const avartar = inventory.getInvenRef(inven, inventory.TYPE_AVARTAR, avartarInvenSlot);
 
         // 时装必须存在、ID 匹配、未被锁定
         if (inventory.isItemEmpty(avartar) ||
@@ -2528,12 +2532,12 @@ function startEmblemFixFeature(ctx) {
         }
 
         // 步骤4：获取时装插槽数据
-        var avartarAddInfo = inventory.getAddInfo(avartar);
-        var invenAvartarMgr = inventory.getAvatarItemMgrR(inven);
+        const avartarAddInfo = inventory.getAddInfo(avartar);
+        const invenAvartarMgr = inventory.getAvatarItemMgrR(inven);
 
         // CAvatarItemMgr::getJewelSocketData
-        var _GetJewelSocketData = nf(addr.cavataritemmgr_get_jewel_socket_data, 'pointer', ['pointer', 'int']);
-        var jewelSocketData = _GetJewelSocketData(invenAvartarMgr, avartarAddInfo);
+        const _GetJewelSocketData = nf(addr.cavataritemmgr_get_jewel_socket_data, 'pointer', ['pointer', 'int']);
+        const jewelSocketData = _GetJewelSocketData(invenAvartarMgr, avartarAddInfo);
 
         if (jewelSocketData.isNull()) {
           return;
@@ -2541,7 +2545,7 @@ function startEmblemFixFeature(ctx) {
 
         // 步骤5：最多只支持 3 个插槽
         if (emblemCnt <= 3) {
-          var emblems = {};
+          const emblems = {};
           for (var i = 0; i < emblemCnt; i++) {
             // 徽章所在的背包槽
             var emblemInvenSlot = packet.getShort(packetBuf);
@@ -2551,7 +2555,7 @@ function startEmblemFixFeature(ctx) {
             var avartarSocketSlot = packet.getByte(packetBuf);
 
             // 步骤6：校验徽章道具
-            var emblem = inventory.getInvenRef(inven, inventory.TYPE_ITEM, emblemInvenSlot);
+            const emblem = inventory.getInvenRef(inven, inventory.TYPE_ITEM, emblemInvenSlot);
             if (inventory.isItemEmpty(emblem) ||
                 inventory.getItemKey(emblem) != emblemItemId ||
                 avartarSocketSlot >= 3) {
@@ -2559,7 +2563,7 @@ function startEmblemFixFeature(ctx) {
             }
 
             // 步骤7：校验徽章类型（必须是消耗品且类型为 20 = 徽章）
-            var citem = item.findItem(emblemItemId);
+            const citem = item.findItem(emblemItemId);
             if (citem.isNull()) {
               return;
             }
@@ -2569,9 +2573,9 @@ function startEmblemFixFeature(ctx) {
 
             // 步骤8：校验徽章插槽颜色是否匹配
             // 获取徽章支持的插槽类型
-            var emblemSocketType = item.getJewelTargetSocket(citem);
+            const emblemSocketType = item.getJewelTargetSocket(citem);
             // 获取时装插槽类型（从插槽数据中读取）
-            var avartarSocketType = jewelSocketData.add(avartarSocketSlot * 6).readShort();
+            const avartarSocketType = jewelSocketData.add(avartarSocketSlot * 6).readShort();
             if (!(emblemSocketType & avartarSocketType)) {
               // 插槽类型不匹配，跳过
               return;
@@ -2602,7 +2606,7 @@ function startEmblemFixFeature(ctx) {
           user.sendUpdateItemList(curUser, 1, 1, avartarInvenSlot);
 
           // 步骤12：回包给客户端通知镶嵌成功
-          var packetGuard = packet.createPacketGuard();
+          const packetGuard = packet.createPacketGuard();
           packet.putHeader(packetGuard, 1, 204);
           packet.putInt(packetGuard, 1);
           packet.finalize(packetGuard, 1);
@@ -2649,7 +2653,7 @@ function startHiddenOptionFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
+  const addr = ctx.addresses;
 
   try {
     // ---- 内存修改：关闭系统分配 + 写入随机属性 ----
@@ -2723,14 +2727,14 @@ function startReturnUserFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
-  var cfg = ctx.config.return_user;
+  const addr = ctx.addresses;
+  const cfg = ctx.config.return_user;
 
   try {
     // 计算回归判定时间阈值（秒）
     // day * 86400 秒/天
-    var day = cfg.day || 15;
-    var time = day * 86400;
+    const day = cfg.day || 15;
+    const time = day * 86400;
 
     // 修改内存：将回归判定时间写入代码段
     // 来源：从旧 frida.js set_return_user 迁移
@@ -2776,26 +2780,26 @@ function startOnlineRewardFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
+  const addr = ctx.addresses;
 
   try {
     // 点券充值函数（来源：从旧 frida.js api_recharge_cash_cera 迁移）
     // 风险：禁止直接修改 billing 库所有表字段，点券相关操作务必调用数据库存储过程
-    var _IPGInput = globalThis.nf(addr.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
-    var _IPGQuery = globalThis.nf(addr.cipghelper_ipg_query, 'int', ['pointer', 'pointer']);
+    const _IPGInput = globalThis.nf(addr.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
+    const _IPGQuery = globalThis.nf(addr.cipghelper_ipg_query, 'int', ['pointer', 'pointer']);
 
     function rechargeCashCera(curUser, amount) {
       // 地址来源：runtime_addresses.js cipghelper_global
-      var ipgHelper = addr.cipghelper_global.readPointer();
+      const ipgHelper = addr.cipghelper_global.readPointer();
       // 地址来源：runtime_addresses.js ipg_empty_string
-      var emptyString = addr.ipg_empty_string;
+      const emptyString = addr.ipg_empty_string;
       _IPGInput(ipgHelper, curUser, 5, amount, emptyString, emptyString, Memory.allocUtf8String('GM'), ptr(0), ptr(0), ptr(0));
       // 通知客户端充值结果
       _IPGQuery(ipgHelper, curUser);
     }
 
     // 获取登录时间
-    var _GetLoginTick = globalThis.nf(addr.cusercharacinfo_get_login_tick, 'int', ['pointer']);
+    const _GetLoginTick = globalThis.nf(addr.cusercharacinfo_get_login_tick, 'int', ['pointer']);
 
     // Hook CUser::WorkPerFiveMin
     // 来源：从旧 frida.js enable_online_reward 迁移
@@ -2803,16 +2807,16 @@ function startOnlineRewardFeature(ctx) {
     // 风险：这是游戏自身的定时函数，hook 它可能会影响其他 5 分钟逻辑
     globalThis.attachOnce('online_reward_work_per_five_min', addr.cuser_work_per_five_min, {
       onEnter: function (args) {
-        var curUser = args[0];
+        const curUser = args[0];
 
         // 当前系统时间
-        var curTime = ctx.time.getCurSec();
+        const curTime = ctx.time.getCurSec();
         // 本次登录时间
-        var loginTick = _GetLoginTick(curUser);
+        const loginTick = _GetLoginTick(curUser);
 
         if (loginTick > 0) {
           // 在线时长（分钟）
-          var diffTime = Math.floor((curTime - loginTick) / 60);
+          const diffTime = Math.floor((curTime - loginTick) / 60);
 
           // 在线 30 分钟后才开始计算
           if (diffTime < 30) {
@@ -2825,8 +2829,8 @@ function startOnlineRewardFeature(ctx) {
           }
 
           // 奖励：每分钟 0.1 点券
-          var REWARD_CASH_CERA_PER_MIN = 0.1;
-          var rewardCashCera = Math.floor(diffTime * REWARD_CASH_CERA_PER_MIN);
+          const REWARD_CASH_CERA_PER_MIN = 0.1;
+          const rewardCashCera = Math.floor(diffTime * REWARD_CASH_CERA_PER_MIN);
 
           // 发放点券
           rechargeCashCera(curUser, rewardCashCera);
@@ -2933,7 +2937,7 @@ function getRankNumber(fridaDb, characNo) {
     return 0;
   }
   // SQL 拼接未做转义，characNo 为数字类型是安全的
-  var sql = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
+  const sql = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
   if (fridaDb.exec(sql)) {
     if (fridaDb.getNRows() == 1) {
       fridaDb.fetch();
@@ -2946,7 +2950,7 @@ function getRankNumber(fridaDb, characNo) {
 // 来源：从旧 frida.js GetMyEquInfo 迁移
 // 注意：角色名处多加空格用于屏蔽客户端内排行榜对显示框的修改
 function getMyEquInfo(ctx, curUser) {
-  var MyRanklist = {
+  const MyRanklist = {
     'rank': 0,
     'characname': '',
     'job': 0,
@@ -2958,7 +2962,7 @@ function getMyEquInfo(ctx, curUser) {
     'equip': []
   };
 
-  var characNo = ctx.user.getCurCharacNo(curUser);
+  const characNo = ctx.user.getCurCharacNo(curUser);
   MyRanklist.rank = getRankNumber(ctx.fridaDb, characNo) || 0;
   // 名字后加空格用于屏蔽客户端自定义显示字符串
   MyRanklist.characname = ctx.user.getCurCharacName(curUser) + ' ';
@@ -2972,10 +2976,10 @@ function getMyEquInfo(ctx, curUser) {
   }
 
   // 读取角色身上穿的装备
-  var InvenW = ctx.user.getCurCharacInvenW(curUser);
+  const InvenW = ctx.user.getCurCharacInvenW(curUser);
   for (var i = 0; i <= 10; i++) {
     if (i != 9) {
-      var invenItem = ctx.inventory.getInvenRef(InvenW, ctx.inventory.TYPE_BODY, i);
+      const invenItem = ctx.inventory.getInvenRef(InvenW, ctx.inventory.TYPE_BODY, i);
       MyRanklist.equip.push(ctx.inventory.getItemKey(invenItem));
     } else {
       MyRanklist.equip.push(-1);
@@ -2989,11 +2993,11 @@ function getMyEquInfo(ctx, curUser) {
 // 来源：从旧 frida.js SetRanking 迁移
 // 原理：获取角色战力值，与现有排行榜比较，只保留前三名
 function setRanking(ctx, curUser) {
-  var MyRanklist = getMyEquInfo(ctx, curUser);
+  const MyRanklist = getMyEquInfo(ctx, curUser);
 
   // findIndex 可能为 ES6+ 语法，使用循环代替
   var existingIndex = -1;
-  var rankKeys = [];
+  const rankKeys = [];
   for (var key in g_ranklist) {
     if (g_ranklist.hasOwnProperty(key)) {
       rankKeys.push(key);
@@ -3013,7 +3017,7 @@ function setRanking(ctx, curUser) {
     }
 
     // 排序（按战力值降序）
-    var rankArray = [];
+    const rankArray = [];
     for (var key in g_ranklist) {
       if (g_ranklist.hasOwnProperty(key)) {
         rankArray.push(g_ranklist[key]);
@@ -3022,9 +3026,9 @@ function setRanking(ctx, curUser) {
     rankArray.sort(function (a, b) { return b.rank - a.rank; });
 
     // 只保留前三名
-    var topThree = rankArray.slice(0, 3);
+    const topThree = rankArray.slice(0, 3);
 
-    var tmp = {};
+    const tmp = {};
     for (var i = 0; i < topThree.length; i++) {
       tmp[(i + 1).toString()] = topThree[i];
     }
@@ -3040,21 +3044,21 @@ function setRanking(ctx, curUser) {
 // user: CUser 指针
 // all: true=全体下发, false=单体下发
 function sendRankLits(ctx, curUser, all) {
-  var packetGuard = ctx.packet.createPacketGuard();
+  const packetGuard = ctx.packet.createPacketGuard();
   // 协议 ENUM_NOTIPACKET_STATUE_POSITION (182)
   ctx.packet.putHeader(packetGuard, 0, 182);
   ctx.packet.putByte(packetGuard, Object.keys(g_ranklist).length);
 
   for (var key in g_ranklist) {
     if (g_ranklist.hasOwnProperty(key)) {
-      var data = g_ranklist[key];
-      var characName = data.characname;
-      var characLevel = data.lev;
-      var characJob = data.job;
-      var characGrowType = data.Grow;
-      var characGuilname = data.Guilname;
-      var characGuilkey = data.Guilkey;
-      var equip = data.equip;
+      const data = g_ranklist[key];
+      const characName = data.characname;
+      const characLevel = data.lev;
+      const characJob = data.job;
+      const characGrowType = data.Grow;
+      const characGuilname = data.Guilname;
+      const characGuilkey = data.Guilkey;
+      const equip = data.equip;
 
       ctx.packet.putString(packetGuard, characName);
       ctx.packet.putByte(packetGuard, characLevel);
@@ -3064,7 +3068,7 @@ function sendRankLits(ctx, curUser, all) {
       ctx.packet.putInt(packetGuard, characGuilkey);
 
       for (var i = 0; i < equip.length; i++) {
-        var itemId = (i != 9) ? equip[i] : -1;
+        const itemId = (i != 9) ? equip[i] : -1;
         ctx.packet.putInt(packetGuard, itemId);
       }
     }
@@ -3089,7 +3093,7 @@ function loadRankInfoFromDb(fridaDb) {
   if (fridaDb.exec("select event_info from game_event where event_id = 'rankinfo';")) {
     if (fridaDb.getNRows() == 1) {
       fridaDb.fetch();
-      var info = fridaDb.getStr(0);
+      const info = fridaDb.getStr(0);
       if (info) {
         try {
           g_ranklist = JSON.parse(info);
@@ -3196,7 +3200,7 @@ function startUserInoutFeature(ctx) {
     return;
   }
 
-  var addr = ctx.addresses;
+  const addr = ctx.addresses;
 
   try {
     // ---- Hook 1: GameWorld::reach_game_world（玩家进入游戏世界） ----
@@ -3210,7 +3214,7 @@ function startUserInoutFeature(ctx) {
         this.user = args[1];
       },
       onLeave: function (retval) {
-        var curUser = this.user;
+        const curUser = this.user;
 
         // 战力排行榜下发（全体）
         // 通过 ctx 的事件回调触发，不直接写排行榜逻辑
@@ -3227,7 +3231,7 @@ function startUserInoutFeature(ctx) {
         // 问候消息
         // 来源：从旧 frida.js 移植，向进入游戏的玩家发送问候
         if (ctx.user) {
-          var characName = ctx.user.getCurCharacName(curUser);
+          const characName = ctx.user.getCurCharacName(curUser);
           ctx.user.sendNotiPacketMessage(curUser, 'Hello : ' + characName, 2);
         }
       }
@@ -3239,7 +3243,7 @@ function startUserInoutFeature(ctx) {
     // Hook 点：onEnter 时更新排行榜排名
     attachOnce('user_inout_leave', addr.gameworld_leave_game_world, {
       onEnter: function (args) {
-        var curUser = args[1];
+        const curUser = args[1];
 
         // 通过 ctx 的事件回调触发排行榜更新
         if (ctx.onUserLeave) {
@@ -3264,7 +3268,7 @@ if (typeof globalThis !== 'undefined') {
 // 来源：从旧 frida.js VILLAGEATTACK_STATE_* / EVENT_VILLAGEATTACK_* 常量迁移
 // 用途：定义怪物攻城活动的所有常量，供模块内各文件共享
 
-var VILLAGE_ATTACK_CONSTANTS = {
+const VILLAGE_ATTACK_CONSTANTS = {
   // 活动阶段
   // 来源：从旧 frida.js 迁移
   STATE_P1: 0,  // 一阶段：小镇周围刷新怪物，击杀牛头统帅提升难度
@@ -3347,7 +3351,7 @@ if (typeof globalThis !== 'undefined') {
 // 不要在其他文件中直接修改 villageAttackEventInfo 的字段。
 // 所有状态修改都通过本文件的函数进行，便于追踪和调试。
 
-var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
 
 // 怪物攻城活动数据（全局单例）
 // 来源：从旧 frida.js villageAttackEventInfo 迁移
@@ -3517,7 +3521,7 @@ function clearUserPtInfo() {
 // systemTime: 当前系统 UTC 时间
 // totalTime: 活动总时长
 function getRemainTime(systemTime, totalTime) {
-  var eventEndTime = g_info.start_time + totalTime;
+  const eventEndTime = g_info.start_time + totalTime;
   return eventEndTime - systemTime;
 }
 
@@ -3589,7 +3593,7 @@ function createVillageAttackDb(fridaDb) {
       // 风险：JSON.stringify 可能产生包含单引号的字符串，
       // 如果包含会导致 SQL 语法错误
       // TODO: 后续统一使用参数化查询
-      var json = JSON.stringify(info);
+      const json = JSON.stringify(info);
       fridaDb.exec("replace into game_event (event_id, event_info) values ('villageattack', '" + json + "');");
     } catch (error) {
       console.log('[village_attack_db] save failed: ' + error);
@@ -3603,7 +3607,7 @@ function createVillageAttackDb(fridaDb) {
       if (fridaDb.exec("select event_info from game_event where event_id = 'villageattack';")) {
         if (fridaDb.getNRows() == 1) {
           fridaDb.fetch();
-          var info = fridaDb.getStr(0);
+          const info = fridaDb.getStr(0);
           if (info) {
             return JSON.parse(info);
           }
@@ -3630,8 +3634,8 @@ if (typeof globalThis !== 'undefined') {
 // 用途：向玩家发送怪物攻城活动进度和状态通知
 
 function createVillageAttackNotify(ctx) {
-  var st = globalThis.village_attack_state;
-  var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+  const st = globalThis.village_attack_state;
+  const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
 
   // 世界广播活动当前阶段和难度
   // 来源：从旧 frida.js event_villageattack_broadcast_diffcult 迁移
@@ -3656,12 +3660,12 @@ function createVillageAttackNotify(ctx) {
   // 来源：从旧 frida.js gameworld_update_villageattack_score 迁移
   // 协议: ENUM_NOTIPACKET_UPDATE_VILLAGE_ATTACKED (247)
   function updateScoreBroadcast() {
-    var remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
+    const remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
     if ((remainTime <= 0) || (st.getState() == C.STATE_END)) {
       return;
     }
 
-    var pkt = ctx.packet.createPacketGuard();
+    const pkt = ctx.packet.createPacketGuard();
     ctx.packet.putHeader(pkt, 0, 247);
     ctx.packet.putInt(pkt, remainTime);                                   // 活动剩余时间
     ctx.packet.putInt(pkt, st.getScore());                                // 当前频道 PT 点数
@@ -3677,15 +3681,15 @@ function createVillageAttackNotify(ctx) {
   // 协议: ENUM_NOTIPACKET_STARTED_VILLAGE_ATTACKED (248)
   // 用途：在玩家进入游戏时调用，打开怪物攻城 UI 并更新当前进度
   function notifyPlayerScore(curUser) {
-    var characNo = ctx.user.getCurCharacNo(curUser).toString();
-    var pt = st.getUserPt(characNo);
+    const characNo = ctx.user.getCurCharacNo(curUser).toString();
+    const pt = st.getUserPt(characNo);
 
-    var remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
+    const remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
     if ((remainTime <= 0) || (st.getState() == C.STATE_END)) {
       return;
     }
 
-    var pkt = ctx.packet.createPacketGuard();
+    const pkt = ctx.packet.createPacketGuard();
     ctx.packet.putHeader(pkt, 0, 248);
     ctx.packet.putInt(pkt, remainTime);                                   // 活动剩余时间
     ctx.packet.putInt(pkt, st.getScore());                                // 当前频道 PT 点数
@@ -3717,13 +3721,13 @@ if (typeof globalThis !== 'undefined') {
 // 已将 switch 改为数据表（见 constants.js REWARD_TABLE）
 
 function createVillageAttackReward(ctx) {
-  var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+  const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
 
   // 发送单道具系统邮件
   // 来源：从旧 frida.js CMailBoxHelperReqDBSendNewSystemMail 迁移
   // 用途：怪物攻城每次挑战成功后发送对应奖励
   function sendChallengeReward(curUser) {
-    var VAttackCount = ctx.user.getCurVAttackCount(curUser);
+    const VAttackCount = ctx.user.getCurVAttackCount(curUser);
     var reward = C.REWARD_TABLE[VAttackCount];
 
     if (!reward) {
@@ -3731,11 +3735,11 @@ function createVillageAttackReward(ctx) {
       reward = [3037, 5];
     }
 
-    var itemId = reward[0];
-    var itemCount = reward[1];
+    const itemId = reward[0];
+    const itemCount = reward[1];
 
     // 查询道具 PVF 数据
-    var retitem = globalThis.nf(ctx.addresses.cdata_manager_find_item, 'pointer', ['pointer', 'int'])(
+    const retitem = globalThis.nf(ctx.addresses.cdata_manager_find_item, 'pointer', ['pointer', 'int'])(
       globalThis.nf(ctx.addresses.g_cdata_manager, 'pointer', [])(), itemId
     );
 
@@ -3744,27 +3748,27 @@ function createVillageAttackReward(ctx) {
     }
 
     // 构造道具对象用于邮件发送
-    var InvenItemConstructor = globalThis.nf(ctx.addresses.inven_item_constructor, 'pointer', ['pointer']);
-    var GetItemIndex = globalThis.nf(ctx.addresses.getitem_index, 'int', ['pointer']);
-    var ReqDBSendNewSystemMail = globalThis.nf(ctx.addresses.req_db_send_new_system_mail, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'int', 'int', 'int', 'char', 'char']);
+    const InvenItemConstructor = globalThis.nf(ctx.addresses.inven_item_constructor, 'pointer', ['pointer']);
+    const GetItemIndex = globalThis.nf(ctx.addresses.getitem_index, 'int', ['pointer']);
+    const ReqDBSendNewSystemMail = globalThis.nf(ctx.addresses.req_db_send_new_system_mail, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'int', 'int', 'int', 'char', 'char']);
 
-    var InvenItemPr = Memory.alloc(100);
+    const InvenItemPr = Memory.alloc(100);
     InvenItemConstructor(InvenItemPr);
 
-    var itemid = GetItemIndex(retitem);
-    var itemtype = retitem.add(8).readU8();
+    const itemid = GetItemIndex(retitem);
+    const itemtype = retitem.add(8).readU8();
     InvenItemPr.writeU8(itemtype);
     InvenItemPr.add(2).writeInt(itemid);
     InvenItemPr.add(7).writeInt(itemCount);
 
-    var GoldValue = 0;
-    var TitlePr = Memory.allocUtf8String('居民代表');
-    var TxtValue = '击杀怪物奖励：';
-    var UserID = ctx.user.getCurCharacNo(curUser);
-    var TxtValuePr = Memory.allocUtf8String(TxtValue);
-    var TxtValueLength = TxtValue.length;
-    var ServerGroup = ctx.user.getServerGroup(curUser);
-    var MailDate = 30;
+    const GoldValue = 0;
+    const TitlePr = Memory.allocUtf8String('居民代表');
+    const TxtValue = '击杀怪物奖励：';
+    const UserID = ctx.user.getCurCharacNo(curUser);
+    const TxtValuePr = Memory.allocUtf8String(TxtValue);
+    const TxtValueLength = TxtValue.length;
+    const ServerGroup = ctx.user.getServerGroup(curUser);
+    const MailDate = 30;
 
     ReqDBSendNewSystemMail(TitlePr, InvenItemPr, GoldValue, UserID, TxtValuePr, TxtValueLength, MailDate, ServerGroup, 0, 0);
   }
@@ -3789,19 +3793,19 @@ if (typeof globalThis !== 'undefined') {
 // 4. 所有真实地址已迁移到 runtime_addresses.js
 
 function createVillageAttackSettlement(ctx) {
-  var st = globalThis.village_attack_state;
-  var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+  const st = globalThis.village_attack_state;
+  const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
 
   // 点券充值（来源：从旧 frida.js api_recharge_cash_cera 迁移）
   // 风险：禁止直接修改 billing 库所有表字段，点券相关操作务必调用数据库存储过程
-  var _IPGInput = globalThis.nf(ctx.addresses.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
-  var _IPGQuery = globalThis.nf(ctx.addresses.cipghelper_ipg_query, 'int', ['pointer', 'pointer']);
+  const _IPGInput = globalThis.nf(ctx.addresses.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
+  const _IPGQuery = globalThis.nf(ctx.addresses.cipghelper_ipg_query, 'int', ['pointer', 'pointer']);
 
   function rechargeCashCera(curUser, amount) {
     // 地址来源：runtime_addresses.js cipghelper_global
-    var ipgHelper = ctx.addresses.cipghelper_global.readPointer();
+    const ipgHelper = ctx.addresses.cipghelper_global.readPointer();
     // 地址来源：runtime_addresses.js ipg_empty_string
-    var emptyString = ctx.addresses.ipg_empty_string;
+    const emptyString = ctx.addresses.ipg_empty_string;
     _IPGInput(ipgHelper, curUser, 5, amount, emptyString, emptyString, Memory.allocUtf8String('GM'), ptr(0), ptr(0), ptr(0));
     _IPGQuery(ipgHelper, curUser);
   }
@@ -3825,46 +3829,46 @@ function createVillageAttackSettlement(ctx) {
   // 来源：从旧 frida.js on_end_event_villageattack 防守成功分支迁移
   // 包括：全服发信奖励、装备强化、点券奖励、排名第一额外奖励
   function settleSuccess() {
-    var diff = st.getDifficult();
-    var multiplier = 1 + diff;
+    const diff = st.getDifficult();
+    const multiplier = 1 + diff;
 
     // 1. 全服在线玩家发信：金币 + 道具
-    var rewardGold = 1000000 * multiplier;
-    var rewardItemList = [];
-    var baseItems = C.DEFEND_SUCCESS_REWARD_ITEMS;
+    const rewardGold = 1000000 * multiplier;
+    const rewardItemList = [];
+    const baseItems = C.DEFEND_SUCCESS_REWARD_ITEMS;
     for (var i = 0; i < baseItems.length; i++) {
       rewardItemList.push([baseItems[i][0], baseItems[i][1] * multiplier]);
     }
 
     // 遍历所有在线玩家发信
     ctx.gw.forEachUser(function (curUser, args) {
-      var characNo = ctx.user.getCurCharacNo(curUser);
+      const characNo = ctx.user.getCurCharacNo(curUser);
       ctx.mail.sendMultiMail(characNo, '<怪物攻城活动>', '恭喜勇士! 防守成功!', rewardGold, rewardItemList);
     }, null);
 
     // 2. 特殊奖励：绝望之塔推至 100 层 + 随机强化一件装备
     // 来源：从旧 frida.js 移植
-    var _TODLayerConstructor = globalThis.nf(ctx.addresses.tod_layer_constructor, 'pointer', ['pointer', 'int']);
-    var _TODSetEnterLayer = globalThis.nf(ctx.addresses.tod_userstate_set_enter_layer, 'pointer', ['pointer', 'pointer']);
+    const _TODLayerConstructor = globalThis.nf(ctx.addresses.tod_layer_constructor, 'pointer', ['pointer', 'int']);
+    const _TODSetEnterLayer = globalThis.nf(ctx.addresses.tod_userstate_set_enter_layer, 'pointer', ['pointer', 'pointer']);
 
     ctx.gw.forEachUser(function (curUser, args) {
       // 设置绝望之塔层数为 99（对应游戏内 100 层）
-      var todLayer = Memory.alloc(100);
+      const todLayer = Memory.alloc(100);
       _TODLayerConstructor(todLayer, 99);
-      var expandData = ctx.user.getCharacExpandData(curUser, 13);
+      const expandData = ctx.user.getCharacExpandData(curUser, 13);
       _TODSetEnterLayer(expandData, todLayer);
 
       // 随机选择一件穿戴中的装备提升强化/增幅等级
-      var inven = ctx.user.getCurCharacInvenW(curUser);
-      var slot = globalThis.getRandomInt(10, 21); // 12 件装备 slot 范围 10-21
-      var equ = ctx.inventory.getInvenRef(inven, ctx.inventory.TYPE_BODY, slot);
+      const inven = ctx.user.getCurCharacInvenW(curUser);
+      const slot = globalThis.getRandomInt(10, 21); // 12 件装备 slot 范围 10-21
+      const equ = ctx.inventory.getInvenRef(inven, ctx.inventory.TYPE_BODY, slot);
 
       if (ctx.inventory.getItemKey(equ)) {
         // 读取装备强化等级（偏移 6，来源：游戏逆向分析）
         var upgradeLevel = equ.add(6).readU8();
         if (upgradeLevel < 31) {
           // 提升强化/增幅等级（随机 1 到 1+difficult）
-          var bonusLevel = globalThis.getRandomInt(1, 1 + diff);
+          const bonusLevel = globalThis.getRandomInt(1, 1 + diff);
           upgradeLevel += bonusLevel;
           if (upgradeLevel >= 31) {
             upgradeLevel = 31;
@@ -3884,8 +3888,8 @@ function createVillageAttackSettlement(ctx) {
     var maxPt = 0;
 
     st.forEachUserPt(function (characNo, accountId, pt) {
-      var rewardCera = pt * 10;
-      var userPr = ctx.gw.findUserFromWorldByAccid(ctx.gw.getGameWorld(), accountId);
+      const rewardCera = pt * 10;
+      const userPr = ctx.gw.findUserFromWorldByAccid(ctx.gw.getGameWorld(), accountId);
       if (!userPr || userPr.isNull()) {
         return;
       }
@@ -3910,7 +3914,7 @@ function createVillageAttackSettlement(ctx) {
       }
 
       // 广播排行榜第一名
-      var rankFirstName = ctx.va_getCharacNameByNo(rankFirstCharacNo);
+      const rankFirstName = ctx.va_getCharacNameByNo(rankFirstCharacNo);
       ctx.va_notify.broadcastMessage('<怪物攻城活动> 恭喜勇士 【' + rankFirstName + '】 成为个人积分排行榜第一名(' + maxPt + 'pt)!');
     }
   }
@@ -3921,12 +3925,12 @@ function createVillageAttackSettlement(ctx) {
   // 风险：随机删除装备对玩家影响很大，需确认这个玩法是否被接受
   function settleFailure() {
     ctx.gw.forEachUser(function (curUser, args) {
-      var inven = ctx.user.getCurCharacInvenW(curUser);
+      const inven = ctx.user.getCurCharacInvenW(curUser);
 
       // 7% 概率被掠夺一件穿戴中的装备
       if (globalThis.getRandomInt(0, 100) < 7) {
-        var slot = globalThis.getRandomInt(10, 21);
-        var equ = ctx.inventory.getInvenRef(inven, ctx.inventory.TYPE_BODY, slot);
+        const slot = globalThis.getRandomInt(10, 21);
+        const equ = ctx.inventory.getInvenRef(inven, ctx.inventory.TYPE_BODY, slot);
 
         if (ctx.inventory.getItemKey(equ)) {
           ctx.inventory.resetItem(equ);
@@ -3935,9 +3939,9 @@ function createVillageAttackSettlement(ctx) {
       }
 
       // 随机掠夺 1%-10% 所持金币
-      var rate = globalThis.getRandomInt(1, 11);
-      var curGold = ctx.inventory.getMoney(inven);
-      var tax = Math.floor((rate / 100) * curGold);
+      const rate = globalThis.getRandomInt(1, 11);
+      const curGold = ctx.inventory.getMoney(inven);
+      const tax = Math.floor((rate / 100) * curGold);
       ctx.inventory.useMoney(inven, tax, 0, 0);
       ctx.user.sendUpdateItemList(curUser, 1, 0, 0);
     }, null);
@@ -3960,14 +3964,14 @@ if (typeof globalThis !== 'undefined') {
 // 用途：控制活动开启、计时、阶段流转、活动结束
 
 function createVillageAttackFlow(ctx) {
-  var st = globalThis.village_attack_state;
-  var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
-  var notify = ctx.va_notify;
-  var db = ctx.va_db;
+  const st = globalThis.village_attack_state;
+  const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+  const notify = ctx.va_notify;
+  const db = ctx.va_db;
 
-  var _InterVillageAttackedStart = globalThis.nf(ctx.addresses.inter_village_attacked_start_dispatch, 'pointer', ['pointer', 'pointer', 'pointer']);
-  var _OnDestroyVillageMonster = globalThis.nf(ctx.addresses.cvillagemonstermgr_on_destroy_village_monster, 'pointer', ['pointer', 'int']);
-  var _GlobalVillageMonsterMgr = ctx.addresses.globaldata_villagemonstermgr;
+  const _InterVillageAttackedStart = globalThis.nf(ctx.addresses.inter_village_attacked_start_dispatch, 'pointer', ['pointer', 'pointer', 'pointer']);
+  const _OnDestroyVillageMonster = globalThis.nf(ctx.addresses.cvillagemonstermgr_on_destroy_village_monster, 'pointer', ['pointer', 'int']);
+  const _GlobalVillageMonsterMgr = ctx.addresses.globaldata_villagemonstermgr;
 
   // 设置怪物攻城副本难度
   // 来源：从旧 frida.js set_villageattack_dungeon_difficult 迁移
@@ -3981,7 +3985,7 @@ function createVillageAttackFlow(ctx) {
   // 开启怪物攻城活动（调用游戏原生函数）
   // 来源：从旧 frida.js start_villageattack 迁移
   function startGameEvent(totalTime, score, targetScore) {
-    var a3 = Memory.alloc(100);
+    const a3 = Memory.alloc(100);
     a3.add(10).writeInt(totalTime);    // 活动剩余时间
     a3.add(14).writeInt(score);        // 当前频道 PT 点数
     a3.add(18).writeInt(targetScore);  // 成功防守所需点数
@@ -3997,7 +4001,7 @@ function createVillageAttackFlow(ctx) {
   // 开启活动（入口函数）
   // 来源：从旧 frida.js on_start_event_villageattack 迁移
   function onStart() {
-    var curTime = ctx.time.getCurSec();
+    const curTime = ctx.time.getCurSec();
     // 重置活动状态
     st.reset(curTime);
     setDungeonDifficult(st.getDifficult());
@@ -4029,7 +4033,7 @@ function createVillageAttackFlow(ctx) {
     }
 
     // 活动结束检测
-    var remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
+    const remainTime = st.getRemainTime(ctx.time.getCurSec(), ctx.villageAttackConfig.total_time);
     if (remainTime <= 0) {
       onEnd();
       return;
@@ -4057,7 +4061,7 @@ function createVillageAttackFlow(ctx) {
     // 扣除 PT（不低于当前阶段最低值）
     if (damage > 0) {
       var currentScore = st.getScore() - damage;
-      var minScore = ctx.villageAttackConfig.target_score[st.getState() - 1];
+      const minScore = ctx.villageAttackConfig.target_score[st.getState() - 1];
       if (currentScore < minScore) {
         currentScore = minScore;
       }
@@ -4080,8 +4084,8 @@ function createVillageAttackFlow(ctx) {
     }
 
     // 保存状态
-    var wasDefendSuccess = st.getDefendSuccess();
-    var wasState = st.getState();
+    const wasDefendSuccess = st.getDefendSuccess();
+    const wasState = st.getState();
 
     // 设置活动结束
     st.setState(C.STATE_END);
@@ -4104,8 +4108,8 @@ function createVillageAttackFlow(ctx) {
   // 安排下一轮活动
   // 来源：从旧 frida.js start_event_villageattack_timer 迁移
   function scheduleNextEvent() {
-    var curTime = ctx.time.getCurSec();
-    var startHour = ctx.villageAttackConfig.start_hour || C.DEFAULT_START_HOUR;
+    const curTime = ctx.time.getCurSec();
+    const startHour = ctx.villageAttackConfig.start_hour || C.DEFAULT_START_HOUR;
     // 计算距离下次开启的时间
     var delayTime = (3600 * startHour) - (curTime % (3600 * 24));
     if (delayTime <= 0) {
@@ -4155,14 +4159,14 @@ if (typeof globalThis !== 'undefined') {
 // 5. replace hook 异常时必须兜底调用原函数
 
 function createVillageAttackHooks(ctx) {
-  var st = globalThis.village_attack_state;
-  var C = globalThis.VILLAGE_ATTACK_CONSTANTS;
-  var notify = ctx.va_notify;
-  var addr = ctx.addresses;
+  const st = globalThis.village_attack_state;
+  const C = globalThis.VILLAGE_ATTACK_CONSTANTS;
+  const notify = ctx.va_notify;
+  const addr = ctx.addresses;
 
   // 辅助：获取队伍中所有在线玩家
-  var _GetParty = globalThis.nf(addr.cuser_get_party, 'pointer', ['pointer']);
-  var _GetPartyUser = globalThis.nf(addr.cparty_get_user, 'pointer', ['pointer', 'int']);
+  const _GetParty = globalThis.nf(addr.cuser_get_party, 'pointer', ['pointer']);
+  const _GetPartyUser = globalThis.nf(addr.cparty_get_user, 'pointer', ['pointer', 'int']);
 
   // =====================================================
   // Hook 1: 攻城副本回调（队友击杀奖励）
@@ -4216,12 +4220,12 @@ function createVillageAttackHooks(ctx) {
         }
 
         // 当前杀死的攻城怪物 ID
-        var villageMonsterId = this.villageMonster.add(2).readUShort();
+        const villageMonsterId = this.villageMonster.add(2).readUShort();
         // 当前阶段击杀每只攻城怪物 PT 点数奖励: (1, 2, 4, 8, 16)
-        var bonusPt = Math.pow(2, st.getDifficult());
+        const bonusPt = Math.pow(2, st.getDifficult());
 
         // 获取玩家所在队伍
-        var party = _GetParty(this.user);
+        const party = _GetParty(this.user);
         if (party.isNull()) {
           return;
         }
@@ -4230,7 +4234,7 @@ function createVillageAttackHooks(ctx) {
         for (var i = 0; i < 4; ++i) {
           var user = _GetPartyUser(party, i);
           if (!user.isNull()) {
-            var characNo = ctx.user.getCurCharacNo(user).toString();
+            const characNo = ctx.user.getCurCharacNo(user).toString();
             // 记录角色 accid（方便离线充值）
             st.addUserPt(characNo, ctx.user.getAccId(user), bonusPt);
 
@@ -4267,8 +4271,8 @@ function createVillageAttackHooks(ctx) {
         }
         // ---- P2 阶段处理 ----
         else if (st.getState() == C.STATE_P2) {
-          var curTime = ctx.time.getCurSec();
-          var diffTime = curTime - st.getP2LastKilledTime();
+          const curTime = ctx.time.getCurSec();
+          const diffTime = curTime - st.getP2LastKilledTime();
 
           // 1 分钟内连续击杀相同攻城怪物
           if ((diffTime < 60) && (villageMonsterId == st.getLastKilledMonsterId())) {
@@ -4354,8 +4358,8 @@ function createVillageAttackHooks(ctx) {
           return;
         }
 
-        var nextMonster = ptr(retval);
-        var nextMonsterId = nextMonster.readUShort();
+        const nextMonster = ptr(retval);
+        const nextMonsterId = nextMonster.readUShort();
 
         // 当前刷新的怪物为机制怪物（牛头统帅或机械牛）
         // 替换为随机普通怪物，避免机制怪物被刷在错误阶段
@@ -4428,7 +4432,7 @@ function createVillageAttackHooks(ctx) {
     onEnter: function (args) {
       try {
         if (g_va_fighting_state) {
-          var villageMonster = args[0];
+          const villageMonster = args[0];
           g_va_fighting_monster_id = villageMonster.add(2).readU16();
         }
       } catch (err) {
@@ -4452,7 +4456,7 @@ function createVillageAttackHooks(ctx) {
   // 风险：
   //   1. 直接修改怪物对象内存，如果结构体布局变化会导致崩溃
   //   2. 难度 3/4 额外刷怪逻辑涉及 index/uid 重新分配，需要确保唯一性
-  var _OriginalAddMob = globalThis.nf(addr.mapinfo_add_mob, 'int', ['pointer', 'pointer']);
+  const _OriginalAddMob = globalThis.nf(addr.mapinfo_add_mob, 'int', ['pointer', 'pointer']);
 
   replaceOnce('va_add_mob', addr.mapinfo_add_mob, function (mapInfo, monster) {
     try {
@@ -4461,13 +4465,13 @@ function createVillageAttackHooks(ctx) {
         // 正在挑战世界 BOSS 时副本内有几率刷出世界 BOSS
         if (g_va_fighting_monster_id == C.MONSTER_TAU_META_COW &&
             st.getState() == C.STATE_P3) {
-          var p3Chance = (st.getScore() - ctx.villageAttackConfig.target_score[1]) + (6 * st.getDifficult());
+          const p3Chance = (st.getScore() - ctx.villageAttackConfig.target_score[1]) + (6 * st.getDifficult());
           if (globalThis.getRandomInt(0, 100) < p3Chance) {
             monster.add(0xc).writeUInt(C.MONSTER_TAU_META_COW);
           }
         }
 
-        var diff = st.getDifficult();
+        const diff = st.getDifficult();
 
         if (diff == 0) {
           // 难度 0: 无变化
@@ -4495,7 +4499,7 @@ function createVillageAttackHooks(ctx) {
           }
           _OriginalAddMob(mapInfo, monster);
 
-          var uidOffset = 1000;
+          const uidOffset = 1000;
           monster.writeUInt(monster.readUInt() + uidOffset);
           monster.add(4).writeUInt(monster.add(4).readUInt() + uidOffset);
           return _OriginalAddMob(mapInfo, monster);
@@ -4507,7 +4511,7 @@ function createVillageAttackHooks(ctx) {
           }
           _OriginalAddMob(mapInfo, monster);
 
-          var uidOffset2 = 1000;
+          const uidOffset2 = 1000;
           var ret = 0;
           for (var cnt = 3; cnt > 0; cnt--) {
             monster.writeUInt(monster.readUInt() + uidOffset2);
@@ -4542,15 +4546,15 @@ function createVillageAttackHooks(ctx) {
     onLeave: function (retval) {
       try {
         if (retval == 0 && this.result) {
-          var party = _GetParty(this.user);
+          const party = _GetParty(this.user);
 
           // 给队伍所有成员发额外经验
           for (var i = 0; i < 4; ++i) {
-            var user = _GetPartyUser(party, i);
+            const user = _GetPartyUser(party, i);
             if (!user.isNull()) {
-              var curLevel = ctx.user.getCharacLevel(user);
+              const curLevel = ctx.user.getCharacLevel(user);
               // 随机经验奖励：当前等级升级所需经验的 0%-0.1%
-              var rewardExp = Math.floor(
+              const rewardExp = Math.floor(
                 ctx.user.getLevelUpExp(user, curLevel) * globalThis.getRandomInt(0, 1000) / 1000000
               );
               ctx.user.gainExpSp(user, rewardExp);
@@ -4618,7 +4622,7 @@ function startVillageAttackFeature(ctx) {
 
     // 从数据库加载活动状态
     if (vaDb) {
-      var savedInfo = vaDb.load();
+      const savedInfo = vaDb.load();
       if (savedInfo) {
         globalThis.village_attack_state.setInfo(savedInfo);
       }
@@ -4628,14 +4632,14 @@ function startVillageAttackFeature(ctx) {
     ctx.va_notify = globalThis.createVillageAttackNotify(ctx);
 
     // 初始化流程模块（先创建，因为 hooks 和 settlement 需要引用它）
-    var vaFlow = globalThis.createVillageAttackFlow(ctx);
+    const vaFlow = globalThis.createVillageAttackFlow(ctx);
     ctx.va_flow = vaFlow;
 
     // 初始化奖励模块
     ctx.va_reward = globalThis.createVillageAttackReward(ctx);
 
     // 初始化结算模块
-    var vaSettlement = globalThis.createVillageAttackSettlement(ctx);
+    const vaSettlement = globalThis.createVillageAttackSettlement(ctx);
     ctx.va_settlement = vaSettlement.settle;
 
     // 根据角色 charac_no 查询角色名（结算时广播用）
@@ -4643,14 +4647,14 @@ function startVillageAttackFeature(ctx) {
     ctx.va_getCharacNameByNo = function (characNo) {
       // 从数据库查询角色名
       // 风险：直接拼接 SQL，characNo 为数字类型是安全的
-      var fridaDb = ctx.fridaDb;
+      const fridaDb = ctx.fridaDb;
       if (!fridaDb) {
         return characNo.toString();
       }
       if (fridaDb.exec("select charac_name from charac_info where charac_no=" + characNo + ";")) {
         if (fridaDb.getNRows() == 1) {
           fridaDb.fetch();
-          var name = fridaDb.getStr(0);
+          const name = fridaDb.getStr(0);
           if (name) {
             return name;
           }
@@ -4683,12 +4687,12 @@ if (typeof globalThis !== 'undefined') {
 // 获取服务器环境配置
 // 来源：从旧 frida.js G_CEnvironment + CEnvironment_get_file_name 迁移
 function createStartupHelpers(addr) {
-  var _G_CEnvironment = nf(addr.g_cenvironment, 'pointer', []);
-  var _GetFileName = nf(addr.cenvironment_get_file_name, 'pointer', ['pointer']);
+  const _G_CEnvironment = nf(addr.g_cenvironment, 'pointer', []);
+  const _GetFileName = nf(addr.cenvironment_get_file_name, 'pointer', ['pointer']);
 
   function getChannelName() {
     try {
-      var filename = _GetFileName(_G_CEnvironment());
+      const filename = _GetFileName(_G_CEnvironment());
       return filename.readUtf8String(-1);
     } catch (e) {
       return 'unknown';
@@ -4750,9 +4754,9 @@ function startRuntimeModules() {
 
   console.log('==================== frida runtime start ====================');
 
-  var addr = globalThis.PROJECT_ADDRESSES;
-  var cfg = globalThis.PROJECT_JS_CONFIG;
-  var helpers = globalThis.createStartupHelpers(addr);
+  const addr = globalThis.PROJECT_ADDRESSES;
+  const cfg = globalThis.PROJECT_JS_CONFIG;
+  const helpers = globalThis.createStartupHelpers(addr);
 
   helpers.logStartup('initializing runtime...');
 
@@ -4848,7 +4852,7 @@ function startRuntimeModules() {
   // 日志上下文说明：
   //   ctx.logger   = logger 完整对象（有 .log() 和 .getTimestamp()）
   //   ctx.log      = 便捷日志函数 logger.log(msg)
-  var ctx = {
+  const ctx = {
     addresses: addr,
     config: cfg,
     logger: logger,
@@ -4897,30 +4901,30 @@ function startRuntimeModules() {
     helpers.logModuleStart('database');
     try {
       // 加载本地配置文件（数据库连接信息）
-      var fileMod = globalThis.createFileModule();
-      var globalConfig = fileMod.loadConfig('frida_config.json');
+      const fileMod = globalThis.createFileModule();
+      const globalConfig = fileMod.loadConfig('frida_config.json');
 
       if (!globalConfig) {
         // 配置文件读取失败，无法获取数据库账号
         console.log('[database] frida_config.json 读取失败，数据库账号为空，跳过数据库初始化');
       } else {
-        var dbConfig = globalConfig['db_config'] || {};
+        const dbConfig = globalConfig['db_config'] || {};
 
         if (!dbConfig['account'] || !dbConfig['password']) {
           console.log('[database] frida_config.json 中 db_config.account/password 为空，跳过数据库初始化');
         } else if (mysqlBind) {
           // 初始化数据库连接
           // 风险：数据库连接信息使用 localhost:3306，生产环境需从配置读取
-          var mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
-          var mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
-          var mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          const mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          const mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          const mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
           // 建库 frida
           if (mysqlTaiwanCain) {
             mysqlBind.exec(mysqlTaiwanCain, 'create database if not exists frida default charset utf8;');
           }
 
-          var mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+          const mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
           if (mysqlFrida) {
             // 建表 game_event（存储活动数据和排行榜）
@@ -5123,7 +5127,7 @@ function createBoundMysqlDb(mysqlBind, mysqlHandle) {
 function disposeRuntimeModules() {
   console.log('-------------------- frida dispose --------------------');
 
-  var ctx = globalThis._runtimeCtx;
+  const ctx = globalThis._runtimeCtx;
   if (!ctx) {
     return;
   }
@@ -5141,7 +5145,7 @@ function disposeRuntimeModules() {
 
     // 关闭数据库连接（使用 ctx.mysql binding 的 close 函数）
     if (ctx.db && ctx.mysql) {
-      var db = ctx.db;
+      const db = ctx.db;
       if (db.frida) {
         ctx.mysql.close(db.frida);
       }
@@ -5210,7 +5214,7 @@ rpc.exports = {
 
 // 延迟启动：等待 check_argv 执行完后启动
 function awake() {
-  var addr = globalThis.PROJECT_ADDRESSES;
+  const addr = globalThis.PROJECT_ADDRESSES;
   if (!addr || !addr.check_argv) {
     // 地址不可用，直接启动
     console.log('[entry] check_argv 地址不可用，直接启动');
@@ -5228,9 +5232,10 @@ function awake() {
   // 使用 attachOnce 防重复注册
   // attachOnce 返回 false 表示注册失败（地址异常、函数不可 hook 等），
   // 此时必须兜底直接启动，否则整个 runtime 静默不启动
-  var attached = globalThis.attachOnce('runtime_check_argv', addr.check_argv, {
-    onEnter: function (args) {},
-    onLeave: function (retval) {
+  const attached = globalThis.attachOnce('runtime_check_argv', addr.check_argv, {
+    onEnter: function (args) {
+    },
+    onLeave: function () {
       // check_argv 执行完毕=服务器初始化完成，开始加载
       start();
     }
