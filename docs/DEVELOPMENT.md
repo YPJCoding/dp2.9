@@ -20,6 +20,27 @@
 - 不写真实地址
 - 不直接创建 NativeFunction
 
+### template 默认 JS 启动流程
+
+```text
+df_game_r.js
+  -> dp_load('example_module')
+  -> globalThis.startExampleModule()
+```
+
+该流程只是验证 template 的 `dp_load` 加载骨架可用，不代表真实业务启动顺序。
+
+真实项目可以在派生分支中替换为：
+
+```text
+df_game_r.js
+  -> dp_load('startup_helpers')
+  -> dp_load('startup_modules')
+  -> startRuntimeModules()
+```
+
+但 template 分支不内置真实 runtime 地址、binding 或 feature。
+
 ## 部署方式
 
 ```text

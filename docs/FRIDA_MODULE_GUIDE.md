@@ -19,6 +19,13 @@ df_game_r.js
 script/js/example_module.js
 ```
 
+template 默认入口会通过 `dp_load('example_module')` 加载示例模块，并调用 `globalThis.startExampleModule()`。
+
+`loadTemplateModule()` 是最小 `dp_load` 包装：
+- `dp_load` 不存在时返回 `false`
+- `dp_load` 返回非 `true` 时返回 `false`
+- 捕获异常并输出日志
+
 ## 可选拆分结构
 
 项目变复杂后，可以按需要拆分为以下结构：

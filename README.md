@@ -15,6 +15,14 @@ df_game_r.js    # Frida JS 入口，通过 dp_load 加载 script/js/**
 script/js/**    # Frida runtime 模块
 ```
 
+template 默认只加载示例模块：
+
+```text
+script/js/example_module.js
+```
+
+`df_game_r.js` 会通过 `dp_load('example_module')` 加载示例模块，并调用 `globalThis.startExampleModule()`。
+
 ## 部署方式
 
 唯一部署方式：
