@@ -30,7 +30,7 @@ rpc.exports.dispose()
 
 ### Lua 侧
 
-保持不变。`df_game_r.lua` 负责 Lua 模块加载，与 JS 侧解耦。
+`df_game_r.lua` 是兼容空壳入口，不加载 `script.bootstrap`，不承载业务逻辑。真实 runtime 由 JS 侧启动。
 
 ## 地址管理
 

@@ -1,62 +1,8 @@
-# DP Runtime Clean Template
+# DP2 Frida Runtime
 
-这是一个干净的 DP runtime 模板分支。
+当前分支：`refactor/frida-runtime-modules`
 
-本分支用于创建新项目底板，只保留最小运行结构、示例模块和开发说明。
-
-## 分支定位
-
-- `main`：业务项目主线。
-- `template/clean-runtime-skeleton`：干净模板底板。
-- 新项目建议从 template 分支拉新分支开发，不要把 template 分支合并回业务主线。
-
-## 保留内容
-
-- 最小 Lua 入口。
-- 最小 JS/Frida 入口。
-- 示例配置。
-- 示例 Lua 模块。
-- 示例 Lua handler。
-- 示例 JS 模块。
-- 本地语法检查脚本。
-- 开发说明文档。
-
-## 不包含
-
-- 真实业务逻辑。
-- 真实业务配置。
-- 真实运行时地址。
-- 真实 item_id。
-
-## 目录结构
-
-```text
-df_game_r.lua
-
-df_game_r.js
-
-script/
-  config.lua
-  logger.lua
-  bootstrap.lua
-  modules/
-    example_module.lua
-  handlers/
-    example_handler.lua
-  js/
-    example_module.js
-
-tools/
-  check_js_syntax.sh
-  check_lua_syntax.sh
-
-docs/
-  DEVELOPMENT.md
-  MODULE_GUIDE.md
-  LUA_MODULE_GUIDE.md
-  FRIDA_MODULE_GUIDE.md
-  LOCAL_CHECKS.md
-```
+Frida runtime 已从旧 `frida.js` 模块化重构，拆分到 `script/js/**` 目录。
 
 ## 部署
 
@@ -70,13 +16,47 @@ docs/
 `df_game_r.js` 通过 `dp_load` 加载 `runtime_addresses`、`runtime_config`、`startup_modules` 等引导模块。
 `startup_modules.js` 的 `loadRuntimeDependencies()` 加载其余所有子模块。
 
+## Lua 入口说明
+
+`df_game_r.lua` 当前仅作为 DP2 Lua 侧兼容入口存在，不承载业务逻辑，不再加载 `script.bootstrap`。
+
+实际业务 runtime 入口是 `df_game_r.js + dp_load + script/js/**`。
+
+部署时需确保：
+
+- `df_game_r.lua` 已更新为安全空壳入口
+- `df_game_r.js` 已部署
+- `script/js/**` 已部署
+- 目标环境提供 `dp_load`
+
+## 目录结构
+
+```text
+df_game_r.lua          # Lua 兼容空壳入口
+df_game_r.js           # Frida/JS 入口（dp_load 加载 script/js/）
+
+script/
+  js/                  # Frida/JS 模块
+    core/              # 基础工具模块
+    bindings/          # 游戏 API 封装
+    features/          # 业务功能模块
+      village_attack/  # 怪物攻城活动
+
+tools/
+  check_js_syntax.sh
+  check_lua_syntax.sh
+
+docs/
+  DEVELOPMENT.md
+  FRIDA_MODULE_GUIDE.md
+  FRIDA_REFACTOR_NOTES.md
+```
+
 ## 文档入口
 
 - [总体开发说明](docs/DEVELOPMENT.md)
-- [模块开发总览](docs/MODULE_GUIDE.md)
-- [Lua 模块开发指南](docs/LUA_MODULE_GUIDE.md)
 - [Frida/JS 模块开发指南](docs/FRIDA_MODULE_GUIDE.md)
-- [本地检查](docs/LOCAL_CHECKS.md)
+- [Frida 重构笔记](docs/FRIDA_REFACTOR_NOTES.md)
 
 ## 本地检查
 
@@ -86,11 +66,3 @@ bash tools/check_lua_syntax.sh
 ```
 
 `check_lua_syntax.sh` 依赖本机安装 `luac`。
-
-## 使用方式
-
-1. 从 `template/clean-runtime-skeleton` 拉项目分支。
-2. 修改 README 中的项目名称和版本说明。
-3. 按项目需要调整 `script/config.lua`。
-4. 按项目需要新增模块。
-5. 根据团队习惯安排提交和 review。
