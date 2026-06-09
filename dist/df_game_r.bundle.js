@@ -890,9 +890,7 @@ function nf(address, retType, argTypes) {
   return new NativeFunction(address, retType, argTypes || [], { abi: 'sysv' });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.nf = nf;
-}
+RuntimeUtils.exposeGlobal('nf', nf);
 // 日志模块
 // 来源：从旧 frida.js 迁移
 // 用途：统一日志输出（控制台 + 文件）
@@ -981,9 +979,7 @@ function createLogger(ctx) {
   return { log: log, getTimestamp: getTimestamp };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createLogger = createLogger;
-}
+RuntimeUtils.exposeGlobal('createLogger', createLogger);
 // 时间模块
 // 来源：从旧 frida.js 迁移
 // 用途：提供系统时间、时间戳等相关工具函数
@@ -1011,9 +1007,7 @@ function createTimeModule(addr) {
   return { getCurSec: getCurSec };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createTimeModule = createTimeModule;
-}
+RuntimeUtils.exposeGlobal('createTimeModule', createTimeModule);
 // 随机数模块
 // 来源：从旧 frida.js 迁移
 // 用途：提供统一的随机数生成函数，避免各模块重复定义 get_random_int
@@ -1022,9 +1016,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.getRandomInt = getRandomInt;
-}
+RuntimeUtils.exposeGlobal('getRandomInt', getRandomInt);
 // 内存操作模块
 // 来源：从旧 frida.js 迁移
 // 用途：封装 Memory.protect 和 patch 字节写入等内存操作
@@ -1075,10 +1067,8 @@ function protectAndWrite(address, size, data, restoreProtection) {
   }
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.bin2hex = bin2hex;
-  globalThis.memoryProtectAndWrite = protectAndWrite;
-}
+RuntimeUtils.exposeGlobal('bin2hex', bin2hex);
+RuntimeUtils.exposeGlobal('memoryProtectAndWrite', protectAndWrite);
 // 文件操作模块
 // 来源：从旧 frida.js 迁移并重构
 // 用途：封装 Linux 文件读写操作
@@ -1158,9 +1148,7 @@ function createFileModule() {
   return { readFile: readFile, loadConfig: loadConfig };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createFileModule = createFileModule;
-}
+RuntimeUtils.exposeGlobal('createFileModule', createFileModule);
 // Hook 防重复模块
 // 来源：新增模块，用于防止热重载时重复 hook 造成逻辑叠加
 // 用途：所有 Interceptor.attach 和 Interceptor.replace 都必须走这里
@@ -1387,9 +1375,7 @@ function createPacketBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createPacketBinding = createPacketBinding;
-}
+RuntimeUtils.exposeGlobal('createPacketBinding', createPacketBinding);
 // MySQL 数据库操作 binding
 // 来源：从旧 frida.js MySQL_* 系列函数迁移
 // 用途：封装 MySQL 连接、查询、结果读取
@@ -1535,9 +1521,7 @@ function createMysqlBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createMysqlBinding = createMysqlBinding;
-}
+RuntimeUtils.exposeGlobal('createMysqlBinding', createMysqlBinding);
 // 角色操作 binding
 // 来源：从旧 frida.js CUser* 系列函数迁移
 // 用途：封装角色状态、属性、数据相关操作
@@ -1761,9 +1745,7 @@ function createUserBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createUserBinding = createUserBinding;
-}
+RuntimeUtils.exposeGlobal('createUserBinding', createUserBinding);
 // 背包/道具 binding
 // 来源：从旧 frida.js CInventory*/Inven_Item* 系列函数迁移
 // 用途：封装背包操作、道具查询等
@@ -1865,9 +1847,7 @@ function createInventoryBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createInventoryBinding = createInventoryBinding;
-}
+RuntimeUtils.exposeGlobal('createInventoryBinding', createInventoryBinding);
 // 道具/装备数据 binding
 // 来源：从旧 frida.js CItem* / CStackableItem* 系列函数迁移
 // 用途：封装道具属性查询、PVF 数据查询等
@@ -1945,9 +1925,7 @@ function createItemBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createItemBinding = createItemBinding;
-}
+RuntimeUtils.exposeGlobal('createItemBinding', createItemBinding);
 // 邮件系统 binding
 // 来源：从旧 frida.js CMailBoxHelper*/ReqDBSendNewSystemMail* 系列函数迁移
 // 用途：封装系统邮件发送操作（多道具、时装、单道具）
@@ -2021,9 +1999,7 @@ function createMailBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createMailBinding = createMailBinding;
-}
+RuntimeUtils.exposeGlobal('createMailBinding', createMailBinding);
 // GameWorld 操作 binding
 // 来源：从旧 frida.js G_GameWorld / GameWorld_* 系列函数迁移
 // 用途：封装游戏世界操作（全服广播、玩家遍历、查找玩家等）
@@ -2192,9 +2168,7 @@ function createGameWorldBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createGameWorldBinding = createGameWorldBinding;
-}
+RuntimeUtils.exposeGlobal('createGameWorldBinding', createGameWorldBinding);
 // 定时器调度 binding
 // 来源：从旧 frida.js timer_dispatcher_list + do_timer_dispatch 迁移
 // 用途：在 dispatcher 线程安全地执行任务
@@ -2270,9 +2244,7 @@ function createTimerDispatcherBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createTimerDispatcherBinding = createTimerDispatcherBinding;
-}
+RuntimeUtils.exposeGlobal('createTimerDispatcherBinding', createTimerDispatcherBinding);
 // 任务系统 binding
 // 来源：从旧 frida.js quest 相关函数迁移
 // 用途：封装任务完成、提交奖励等操作
@@ -2330,9 +2302,7 @@ function createQuestBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createQuestBinding = createQuestBinding;
-}
+RuntimeUtils.exposeGlobal('createQuestBinding', createQuestBinding);
 // 绝望之塔修复模块
 // 来源：从旧 frida.js fix_TOD(skip_user_apc) 迁移
 // 用途：修复绝望之塔的门票、金币、每10层跳过用户APC
@@ -2342,18 +2312,13 @@ if (typeof globalThis !== 'undefined') {
 // 2. 可选跳过每10层的 UserAPC（当 skip_user_apc=true 时）
 // 3. 绝望之塔不再扣除金币
 
-var g_tod_fix_started = false;
+var g_tod_fix_state = { started: false };
 
 function startTodFixFeature(ctx) {
-  if (g_tod_fix_started) {
-    console.log('[tod_fix] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_tod_fix_state, 'tod_fix', function () {
+    const addr = ctx.addresses;
+    const cfg = ctx.config.tod_fix;
 
-  const addr = ctx.addresses;
-  const cfg = ctx.config.tod_fix;
-
-  try {
     // ---- 修复1：挑战成功后可以继续使用门票 ----
     // 来源：从旧 frida.js fix_TOD 第一个 hook 迁移
     // 原函数：TOD_UserState 相关逻辑
@@ -2421,17 +2386,10 @@ function startTodFixFeature(ctx) {
       // 其他副本执行原始扣除道具逻辑
       return originalUseAncientDungeonItems(party, dungeon, invenItem, a4);
     }, 'int', ['pointer', 'pointer', 'pointer', 'pointer']);
-
-    g_tod_fix_started = true;
-    if (ctx.log) ctx.log('[tod_fix] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[tod_fix] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startTodFixFeature = startTodFixFeature;
-}
+RuntimeUtils.exposeGlobal('startTodFixFeature', startTodFixFeature);
 // 时装徽章镶嵌修复模块
 // 来源：从旧 frida.js fix_use_emblem() 迁移
 // 用途：处理时装徽章镶嵌请求，替代游戏原有的（已失效的）镶嵌流程
@@ -2450,192 +2408,184 @@ if (typeof globalThis !== 'undefined') {
 // 7. 时装数据存盘
 // 8. 通知客户端更新
 
-var g_emblem_fix_started = false;
+var g_emblem_fix_state = { started: false };
 
 function startEmblemFixFeature(ctx) {
-  if (g_emblem_fix_started) {
-    console.log('[emblem_fix] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_emblem_fix_state, 'emblem_fix', function () {
+    const addr = ctx.addresses;
+    const packet = ctx.packet;
+    const user = ctx.user;
+    const inventory = ctx.inventory;
+    const item = ctx.item;
 
-  const addr = ctx.addresses;
-  const packet = ctx.packet;
-  const user = ctx.user;
-  const inventory = ctx.inventory;
-  const item = ctx.item;
-
-  // ---- 辅助函数：获取时装数据库 UI ID ----
-  // 来源：从旧 frida.js api_get_avartar_ui_id 迁移
-  function getAvatarUiId(avartar) {
-    return avartar.add(7).readInt();
-  }
-
-  // ---- 辅助函数：设置时装插槽数据 ----
-  // 来源：从旧 frida.js api_set_JewelSocketData 迁移
-  // jewelSocketData: 时装插槽数据指针
-  // slot: 插槽索引 (0-2)
-  // emblemItemId: 要镶嵌的徽章 item_id
-  // jewel_type: 红=0x1, 黄=0x2, 绿=0x4, 蓝=0x8, 白金=0x10
-  function setJewelSocketData(jewelSocketData, slot, emblemItemId) {
-    if (!jewelSocketData.isNull()) {
-      // 每个槽数据长 6 字节: 2 字节槽类型 + 4 字节徽章 item_id
-      // 镶嵌不改变槽类型，只修改徽章 id
-      jewelSocketData.add(slot * 6 + 2).writeInt(emblemItemId);
+    // ---- 辅助函数：获取时装数据库 UI ID ----
+    // 来源：从旧 frida.js api_get_avartar_ui_id 迁移
+    function getAvatarUiId(avartar) {
+      return avartar.add(7).readInt();
     }
-  }
 
-  // ---- 时装插槽数据存盘 ----
-  // 来源：从旧 frida.js DB_UpdateAvatarJewelSlot_makeRequest 迁移
-  const _UpdateAvatarJewelSlot = nf(addr.db_update_avatar_jewel_slot_make_request, 'pointer', ['int', 'int', 'pointer']);
-
-  function saveJewelSlotData(characNo, avatarUiId, jewelSocketData) {
-    _UpdateAvatarJewelSlot(characNo, avatarUiId, jewelSocketData);
-  }
-
-  // ---- 主 Hook：拦截镶嵌请求 ----
-  // 来源：从旧 frida.js fix_use_emblem 迁移
-  // 原函数：Dispatcher_UseJewel::dispatch_sig
-  // 为什么是这个地址：此函数处理客户端发来的时装镶嵌请求
-  // 风险：封包解析错误可能导致客户端异常或角色数据异常
-  // 为什么 onLeave 替换返回值为 0：原函数返回非 0 会让客户端断线
-  attachOnce('emblem_fix_dispatch', addr.use_jewel_dispatch, {
-    onEnter: function (args) {
-      try {
-        const curUser = args[1];
-        const packetBuf = args[2];
-
-        // 步骤1：校验角色状态是否允许镶嵌
-        // 只在玩家已进入游戏（state == 3）时处理
-        const state = user.getState(curUser);
-        if (state != 3) {
-          return;
-        }
-
-        // 步骤2：解析客户端封包
-        // 封包格式（来源：协议逆向分析）：
-        //   short: 时装所在的背包槽
-        //   int: 时装 item_id
-        //   byte: 本次镶嵌徽章数量
-        //   对每个徽章: short(背包槽) + int(item_id) + byte(目标插槽)
-
-        // 时装所在的背包槽
-        const avartarInvenSlot = packet.getShort(packetBuf);
-        // 时装 item_id
-        const avartarItemId = packet.getInt(packetBuf);
-        // 本次镶嵌徽章数量
-        const emblemCnt = packet.getByte(packetBuf);
-
-        // 步骤3：获取并校验时装道具
-        const inven = user.getCurCharacInvenW(curUser);
-        const avartar = inventory.getInvenRef(inven, inventory.TYPE_AVARTAR, avartarInvenSlot);
-
-        // 时装必须存在、ID 匹配、未被锁定
-        if (inventory.isItemEmpty(avartar) ||
-            inventory.getItemKey(avartar) != avartarItemId ||
-            user.checkItemLock(curUser, 2, avartarInvenSlot)) {
-          return;
-        }
-
-        // 步骤4：获取时装插槽数据
-        const avartarAddInfo = inventory.getAddInfo(avartar);
-        const invenAvartarMgr = inventory.getAvatarItemMgrR(inven);
-
-        // CAvatarItemMgr::getJewelSocketData
-        const _GetJewelSocketData = nf(addr.cavataritemmgr_get_jewel_socket_data, 'pointer', ['pointer', 'int']);
-        const jewelSocketData = _GetJewelSocketData(invenAvartarMgr, avartarAddInfo);
-
-        if (jewelSocketData.isNull()) {
-          return;
-        }
-
-        // 步骤5：最多只支持 3 个插槽
-        if (emblemCnt <= 3) {
-          const emblems = {};
-          for (var i = 0; i < emblemCnt; i++) {
-            // 徽章所在的背包槽
-            var emblemInvenSlot = packet.getShort(packetBuf);
-            // 徽章 item_id
-            var emblemItemId = packet.getInt(packetBuf);
-            // 该徽章要镶嵌的时装插槽 ID
-            var avartarSocketSlot = packet.getByte(packetBuf);
-
-            // 步骤6：校验徽章道具
-            const emblem = inventory.getInvenRef(inven, inventory.TYPE_ITEM, emblemInvenSlot);
-            if (inventory.isItemEmpty(emblem) ||
-                inventory.getItemKey(emblem) != emblemItemId ||
-                avartarSocketSlot >= 3) {
-              return;
-            }
-
-            // 步骤7：校验徽章类型（必须是消耗品且类型为 20 = 徽章）
-            const citem = item.findItem(emblemItemId);
-            if (citem.isNull()) {
-              return;
-            }
-            if (!item.isStackable(citem) || item.getStackableItemType(citem) != 20) {
-              return;
-            }
-
-            // 步骤8：校验徽章插槽颜色是否匹配
-            // 获取徽章支持的插槽类型
-            const emblemSocketType = item.getJewelTargetSocket(citem);
-            // 获取时装插槽类型（从插槽数据中读取）
-            const avartarSocketType = jewelSocketData.add(avartarSocketSlot * 6).readShort();
-            if (!(emblemSocketType & avartarSocketType)) {
-              // 插槽类型不匹配，跳过
-              return;
-            }
-
-            emblems[avartarSocketSlot] = [emblemInvenSlot, emblemItemId];
-          }
-
-          // 步骤9：执行镶嵌
-          for (var avartarSocketSlot in emblems) {
-            // 删除消耗的徽章
-            var emblemInvenSlot = emblems[avartarSocketSlot][0];
-            inventory.deleteItem(inven, 1, emblemInvenSlot, 1, 8, 1);
-
-            // 设置时装插槽数据
-            var emblemItemId = emblems[avartarSocketSlot][1];
-            setJewelSocketData(jewelSocketData, avartarSocketSlot, emblemItemId);
-          }
-
-          // 步骤10：时装插槽数据存盘
-          saveJewelSlotData(
-            user.getCurCharacNo(curUser),
-            getAvatarUiId(avartar),
-            jewelSocketData
-          );
-
-          // 步骤11：通知客户端时装数据已更新
-          user.sendUpdateItemList(curUser, 1, 1, avartarInvenSlot);
-
-          // 步骤12：回包给客户端通知镶嵌成功
-          const packetGuard = packet.createPacketGuard();
-          packet.putHeader(packetGuard, 1, 204);
-          packet.putInt(packetGuard, 1);
-          packet.finalize(packetGuard, 1);
-          user.send(curUser, packetGuard);
-          packet.destroyPacketGuard(packetGuard);
-        }
-      } catch (error) {
-        // 镶嵌过程中出现异常，记录日志但不影响主流程
-        if (ctx.log) ctx.log('[emblem_fix] exception: ' + error);
+    // ---- 辅助函数：设置时装插槽数据 ----
+    // 来源：从旧 frida.js api_set_JewelSocketData 迁移
+    // jewelSocketData: 时装插槽数据指针
+    // slot: 插槽索引 (0-2)
+    // emblemItemId: 要镶嵌的徽章 item_id
+    // jewel_type: 红=0x1, 黄=0x2, 绿=0x4, 蓝=0x8, 白金=0x10
+    function setJewelSocketData(jewelSocketData, slot, emblemItemId) {
+      if (!jewelSocketData.isNull()) {
+        // 每个槽数据长 6 字节: 2 字节槽类型 + 4 字节徽章 item_id
+        // 镶嵌不改变槽类型，只修改徽章 id
+        jewelSocketData.add(slot * 6 + 2).writeInt(emblemItemId);
       }
-    },
-    onLeave: function (retval) {
-      // 返回值改为 0，不再踢线（原函数返回非 0 会导致客户端断线）
-      retval.replace(0);
     }
+
+    // ---- 时装插槽数据存盘 ----
+    // 来源：从旧 frida.js DB_UpdateAvatarJewelSlot_makeRequest 迁移
+    const _UpdateAvatarJewelSlot = nf(addr.db_update_avatar_jewel_slot_make_request, 'pointer', ['int', 'int', 'pointer']);
+
+    function saveJewelSlotData(characNo, avatarUiId, jewelSocketData) {
+      _UpdateAvatarJewelSlot(characNo, avatarUiId, jewelSocketData);
+    }
+
+    // ---- 主 Hook：拦截镶嵌请求 ----
+    // 来源：从旧 frida.js fix_use_emblem 迁移
+    // 原函数：Dispatcher_UseJewel::dispatch_sig
+    // 为什么是这个地址：此函数处理客户端发来的时装镶嵌请求
+    // 风险：封包解析错误可能导致客户端异常或角色数据异常
+    // 为什么 onLeave 替换返回值为 0：原函数返回非 0 会让客户端断线
+    attachOnce('emblem_fix_dispatch', addr.use_jewel_dispatch, {
+      onEnter: function (args) {
+        try {
+          const curUser = args[1];
+          const packetBuf = args[2];
+
+          // 步骤1：校验角色状态是否允许镶嵌
+          // 只在玩家已进入游戏（state == 3）时处理
+          const state = user.getState(curUser);
+          if (state != 3) {
+            return;
+          }
+
+          // 步骤2：解析客户端封包
+          // 封包格式（来源：协议逆向分析）：
+          //   short: 时装所在的背包槽
+          //   int: 时装 item_id
+          //   byte: 本次镶嵌徽章数量
+          //   对每个徽章: short(背包槽) + int(item_id) + byte(目标插槽)
+
+          // 时装所在的背包槽
+          const avartarInvenSlot = packet.getShort(packetBuf);
+          // 时装 item_id
+          const avartarItemId = packet.getInt(packetBuf);
+          // 本次镶嵌徽章数量
+          const emblemCnt = packet.getByte(packetBuf);
+
+          // 步骤3：获取并校验时装道具
+          const inven = user.getCurCharacInvenW(curUser);
+          const avartar = inventory.getInvenRef(inven, inventory.TYPE_AVARTAR, avartarInvenSlot);
+
+          // 时装必须存在、ID 匹配、未被锁定
+          if (inventory.isItemEmpty(avartar) ||
+              inventory.getItemKey(avartar) != avartarItemId ||
+              user.checkItemLock(curUser, 2, avartarInvenSlot)) {
+            return;
+          }
+
+          // 步骤4：获取时装插槽数据
+          const avartarAddInfo = inventory.getAddInfo(avartar);
+          const invenAvartarMgr = inventory.getAvatarItemMgrR(inven);
+
+          // CAvatarItemMgr::getJewelSocketData
+          const _GetJewelSocketData = nf(addr.cavataritemmgr_get_jewel_socket_data, 'pointer', ['pointer', 'int']);
+          const jewelSocketData = _GetJewelSocketData(invenAvartarMgr, avartarAddInfo);
+
+          if (jewelSocketData.isNull()) {
+            return;
+          }
+
+          // 步骤5：最多只支持 3 个插槽
+          if (emblemCnt <= 3) {
+            const emblems = {};
+            for (var i = 0; i < emblemCnt; i++) {
+              // 徽章所在的背包槽
+              var emblemInvenSlot = packet.getShort(packetBuf);
+              // 徽章 item_id
+              var emblemItemId = packet.getInt(packetBuf);
+              // 该徽章要镶嵌的时装插槽 ID
+              var avartarSocketSlot = packet.getByte(packetBuf);
+
+              // 步骤6：校验徽章道具
+              const emblem = inventory.getInvenRef(inven, inventory.TYPE_ITEM, emblemInvenSlot);
+              if (inventory.isItemEmpty(emblem) ||
+                  inventory.getItemKey(emblem) != emblemItemId ||
+                  avartarSocketSlot >= 3) {
+                return;
+              }
+
+              // 步骤7：校验徽章类型（必须是消耗品且类型为 20 = 徽章）
+              const citem = item.findItem(emblemItemId);
+              if (citem.isNull()) {
+                return;
+              }
+              if (!item.isStackable(citem) || item.getStackableItemType(citem) != 20) {
+                return;
+              }
+
+              // 步骤8：校验徽章插槽颜色是否匹配
+              // 获取徽章支持的插槽类型
+              const emblemSocketType = item.getJewelTargetSocket(citem);
+              // 获取时装插槽类型（从插槽数据中读取）
+              const avartarSocketType = jewelSocketData.add(avartarSocketSlot * 6).readShort();
+              if (!(emblemSocketType & avartarSocketType)) {
+                // 插槽类型不匹配，跳过
+                return;
+              }
+
+              emblems[avartarSocketSlot] = [emblemInvenSlot, emblemItemId];
+            }
+
+            // 步骤9：执行镶嵌
+            for (var avartarSocketSlot in emblems) {
+              // 删除消耗的徽章
+              var emblemInvenSlot = emblems[avartarSocketSlot][0];
+              inventory.deleteItem(inven, 1, emblemInvenSlot, 1, 8, 1);
+
+              // 设置时装插槽数据
+              var emblemItemId = emblems[avartarSocketSlot][1];
+              setJewelSocketData(jewelSocketData, avartarSocketSlot, emblemItemId);
+            }
+
+            // 步骤10：时装插槽数据存盘
+            saveJewelSlotData(
+              user.getCurCharacNo(curUser),
+              getAvatarUiId(avartar),
+              jewelSocketData
+            );
+
+            // 步骤11：通知客户端时装数据已更新
+            user.sendUpdateItemList(curUser, 1, 1, avartarInvenSlot);
+
+            // 步骤12：回包给客户端通知镶嵌成功
+            const packetGuard = packet.createPacketGuard();
+            packet.putHeader(packetGuard, 1, 204);
+            packet.putInt(packetGuard, 1);
+            packet.finalize(packetGuard, 1);
+            user.send(curUser, packetGuard);
+            packet.destroyPacketGuard(packetGuard);
+          }
+        } catch (error) {
+          // 镶嵌过程中出现异常，记录日志但不影响主流程
+          if (ctx.log) ctx.log('[emblem_fix] exception: ' + error);
+        }
+      },
+      onLeave: function (retval) {
+        // 返回值改为 0，不再踢线（原函数返回非 0 会导致客户端断线）
+        retval.replace(0);
+      }
+    });
   });
-
-  g_emblem_fix_started = true;
-  if (ctx.log) ctx.log('[emblem_fix] started');
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startEmblemFixFeature = startEmblemFixFeature;
-}
+RuntimeUtils.exposeGlobal('startEmblemFixFeature', startEmblemFixFeature);
 // 时装潜能（隐藏属性）模块
 // 来源：从旧 frida.js hidden_option() + start_hidden_option() 迁移
 // 用途：修改时装潜能属性下发逻辑
@@ -2649,17 +2599,12 @@ if (typeof globalThis !== 'undefined') {
 // 原游戏时装潜能生成机制可能有问题，通过 Frida 直接修改内存
 // 中的属性值和跳过分配逻辑来修复
 
-var g_hidden_option_started = false;
+var g_hidden_option_state = { started: false };
 
 function startHiddenOptionFeature(ctx) {
-  if (g_hidden_option_started) {
-    console.log('[hidden_option] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_hidden_option_state, 'hidden_option', function () {
+    const addr = ctx.addresses;
 
-  const addr = ctx.addresses;
-
-  try {
     // ---- 内存修改：关闭系统分配 + 写入随机属性 ----
     // 来源：从旧 frida.js hidden_option() 迁移
     function hiddenOption() {
@@ -2699,17 +2644,10 @@ function startHiddenOptionFeature(ctx) {
         retval.replace(1);
       }
     });
-
-    g_hidden_option_started = true;
-    if (ctx.log) ctx.log('[hidden_option] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[hidden_option] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startHiddenOptionFeature = startHiddenOptionFeature;
-}
+RuntimeUtils.exposeGlobal('startHiddenOptionFeature', startHiddenOptionFeature);
 // 勇士归来（回归用户）模块
 // 来源：从旧 frida.js set_return_user(day) 迁移
 // 用途：修改游戏内存中的回归用户判定时间阈值
@@ -2722,18 +2660,13 @@ if (typeof globalThis !== 'undefined') {
 // 1. 直接修改代码段内存，版本更新后地址可能变化
 // 2. 设置过小的天数可能导致所有玩家都算回归，破坏游戏平衡
 
-var g_return_user_started = false;
+var g_return_user_state = { started: false };
 
 function startReturnUserFeature(ctx) {
-  if (g_return_user_started) {
-    console.log('[return_user] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_return_user_state, 'return_user', function () {
+    const addr = ctx.addresses;
+    const cfg = ctx.config.return_user;
 
-  const addr = ctx.addresses;
-  const cfg = ctx.config.return_user;
-
-  try {
     // 计算回归判定时间阈值（秒）
     // day * 86400 秒/天
     const day = cfg.day || 15;
@@ -2747,17 +2680,10 @@ function startReturnUserFeature(ctx) {
     // 风险：地址偏移可能随版本变化，写入错误可能导致崩溃
     Memory.protect(addr.return_user_time_patch, 32, 'rwx');
     addr.return_user_time_patch.writeU32(time);
-
-    g_return_user_started = true;
-    if (ctx.log) ctx.log('[return_user] day=' + day + ' (threshold=' + time + 's)');
-  } catch (err) {
-    if (ctx.log) ctx.log('[return_user] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startReturnUserFeature = startReturnUserFeature;
-}
+RuntimeUtils.exposeGlobal('startReturnUserFeature', startReturnUserFeature);
 // 在线奖励模块
 // 来源：从旧 frida.js enable_online_reward() + api_recharge_cash_cera() + api_recharge_cash_cera_point() 迁移
 // 用途：在线每 5 分钟发放点券奖励
@@ -2774,17 +2700,12 @@ if (typeof globalThis !== 'undefined') {
 // - 每分钟 0.1 点券
 // - 最多奖励 12 小时（半天）
 
-var g_online_reward_started = false;
+var g_online_reward_state = { started: false };
 
 function startOnlineRewardFeature(ctx) {
-  if (g_online_reward_started) {
-    console.log('[online_reward] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_online_reward_state, 'online_reward', function () {
+    const addr = ctx.addresses;
 
-  const addr = ctx.addresses;
-
-  try {
     // 点券充值函数（来源：从旧 frida.js api_recharge_cash_cera 迁移）
     // 风险：禁止直接修改 billing 库所有表字段，点券相关操作务必调用数据库存储过程
     const _IPGInput = globalThis.nf(addr.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
@@ -2852,17 +2773,10 @@ function startOnlineRewardFeature(ctx) {
         // 不影响原函数执行
       }
     });
-
-    g_online_reward_started = true;
-    if (ctx.log) ctx.log('[online_reward] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[online_reward] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startOnlineRewardFeature = startOnlineRewardFeature;
-}
+RuntimeUtils.exposeGlobal('startOnlineRewardFeature', startOnlineRewardFeature);
 // 战力排行模块
 // 来源：从旧 frida.js ranklist / GetRankNumber / GetMyEquInfo / SetRanking / SendRankLits - 相关函数迁移
 // 用途：维护服务器战力排行榜前三名，在城镇显示雕像
@@ -3120,26 +3034,20 @@ function saveRankInfoToDb(fridaDb) {
 }
 
 // ---- 启动模块 ----
-var g_ranking_started = false;
+var g_ranking_state = { started: false };
 
 function startRankingFeature(ctx) {
-  if (g_ranking_started) {
-    console.log('[ranking] already started');
-    return;
-  }
-
-  // 从 DB 加载持久化排行数据
-  // 使用 ctx.fridaDb（绑定 frida 句柄的便捷 DB 对象）
-  if (ctx.fridaDb) {
-    try {
-      loadRankInfoFromDb(ctx.fridaDb);
-    } catch (e) {
-      console.log('[ranking] load from db failed: ' + e);
+  return RuntimeUtils.startOnce(ctx, g_ranking_state, 'ranking', function () {
+    // 从 DB 加载持久化排行数据
+    // 使用 ctx.fridaDb（绑定 frida 句柄的便捷 DB 对象）
+    if (ctx.fridaDb) {
+      try {
+        loadRankInfoFromDb(ctx.fridaDb);
+      } catch (e) {
+        console.log('[ranking] load from db failed: ' + e);
+      }
     }
-  }
-
-  g_ranking_started = true;
-  if (ctx.log) ctx.log('[ranking] started');
+  });
 }
 
 // ---- 暴露给 user_inout 的回调 ----
@@ -3170,12 +3078,10 @@ function onUserLeaveRanking(ctx, curUser) {
   saveRankInfoToDb(ctx.fridaDb);
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startRankingFeature = startRankingFeature;
-  globalThis.ranking_onUserEnter = onUserEnterRanking;
-  globalThis.ranking_onUserLeave = onUserLeaveRanking;
-  globalThis.ranking_saveToDb = saveRankInfoToDb;
-}
+RuntimeUtils.exposeGlobal('startRankingFeature', startRankingFeature);
+RuntimeUtils.exposeGlobal('ranking_onUserEnter', onUserEnterRanking);
+RuntimeUtils.exposeGlobal('ranking_onUserLeave', onUserLeaveRanking);
+RuntimeUtils.exposeGlobal('ranking_saveToDb', saveRankInfoToDb);
 // 玩家上线/下线处理模块
 // 来源：从旧 frida.js hook_user_inout_game_world() 迁移
 // 用途：处理玩家进入和离开游戏世界的事件
@@ -3192,17 +3098,12 @@ if (typeof globalThis !== 'undefined') {
 // 不要在 user_inout 里直接写排行榜、怪物攻城等业务细节。
 // 通过 ctx 中的回调或函数调用实现解耦。
 
-var g_user_inout_started = false;
+var g_user_inout_state = { started: false };
 
 function startUserInoutFeature(ctx) {
-  if (g_user_inout_started) {
-    console.log('[user_inout] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_user_inout_state, 'user_inout', function () {
+    const addr = ctx.addresses;
 
-  const addr = ctx.addresses;
-
-  try {
     // ---- Hook 1: GameWorld::reach_game_world（玩家进入游戏世界） ----
     // 来源：从旧 frida.js hook_user_inout_game_world 第一个 hook 迁移
     // 原函数：玩家选择角色后进入游戏世界
@@ -3252,17 +3153,10 @@ function startUserInoutFeature(ctx) {
       },
       onLeave: function (retval) {}
     });
-
-    g_user_inout_started = true;
-    if (ctx.log) ctx.log('[user_inout] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[user_inout] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startUserInoutFeature = startUserInoutFeature;
-}
+RuntimeUtils.exposeGlobal('startUserInoutFeature', startUserInoutFeature);
 // 怪物攻城活动常量
 // 来源：从旧 frida.js VILLAGEATTACK_STATE_* / EVENT_VILLAGEATTACK_* 常量迁移
 // 用途：定义怪物攻城活动的所有常量，供模块内各文件共享
@@ -3338,9 +3232,7 @@ const VILLAGE_ATTACK_CONSTANTS = {
   ],
 };
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.VILLAGE_ATTACK_CONSTANTS = VILLAGE_ATTACK_CONSTANTS;
-}
+RuntimeUtils.exposeGlobal('VILLAGE_ATTACK_CONSTANTS', VILLAGE_ATTACK_CONSTANTS);
 // 怪物攻城活动状态管理
 // 来源：从旧 frida.js villageAttackEventInfo 及其相关状态操作迁移
 // 用途：集中管理怪物攻城活动的所有状态数据
@@ -3538,8 +3430,7 @@ function reset(systemTime) {
   g_info.start_time = systemTime;
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.village_attack_state = {
+RuntimeUtils.exposeGlobal('village_attack_state', {
     getInfo: getInfo,
     setInfo: setInfo,
     getState: getState,
@@ -3571,8 +3462,7 @@ if (typeof globalThis !== 'undefined') {
     clearUserPtInfo: clearUserPtInfo,
     getRemainTime: getRemainTime,
     reset: reset,
-  };
-}
+});
 // 怪物攻城数据库操作
 // 来源：从旧 frida.js event_villageattack_save_to_db/load_from_db 迁移
 // 用途：持久化怪物攻城活动状态到 frida.game_event 表
@@ -3622,9 +3512,7 @@ function createVillageAttackDb(fridaDb) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackDb = createVillageAttackDb;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackDb', createVillageAttackDb);
 // 怪物攻城世界广播与通知
 // 来源：从旧 frida.js event_villageattack_broadcast_diffcult / gameworld_update_villageattack_score / notify_villageattack_score 迁移
 // 用途：向玩家发送怪物攻城活动进度和状态通知
@@ -3705,9 +3593,7 @@ function createVillageAttackNotify(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackNotify = createVillageAttackNotify;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackNotify', createVillageAttackNotify);
 // 怪物攻城挑战奖励模块
 // 来源：从旧 frida.js VillageAttackedRewardSendReward() 迁移
 // 用途：根据挑战次数发放对应的邮件奖励
@@ -3773,9 +3659,7 @@ function createVillageAttackReward(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackReward = createVillageAttackReward;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackReward', createVillageAttackReward);
 // 怪物攻城活动结算模块
 // 来源：从旧 frida.js on_end_event_villageattack 中的结算逻辑迁移
 // 用途：活动结束时进行结算（发奖/惩罚）
@@ -3949,9 +3833,7 @@ function createVillageAttackSettlement(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackSettlement = createVillageAttackSettlement;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackSettlement', createVillageAttackSettlement);
 // 怪物攻城活动流程控制
 // 来源：从旧 frida.js start_villageattack / on_start_event_villageattack / event_villageattack_timer / on_end_event_villageattack 等迁移
 // 用途：控制活动开启、计时、阶段流转、活动结束
@@ -4136,9 +4018,7 @@ function createVillageAttackFlow(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackFlow = createVillageAttackFlow;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackFlow', createVillageAttackFlow);
 // 怪物攻城活动 Hook 集合
 // 来源：从旧 frida.js hook_VillageAttack() 迁移（约 400 行 hook 代码）
 // 用途：包含所有怪物攻城相关的 Interceptor.attach/replace
@@ -4567,9 +4447,7 @@ function createVillageAttackHooks(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackHooks = createVillageAttackHooks;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackHooks', createVillageAttackHooks);
 // 怪物攻城活动入口模块
 // 来源：从旧 frida.js start_event_villageattack() 迁移
 // 用途：启动怪物攻城功能的所有子模块
@@ -4584,15 +4462,10 @@ if (typeof globalThis !== 'undefined') {
 // 7. reward.js（奖励发放）
 // 8. settlement.js（结算）
 
-var g_village_attack_started = false;
+var g_village_attack_start_guard = { started: false };
 
 function startVillageAttackFeature(ctx) {
-  if (g_village_attack_started) {
-    console.log('[village_attack] already started');
-    return;
-  }
-
-  try {
+  return RuntimeUtils.startOnce(ctx, g_village_attack_start_guard, 'village_attack', function () {
     // 配置覆盖默认值
     ctx.villageAttackConfig = {
       start_hour: ctx.config.village_attack.start_hour || 12,
@@ -4659,17 +4532,10 @@ function startVillageAttackFeature(ctx) {
 
     // 启动活动流程（恢复计时器 or 等待下一轮）
     vaFlow.initFlow();
-
-    g_village_attack_started = true;
-    if (ctx.log) ctx.log('[village_attack] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[village_attack] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startVillageAttackFeature = startVillageAttackFeature;
-}
+RuntimeUtils.exposeGlobal('startVillageAttackFeature', startVillageAttackFeature);
 // 启动辅助模块
 // 来源：从旧 frida.js 工具函数迁移并重构，对齐 main 分支 dp_load 模式
 // 用途：
@@ -4799,8 +4665,8 @@ function loadRuntimeDependencies() {
 
   var modules = [
     // 核心和 binding 已经在 df_game_r.js 中预加载：
-    //   runtime_addresses, runtime_config, core/hook_guard,
-    //   startup_helpers, startup_modules（本文件）
+    //   runtime_addresses, runtime_config, core/runtime_utils,
+    //   core/hook_guard, startup_helpers, startup_modules（本文件）
     // 以下加载其余所有依赖：
 
     'bindings/native_functions',
@@ -4912,51 +4778,17 @@ function startRuntimeModules() {
   helpers.logModuleStart('bindings');
 
   var packetBind, mysqlBind, userBind, inventoryBind, itemBind, mailBind, gwBind, timerBind, questBind;
+  var RU = RuntimeUtils;
 
-  try {
-    packetBind = globalThis.createPacketBinding(addr);
-    helpers.logModuleDone('packet binding');
-  } catch (err) { helpers.logModuleFailed('packet binding', err); packetBind = null; }
-
-  try {
-    mysqlBind = globalThis.createMysqlBinding(addr);
-    helpers.logModuleDone('mysql binding');
-  } catch (err) { helpers.logModuleFailed('mysql binding', err); mysqlBind = null; }
-
-  try {
-    userBind = globalThis.createUserBinding(addr);
-    helpers.logModuleDone('user binding');
-  } catch (err) { helpers.logModuleFailed('user binding', err); userBind = null; }
-
-  try {
-    inventoryBind = globalThis.createInventoryBinding(addr);
-    helpers.logModuleDone('inventory binding');
-  } catch (err) { helpers.logModuleFailed('inventory binding', err); inventoryBind = null; }
-
-  try {
-    itemBind = globalThis.createItemBinding(addr);
-    helpers.logModuleDone('item binding');
-  } catch (err) { helpers.logModuleFailed('item binding', err); itemBind = null; }
-
-  try {
-    mailBind = globalThis.createMailBinding(addr);
-    helpers.logModuleDone('mail binding');
-  } catch (err) { helpers.logModuleFailed('mail binding', err); mailBind = null; }
-
-  try {
-    gwBind = globalThis.createGameWorldBinding(addr);
-    helpers.logModuleDone('game_world binding');
-  } catch (err) { helpers.logModuleFailed('game_world binding', err); gwBind = null; }
-
-  try {
-    timerBind = globalThis.createTimerDispatcherBinding(addr);
-    helpers.logModuleDone('timer_dispatcher binding');
-  } catch (err) { helpers.logModuleFailed('timer_dispatcher binding', err); timerBind = null; }
-
-  try {
-    questBind = globalThis.createQuestBinding(addr);
-    helpers.logModuleDone('quest binding');
-  } catch (err) { helpers.logModuleFailed('quest binding', err); questBind = null; }
+  packetBind    = RU.runStep(helpers, 'packet binding',       function () { return globalThis.createPacketBinding(addr); }, null);
+  mysqlBind     = RU.runStep(helpers, 'mysql binding',         function () { return globalThis.createMysqlBinding(addr); }, null);
+  userBind      = RU.runStep(helpers, 'user binding',          function () { return globalThis.createUserBinding(addr); }, null);
+  inventoryBind = RU.runStep(helpers, 'inventory binding',     function () { return globalThis.createInventoryBinding(addr); }, null);
+  itemBind      = RU.runStep(helpers, 'item binding',          function () { return globalThis.createItemBinding(addr); }, null);
+  mailBind      = RU.runStep(helpers, 'mail binding',          function () { return globalThis.createMailBinding(addr); }, null);
+  gwBind        = RU.runStep(helpers, 'game_world binding',    function () { return globalThis.createGameWorldBinding(addr); }, null);
+  timerBind     = RU.runStep(helpers, 'timer_dispatcher binding', function () { return globalThis.createTimerDispatcherBinding(addr); }, null);
+  questBind     = RU.runStep(helpers, 'quest binding',         function () { return globalThis.createQuestBinding(addr); }, null);
 
   // ---- 构建 ctx 对象（模块之间通过 ctx 通信） ----
   //
@@ -4991,203 +4823,147 @@ function startRuntimeModules() {
 
   // ---- 第 5 步：Timer Dispatcher ----
   // 为什么必须第一个：所有异步任务都需要在 dispatcher 线程执行
-  if (cfg.features.timer_dispatcher) {
-    helpers.logModuleStart('timer_dispatcher');
-    try {
-      // 挂接消息分发线程，确保代码线程安全
-      // 来源：从旧 frida.js hook_TimerDispatcher_dispatch 迁移
-      attachOnce('timer_dispatcher', addr.timer_dispatcher_dispatch, {
-        onEnter: function (args) {},
-        onLeave: function (retval) {
-          if (timerBind) {
-            timerBind.dispatch();
-          }
+  RU.runFeatureStep(helpers, 'timer_dispatcher', cfg.features.timer_dispatcher, function () {
+    // 挂接消息分发线程，确保代码线程安全
+    // 来源：从旧 frida.js hook_TimerDispatcher_dispatch 迁移
+    attachOnce('timer_dispatcher', addr.timer_dispatcher_dispatch, {
+      onEnter: function (args) {},
+      onLeave: function (retval) {
+        if (timerBind) {
+          timerBind.dispatch();
         }
-      });
-      helpers.logModuleDone('timer_dispatcher');
-    } catch (err) {
-      helpers.logModuleFailed('timer_dispatcher', err);
-    }
-  }
+      }
+    });
+  });
 
   // ---- 第 6 步：Database 初始化 ----
   // 来源：从旧 frida.js init_db 迁移
   var dbInitialized = false;
-  if (cfg.features.database) {
-    helpers.logModuleStart('database');
-    try {
-      // 加载本地配置文件（数据库连接信息）
-      const fileMod = globalThis.createFileModule();
-      const globalConfig = fileMod.loadConfig('frida_config.json');
+  RU.runFeatureStep(helpers, 'database', cfg.features.database, function () {
+    // 加载本地配置文件（数据库连接信息）
+    const fileMod = globalThis.createFileModule();
+    const globalConfig = fileMod.loadConfig('frida_config.json');
 
-      if (!globalConfig) {
-        // 配置文件读取失败，无法获取数据库账号
-        console.log('[database] frida_config.json 读取失败，数据库账号为空，跳过数据库初始化');
-      } else {
-        const dbConfig = globalConfig['db_config'] || {};
+    if (!globalConfig) {
+      // 配置文件读取失败，无法获取数据库账号
+      console.log('[database] frida_config.json 读取失败，数据库账号为空，跳过数据库初始化');
+    } else {
+      const dbConfig = globalConfig['db_config'] || {};
 
-        if (!dbConfig['account'] || !dbConfig['password']) {
-          console.log('[database] frida_config.json 中 db_config.account/password 为空，跳过数据库初始化');
-        } else if (mysqlBind) {
-          // 初始化数据库连接
-          // 风险：数据库连接信息使用 localhost:3306，生产环境需从配置读取
-          const mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
-          const mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
-          const mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+      if (!dbConfig['account'] || !dbConfig['password']) {
+        console.log('[database] frida_config.json 中 db_config.account/password 为空，跳过数据库初始化');
+      } else if (mysqlBind) {
+        // 初始化数据库连接
+        // 风险：数据库连接信息使用 localhost:3306，生产环境需从配置读取
+        const mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+        const mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+        const mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
-          // 建库 frida
-          if (mysqlTaiwanCain) {
-            mysqlBind.exec(mysqlTaiwanCain, 'create database if not exists frida default charset utf8;');
-          }
+        // 建库 frida
+        if (mysqlTaiwanCain) {
+          mysqlBind.exec(mysqlTaiwanCain, 'create database if not exists frida default charset utf8;');
+        }
 
-          const mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+        const mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
-          if (mysqlFrida) {
-            // 建表 game_event（存储活动数据和排行榜）
-            mysqlBind.exec(mysqlFrida,
-              'CREATE TABLE game_event (' +
-              'event_id varchar(30) NOT NULL, event_info mediumtext NULL,' +
-              'PRIMARY KEY (event_id)' +
-              ') ENGINE=InnoDB DEFAULT CHARSET=utf8;'
-            );
+        if (mysqlFrida) {
+          // 建表 game_event（存储活动数据和排行榜）
+          mysqlBind.exec(mysqlFrida,
+            'CREATE TABLE game_event (' +
+            'event_id varchar(30) NOT NULL, event_info mediumtext NULL,' +
+            'PRIMARY KEY (event_id)' +
+            ') ENGINE=InnoDB DEFAULT CHARSET=utf8;'
+          );
 
-            // 保存数据库句柄集合
-            ctx.db = {
-              taiwanCain: mysqlTaiwanCain,
-              taiwanCain2nd: mysqlTaiwanCain2nd,
-              taiwanBilling: mysqlTaiwanBilling,
-              frida: mysqlFrida,
-            };
+          // 保存数据库句柄集合
+          ctx.db = {
+            taiwanCain: mysqlTaiwanCain,
+            taiwanCain2nd: mysqlTaiwanCain2nd,
+            taiwanBilling: mysqlTaiwanBilling,
+            frida: mysqlFrida,
+          };
 
-            // 创建绑定 frida 句柄的便捷 DB 对象
-            // 为什么需要这个东西：
-            //   mysqlBind 的 exec/getNRows/fetch/getStr 等函数第一个参数是 mysql 句柄
-            //   业务模块不直接操作 mysql 句柄，通过 fridaDb 简化调用
-            ctx.fridaDb = createBoundMysqlDb(mysqlBind, mysqlFrida);
+          // 创建绑定 frida 句柄的便捷 DB 对象
+          // 为什么需要这个东西：
+          //   mysqlBind 的 exec/getNRows/fetch/getStr 等函数第一个参数是 mysql 句柄
+          //   业务模块不直接操作 mysql 句柄，通过 fridaDb 简化调用
+          ctx.fridaDb = createBoundMysqlDb(mysqlBind, mysqlFrida);
 
-            dbInitialized = true;
-          } else {
-            console.log('[database] frida 数据库连接失败');
-          }
+          dbInitialized = true;
+        } else {
+          console.log('[database] frida 数据库连接失败');
         }
       }
-      helpers.logModuleDone('database');
-    } catch (err) {
-      helpers.logModuleFailed('database', err);
     }
-  }
+  });
 
   // ---- 第 7 步：基础修复类模块 ----
-  // tod_fix: 绝望之塔修复
-  if (cfg.features.tod_fix) {
-    helpers.logModuleStart('tod_fix');
-    try { globalThis.startTodFixFeature(ctx); helpers.logModuleDone('tod_fix'); }
-    catch (err) { helpers.logModuleFailed('tod_fix', err); }
-  }
-
-  // emblem_fix: 时装徽章镶嵌修复
-  if (cfg.features.emblem_fix) {
-    helpers.logModuleStart('emblem_fix');
-    try { globalThis.startEmblemFixFeature(ctx); helpers.logModuleDone('emblem_fix'); }
-    catch (err) { helpers.logModuleFailed('emblem_fix', err); }
-  }
-
-  // hidden_option: 时装潜能
-  if (cfg.features.hidden_option) {
-    helpers.logModuleStart('hidden_option');
-    try { globalThis.startHiddenOptionFeature(ctx); helpers.logModuleDone('hidden_option'); }
-    catch (err) { helpers.logModuleFailed('hidden_option', err); }
-  }
-
-  // return_user: 勇士归来
-  if (cfg.features.return_user) {
-    helpers.logModuleStart('return_user');
-    try { globalThis.startReturnUserFeature(ctx); helpers.logModuleDone('return_user'); }
-    catch (err) { helpers.logModuleFailed('return_user', err); }
-  }
+  RU.runFeatureStep(helpers, 'tod_fix',       cfg.features.tod_fix,       function () { globalThis.startTodFixFeature(ctx); });
+  RU.runFeatureStep(helpers, 'emblem_fix',    cfg.features.emblem_fix,    function () { globalThis.startEmblemFixFeature(ctx); });
+  RU.runFeatureStep(helpers, 'hidden_option', cfg.features.hidden_option, function () { globalThis.startHiddenOptionFeature(ctx); });
+  RU.runFeatureStep(helpers, 'return_user',   cfg.features.return_user,   function () { globalThis.startReturnUserFeature(ctx); });
 
   // ---- 第 8 步：事件/排行榜类模块 ----
   // ranking: 战力排行
-  if (cfg.features.ranking) {
-    helpers.logModuleStart('ranking');
-    try {
-      // 如果数据库未初始化，排行榜无法持久化，但仍然可以启动
-      // 启动时输出中文日志说明
-      if (!dbInitialized) {
-        console.log('[ranking] 数据库未初始化，排行榜将无法持久化');
-      }
-      globalThis.startRankingFeature(ctx);
-      // 保存排行榜的 save 回调，供 dispose 时使用
-      ctx._rankingSaveToDb = function () {
-        if (globalThis.ranking_saveToDb && ctx.fridaDb) {
-          globalThis.ranking_saveToDb(ctx.fridaDb);
-        }
-      };
-      helpers.logModuleDone('ranking');
+  RU.runFeatureStep(helpers, 'ranking', cfg.features.ranking, function () {
+    // 如果数据库未初始化，排行榜无法持久化，但仍然可以启动
+    if (!dbInitialized) {
+      console.log('[ranking] 数据库未初始化，排行榜将无法持久化');
     }
-    catch (err) { helpers.logModuleFailed('ranking', err); }
-  }
+    globalThis.startRankingFeature(ctx);
+    // 保存排行榜的 save 回调，供 dispose 时使用
+    ctx._rankingSaveToDb = function () {
+      if (globalThis.ranking_saveToDb && ctx.fridaDb) {
+        globalThis.ranking_saveToDb(ctx.fridaDb);
+      }
+    };
+  });
 
   // user_inout: 玩家上下线处理
-  if (cfg.features.user_inout) {
-    helpers.logModuleStart('user_inout');
-    try {
-      // 设置事件回调（解耦 user_inout 和 ranking/village_attack）
-      ctx.onUserEnter = function (curUser) {
-        // 排行榜下发
-        if (globalThis.ranking_onUserEnter) {
-          globalThis.ranking_onUserEnter(ctx, curUser);
-        }
-      };
+  RU.runFeatureStep(helpers, 'user_inout', cfg.features.user_inout, function () {
+    // 设置事件回调（解耦 user_inout 和 ranking/village_attack）
+    ctx.onUserEnter = function (curUser) {
+      if (globalThis.ranking_onUserEnter) {
+        globalThis.ranking_onUserEnter(ctx, curUser);
+      }
+    };
 
-      ctx.onUserLeave = function (curUser) {
-        // 排行榜更新
-        if (globalThis.ranking_onUserLeave) {
-          globalThis.ranking_onUserLeave(ctx, curUser);
-        }
-      };
+    ctx.onUserLeave = function (curUser) {
+      if (globalThis.ranking_onUserLeave) {
+        globalThis.ranking_onUserLeave(ctx, curUser);
+      }
+    };
 
-      ctx.onUserEnterVillageAttack = function (curUser) {
-        // 怪物攻城进度通知（village_attack 模块会设置 ctx.va_notify）
-        if (ctx.va_notify) {
-          ctx.va_notify.notifyPlayerScore(curUser);
-          ctx.va_notify.broadcastPhase();
-        }
-      };
+    ctx.onUserEnterVillageAttack = function (curUser) {
+      if (ctx.va_notify) {
+        ctx.va_notify.notifyPlayerScore(curUser);
+        ctx.va_notify.broadcastPhase();
+      }
+    };
 
-      globalThis.startUserInoutFeature(ctx);
-      helpers.logModuleDone('user_inout');
-    }
-    catch (err) { helpers.logModuleFailed('user_inout', err); }
-  }
+    globalThis.startUserInoutFeature(ctx);
+  });
 
   // ---- 第 9 步：大型活动模块 ----
   // village_attack: 怪物攻城
-  if (cfg.features.village_attack) {
-    helpers.logModuleStart('village_attack');
-    try {
-      if (!dbInitialized) {
-        console.log('[village_attack] 数据库未初始化，活动数据将无法持久化');
-      }
-      globalThis.startVillageAttackFeature(ctx);
-      // 保存数据库保存回调供 dispose 使用
-      ctx._villageAttackSaveToDb = function () {
-        if (ctx.va_db) {
-          ctx.va_db.save(globalThis.village_attack_state.getInfo());
-        }
-      };
-      helpers.logModuleDone('village_attack');
+  RU.runFeatureStep(helpers, 'village_attack', cfg.features.village_attack, function () {
+    if (!dbInitialized) {
+      console.log('[village_attack] 数据库未初始化，活动数据将无法持久化');
     }
-    catch (err) { helpers.logModuleFailed('village_attack', err); }
-  }
+    globalThis.startVillageAttackFeature(ctx);
+    // 保存数据库保存回调供 dispose 使用
+    ctx._villageAttackSaveToDb = function () {
+      if (ctx.va_db) {
+        ctx.va_db.save(globalThis.village_attack_state.getInfo());
+      }
+    };
+  });
 
   // ---- 第 10 步：可选模块 ----
   // online_reward: 在线奖励（默认关闭，高风险）
-  if (cfg.features.online_reward) {
-    helpers.logModuleStart('online_reward');
-    try { globalThis.startOnlineRewardFeature(ctx); helpers.logModuleDone('online_reward'); }
-    catch (err) { helpers.logModuleFailed('online_reward', err); }
-  }
+  RU.runFeatureStep(helpers, 'online_reward', cfg.features.online_reward, function () {
+    globalThis.startOnlineRewardFeature(ctx);
+  });
 
   // 保存 ctx 到 globalThis 供 dispose 使用
   globalThis._runtimeCtx = ctx;
@@ -5283,11 +5059,9 @@ function disposeRuntimeModules() {
   console.log('-------------------- frida dispose done --------------------');
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startRuntimeModules = startRuntimeModules;
-  globalThis.disposeRuntimeModules = disposeRuntimeModules;
-  globalThis.createBoundMysqlDb = createBoundMysqlDb;
-}
+RuntimeUtils.exposeGlobal('startRuntimeModules', startRuntimeModules);
+RuntimeUtils.exposeGlobal('disposeRuntimeModules', disposeRuntimeModules);
+RuntimeUtils.exposeGlobal('createBoundMysqlDb', createBoundMysqlDb);
 // clean runtime project JS entry
 // 默认部署文件：df_game_r.js
 // 该文件通过 dp_load 动态加载 script/js 模块，不直接写业务逻辑。
@@ -5342,10 +5116,13 @@ function loadRuntimeBootstrapModules() {
   ok = loadEntryModule('runtime_addresses') && ok;
   ok = loadEntryModule('runtime_config') && ok;
 
-  // 第 2 步：hook guard（early hook 需要 attachOnce）
+  // 第 2 步：公共工具（hook_guard 的缓存函数可用，但不依赖 N
+  ok = loadEntryModule('core/runtime_utils') && ok;
+
+  // 第 3 步：hook guard（early hook 需要 attachOnce）
   ok = loadEntryModule('core/hook_guard') && ok;
 
-  // 第 3 步：启动辅助和调度（负责加载后续所有模块）
+  // 第 4 步：启动辅助和调度（负责加载后续所有模块）
   ok = loadEntryModule('startup_helpers') && ok;
   ok = loadEntryModule('startup_modules') && ok;
 

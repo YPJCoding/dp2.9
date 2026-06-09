@@ -221,6 +221,4 @@ function createUserBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createUserBinding = createUserBinding;
-}
+RuntimeUtils.exposeGlobal('createUserBinding', createUserBinding);

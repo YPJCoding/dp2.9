@@ -71,6 +71,4 @@ function createMailBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createMailBinding = createMailBinding;
-}
+RuntimeUtils.exposeGlobal('createMailBinding', createMailBinding);

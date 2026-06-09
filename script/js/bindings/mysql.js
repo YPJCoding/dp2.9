@@ -143,6 +143,4 @@ function createMysqlBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createMysqlBinding = createMysqlBinding;
-}
+RuntimeUtils.exposeGlobal('createMysqlBinding', createMysqlBinding);

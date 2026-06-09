@@ -7,18 +7,13 @@
 // 2. 可选跳过每10层的 UserAPC（当 skip_user_apc=true 时）
 // 3. 绝望之塔不再扣除金币
 
-var g_tod_fix_started = false;
+var g_tod_fix_state = { started: false };
 
 function startTodFixFeature(ctx) {
-  if (g_tod_fix_started) {
-    console.log('[tod_fix] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_tod_fix_state, 'tod_fix', function () {
+    const addr = ctx.addresses;
+    const cfg = ctx.config.tod_fix;
 
-  const addr = ctx.addresses;
-  const cfg = ctx.config.tod_fix;
-
-  try {
     // ---- 修复1：挑战成功后可以继续使用门票 ----
     // 来源：从旧 frida.js fix_TOD 第一个 hook 迁移
     // 原函数：TOD_UserState 相关逻辑
@@ -86,14 +81,7 @@ function startTodFixFeature(ctx) {
       // 其他副本执行原始扣除道具逻辑
       return originalUseAncientDungeonItems(party, dungeon, invenItem, a4);
     }, 'int', ['pointer', 'pointer', 'pointer', 'pointer']);
-
-    g_tod_fix_started = true;
-    if (ctx.log) ctx.log('[tod_fix] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[tod_fix] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startTodFixFeature = startTodFixFeature;
-}
+RuntimeUtils.exposeGlobal('startTodFixFeature', startTodFixFeature);

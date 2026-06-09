@@ -126,6 +126,4 @@ function createPacketBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createPacketBinding = createPacketBinding;
-}
+RuntimeUtils.exposeGlobal('createPacketBinding', createPacketBinding);

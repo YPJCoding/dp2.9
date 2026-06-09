@@ -6,6 +6,4 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.getRandomInt = getRandomInt;
-}
+RuntimeUtils.exposeGlobal('getRandomInt', getRandomInt);

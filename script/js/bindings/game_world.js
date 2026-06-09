@@ -166,6 +166,4 @@ function createGameWorldBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createGameWorldBinding = createGameWorldBinding;
-}
+RuntimeUtils.exposeGlobal('createGameWorldBinding', createGameWorldBinding);

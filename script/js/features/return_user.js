@@ -10,18 +10,13 @@
 // 1. 直接修改代码段内存，版本更新后地址可能变化
 // 2. 设置过小的天数可能导致所有玩家都算回归，破坏游戏平衡
 
-var g_return_user_started = false;
+var g_return_user_state = { started: false };
 
 function startReturnUserFeature(ctx) {
-  if (g_return_user_started) {
-    console.log('[return_user] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_return_user_state, 'return_user', function () {
+    const addr = ctx.addresses;
+    const cfg = ctx.config.return_user;
 
-  const addr = ctx.addresses;
-  const cfg = ctx.config.return_user;
-
-  try {
     // 计算回归判定时间阈值（秒）
     // day * 86400 秒/天
     const day = cfg.day || 15;
@@ -35,14 +30,7 @@ function startReturnUserFeature(ctx) {
     // 风险：地址偏移可能随版本变化，写入错误可能导致崩溃
     Memory.protect(addr.return_user_time_patch, 32, 'rwx');
     addr.return_user_time_patch.writeU32(time);
-
-    g_return_user_started = true;
-    if (ctx.log) ctx.log('[return_user] day=' + day + ' (threshold=' + time + 's)');
-  } catch (err) {
-    if (ctx.log) ctx.log('[return_user] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startReturnUserFeature = startReturnUserFeature;
-}
+RuntimeUtils.exposeGlobal('startReturnUserFeature', startReturnUserFeature);

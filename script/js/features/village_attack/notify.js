@@ -78,6 +78,4 @@ function createVillageAttackNotify(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackNotify = createVillageAttackNotify;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackNotify', createVillageAttackNotify);

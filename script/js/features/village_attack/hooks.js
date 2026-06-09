@@ -426,6 +426,4 @@ function createVillageAttackHooks(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackHooks = createVillageAttackHooks;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackHooks', createVillageAttackHooks);

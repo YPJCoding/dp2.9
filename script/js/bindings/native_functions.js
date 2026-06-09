@@ -24,6 +24,4 @@ function nf(address, retType, argTypes) {
   return new NativeFunction(address, retType, argTypes || [], { abi: 'sysv' });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.nf = nf;
-}
+RuntimeUtils.exposeGlobal('nf', nf);

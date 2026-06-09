@@ -75,6 +75,4 @@ function createItemBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createItemBinding = createItemBinding;
-}
+RuntimeUtils.exposeGlobal('createItemBinding', createItemBinding);

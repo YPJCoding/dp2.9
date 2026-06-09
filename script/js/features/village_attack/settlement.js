@@ -171,6 +171,4 @@ function createVillageAttackSettlement(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackSettlement = createVillageAttackSettlement;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackSettlement', createVillageAttackSettlement);

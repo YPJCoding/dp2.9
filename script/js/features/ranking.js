@@ -255,26 +255,20 @@ function saveRankInfoToDb(fridaDb) {
 }
 
 // ---- 启动模块 ----
-var g_ranking_started = false;
+var g_ranking_state = { started: false };
 
 function startRankingFeature(ctx) {
-  if (g_ranking_started) {
-    console.log('[ranking] already started');
-    return;
-  }
-
-  // 从 DB 加载持久化排行数据
-  // 使用 ctx.fridaDb（绑定 frida 句柄的便捷 DB 对象）
-  if (ctx.fridaDb) {
-    try {
-      loadRankInfoFromDb(ctx.fridaDb);
-    } catch (e) {
-      console.log('[ranking] load from db failed: ' + e);
+  return RuntimeUtils.startOnce(ctx, g_ranking_state, 'ranking', function () {
+    // 从 DB 加载持久化排行数据
+    // 使用 ctx.fridaDb（绑定 frida 句柄的便捷 DB 对象）
+    if (ctx.fridaDb) {
+      try {
+        loadRankInfoFromDb(ctx.fridaDb);
+      } catch (e) {
+        console.log('[ranking] load from db failed: ' + e);
+      }
     }
-  }
-
-  g_ranking_started = true;
-  if (ctx.log) ctx.log('[ranking] started');
+  });
 }
 
 // ---- 暴露给 user_inout 的回调 ----
@@ -305,9 +299,7 @@ function onUserLeaveRanking(ctx, curUser) {
   saveRankInfoToDb(ctx.fridaDb);
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startRankingFeature = startRankingFeature;
-  globalThis.ranking_onUserEnter = onUserEnterRanking;
-  globalThis.ranking_onUserLeave = onUserLeaveRanking;
-  globalThis.ranking_saveToDb = saveRankInfoToDb;
-}
+RuntimeUtils.exposeGlobal('startRankingFeature', startRankingFeature);
+RuntimeUtils.exposeGlobal('ranking_onUserEnter', onUserEnterRanking);
+RuntimeUtils.exposeGlobal('ranking_onUserLeave', onUserLeaveRanking);
+RuntimeUtils.exposeGlobal('ranking_saveToDb', saveRankInfoToDb);

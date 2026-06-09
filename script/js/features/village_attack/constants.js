@@ -73,6 +73,4 @@ const VILLAGE_ATTACK_CONSTANTS = {
   ],
 };
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.VILLAGE_ATTACK_CONSTANTS = VILLAGE_ATTACK_CONSTANTS;
-}
+RuntimeUtils.exposeGlobal('VILLAGE_ATTACK_CONSTANTS', VILLAGE_ATTACK_CONSTANTS);

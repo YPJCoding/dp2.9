@@ -11,17 +11,12 @@
 // 原游戏时装潜能生成机制可能有问题，通过 Frida 直接修改内存
 // 中的属性值和跳过分配逻辑来修复
 
-var g_hidden_option_started = false;
+var g_hidden_option_state = { started: false };
 
 function startHiddenOptionFeature(ctx) {
-  if (g_hidden_option_started) {
-    console.log('[hidden_option] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_hidden_option_state, 'hidden_option', function () {
+    const addr = ctx.addresses;
 
-  const addr = ctx.addresses;
-
-  try {
     // ---- 内存修改：关闭系统分配 + 写入随机属性 ----
     // 来源：从旧 frida.js hidden_option() 迁移
     function hiddenOption() {
@@ -61,14 +56,7 @@ function startHiddenOptionFeature(ctx) {
         retval.replace(1);
       }
     });
-
-    g_hidden_option_started = true;
-    if (ctx.log) ctx.log('[hidden_option] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[hidden_option] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startHiddenOptionFeature = startHiddenOptionFeature;
-}
+RuntimeUtils.exposeGlobal('startHiddenOptionFeature', startHiddenOptionFeature);

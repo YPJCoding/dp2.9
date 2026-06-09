@@ -73,6 +73,4 @@ function createTimerDispatcherBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createTimerDispatcherBinding = createTimerDispatcherBinding;
-}
+RuntimeUtils.exposeGlobal('createTimerDispatcherBinding', createTimerDispatcherBinding);

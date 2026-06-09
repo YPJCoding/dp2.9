@@ -38,8 +38,8 @@ function loadRuntimeDependencies() {
 
   var modules = [
     // 核心和 binding 已经在 df_game_r.js 中预加载：
-    //   runtime_addresses, runtime_config, core/hook_guard,
-    //   startup_helpers, startup_modules（本文件）
+    //   runtime_addresses, runtime_config, core/runtime_utils,
+    //   core/hook_guard, startup_helpers, startup_modules（本文件）
     // 以下加载其余所有依赖：
 
     'bindings/native_functions',
@@ -151,51 +151,17 @@ function startRuntimeModules() {
   helpers.logModuleStart('bindings');
 
   var packetBind, mysqlBind, userBind, inventoryBind, itemBind, mailBind, gwBind, timerBind, questBind;
+  var RU = RuntimeUtils;
 
-  try {
-    packetBind = globalThis.createPacketBinding(addr);
-    helpers.logModuleDone('packet binding');
-  } catch (err) { helpers.logModuleFailed('packet binding', err); packetBind = null; }
-
-  try {
-    mysqlBind = globalThis.createMysqlBinding(addr);
-    helpers.logModuleDone('mysql binding');
-  } catch (err) { helpers.logModuleFailed('mysql binding', err); mysqlBind = null; }
-
-  try {
-    userBind = globalThis.createUserBinding(addr);
-    helpers.logModuleDone('user binding');
-  } catch (err) { helpers.logModuleFailed('user binding', err); userBind = null; }
-
-  try {
-    inventoryBind = globalThis.createInventoryBinding(addr);
-    helpers.logModuleDone('inventory binding');
-  } catch (err) { helpers.logModuleFailed('inventory binding', err); inventoryBind = null; }
-
-  try {
-    itemBind = globalThis.createItemBinding(addr);
-    helpers.logModuleDone('item binding');
-  } catch (err) { helpers.logModuleFailed('item binding', err); itemBind = null; }
-
-  try {
-    mailBind = globalThis.createMailBinding(addr);
-    helpers.logModuleDone('mail binding');
-  } catch (err) { helpers.logModuleFailed('mail binding', err); mailBind = null; }
-
-  try {
-    gwBind = globalThis.createGameWorldBinding(addr);
-    helpers.logModuleDone('game_world binding');
-  } catch (err) { helpers.logModuleFailed('game_world binding', err); gwBind = null; }
-
-  try {
-    timerBind = globalThis.createTimerDispatcherBinding(addr);
-    helpers.logModuleDone('timer_dispatcher binding');
-  } catch (err) { helpers.logModuleFailed('timer_dispatcher binding', err); timerBind = null; }
-
-  try {
-    questBind = globalThis.createQuestBinding(addr);
-    helpers.logModuleDone('quest binding');
-  } catch (err) { helpers.logModuleFailed('quest binding', err); questBind = null; }
+  packetBind    = RU.runStep(helpers, 'packet binding',       function () { return globalThis.createPacketBinding(addr); }, null);
+  mysqlBind     = RU.runStep(helpers, 'mysql binding',         function () { return globalThis.createMysqlBinding(addr); }, null);
+  userBind      = RU.runStep(helpers, 'user binding',          function () { return globalThis.createUserBinding(addr); }, null);
+  inventoryBind = RU.runStep(helpers, 'inventory binding',     function () { return globalThis.createInventoryBinding(addr); }, null);
+  itemBind      = RU.runStep(helpers, 'item binding',          function () { return globalThis.createItemBinding(addr); }, null);
+  mailBind      = RU.runStep(helpers, 'mail binding',          function () { return globalThis.createMailBinding(addr); }, null);
+  gwBind        = RU.runStep(helpers, 'game_world binding',    function () { return globalThis.createGameWorldBinding(addr); }, null);
+  timerBind     = RU.runStep(helpers, 'timer_dispatcher binding', function () { return globalThis.createTimerDispatcherBinding(addr); }, null);
+  questBind     = RU.runStep(helpers, 'quest binding',         function () { return globalThis.createQuestBinding(addr); }, null);
 
   // ---- 构建 ctx 对象（模块之间通过 ctx 通信） ----
   //
@@ -230,203 +196,147 @@ function startRuntimeModules() {
 
   // ---- 第 5 步：Timer Dispatcher ----
   // 为什么必须第一个：所有异步任务都需要在 dispatcher 线程执行
-  if (cfg.features.timer_dispatcher) {
-    helpers.logModuleStart('timer_dispatcher');
-    try {
-      // 挂接消息分发线程，确保代码线程安全
-      // 来源：从旧 frida.js hook_TimerDispatcher_dispatch 迁移
-      attachOnce('timer_dispatcher', addr.timer_dispatcher_dispatch, {
-        onEnter: function (args) {},
-        onLeave: function (retval) {
-          if (timerBind) {
-            timerBind.dispatch();
-          }
+  RU.runFeatureStep(helpers, 'timer_dispatcher', cfg.features.timer_dispatcher, function () {
+    // 挂接消息分发线程，确保代码线程安全
+    // 来源：从旧 frida.js hook_TimerDispatcher_dispatch 迁移
+    attachOnce('timer_dispatcher', addr.timer_dispatcher_dispatch, {
+      onEnter: function (args) {},
+      onLeave: function (retval) {
+        if (timerBind) {
+          timerBind.dispatch();
         }
-      });
-      helpers.logModuleDone('timer_dispatcher');
-    } catch (err) {
-      helpers.logModuleFailed('timer_dispatcher', err);
-    }
-  }
+      }
+    });
+  });
 
   // ---- 第 6 步：Database 初始化 ----
   // 来源：从旧 frida.js init_db 迁移
   var dbInitialized = false;
-  if (cfg.features.database) {
-    helpers.logModuleStart('database');
-    try {
-      // 加载本地配置文件（数据库连接信息）
-      const fileMod = globalThis.createFileModule();
-      const globalConfig = fileMod.loadConfig('frida_config.json');
+  RU.runFeatureStep(helpers, 'database', cfg.features.database, function () {
+    // 加载本地配置文件（数据库连接信息）
+    const fileMod = globalThis.createFileModule();
+    const globalConfig = fileMod.loadConfig('frida_config.json');
 
-      if (!globalConfig) {
-        // 配置文件读取失败，无法获取数据库账号
-        console.log('[database] frida_config.json 读取失败，数据库账号为空，跳过数据库初始化');
-      } else {
-        const dbConfig = globalConfig['db_config'] || {};
+    if (!globalConfig) {
+      // 配置文件读取失败，无法获取数据库账号
+      console.log('[database] frida_config.json 读取失败，数据库账号为空，跳过数据库初始化');
+    } else {
+      const dbConfig = globalConfig['db_config'] || {};
 
-        if (!dbConfig['account'] || !dbConfig['password']) {
-          console.log('[database] frida_config.json 中 db_config.account/password 为空，跳过数据库初始化');
-        } else if (mysqlBind) {
-          // 初始化数据库连接
-          // 风险：数据库连接信息使用 localhost:3306，生产环境需从配置读取
-          const mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
-          const mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
-          const mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+      if (!dbConfig['account'] || !dbConfig['password']) {
+        console.log('[database] frida_config.json 中 db_config.account/password 为空，跳过数据库初始化');
+      } else if (mysqlBind) {
+        // 初始化数据库连接
+        // 风险：数据库连接信息使用 localhost:3306，生产环境需从配置读取
+        const mysqlTaiwanCain = mysqlBind.open('taiwan_cain', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+        const mysqlTaiwanCain2nd = mysqlBind.open('taiwan_cain_2nd', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+        const mysqlTaiwanBilling = mysqlBind.open('taiwan_billing', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
-          // 建库 frida
-          if (mysqlTaiwanCain) {
-            mysqlBind.exec(mysqlTaiwanCain, 'create database if not exists frida default charset utf8;');
-          }
+        // 建库 frida
+        if (mysqlTaiwanCain) {
+          mysqlBind.exec(mysqlTaiwanCain, 'create database if not exists frida default charset utf8;');
+        }
 
-          const mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
+        const mysqlFrida = mysqlBind.open('frida', '127.0.0.1', 3306, dbConfig['account'], dbConfig['password']);
 
-          if (mysqlFrida) {
-            // 建表 game_event（存储活动数据和排行榜）
-            mysqlBind.exec(mysqlFrida,
-              'CREATE TABLE game_event (' +
-              'event_id varchar(30) NOT NULL, event_info mediumtext NULL,' +
-              'PRIMARY KEY (event_id)' +
-              ') ENGINE=InnoDB DEFAULT CHARSET=utf8;'
-            );
+        if (mysqlFrida) {
+          // 建表 game_event（存储活动数据和排行榜）
+          mysqlBind.exec(mysqlFrida,
+            'CREATE TABLE game_event (' +
+            'event_id varchar(30) NOT NULL, event_info mediumtext NULL,' +
+            'PRIMARY KEY (event_id)' +
+            ') ENGINE=InnoDB DEFAULT CHARSET=utf8;'
+          );
 
-            // 保存数据库句柄集合
-            ctx.db = {
-              taiwanCain: mysqlTaiwanCain,
-              taiwanCain2nd: mysqlTaiwanCain2nd,
-              taiwanBilling: mysqlTaiwanBilling,
-              frida: mysqlFrida,
-            };
+          // 保存数据库句柄集合
+          ctx.db = {
+            taiwanCain: mysqlTaiwanCain,
+            taiwanCain2nd: mysqlTaiwanCain2nd,
+            taiwanBilling: mysqlTaiwanBilling,
+            frida: mysqlFrida,
+          };
 
-            // 创建绑定 frida 句柄的便捷 DB 对象
-            // 为什么需要这个东西：
-            //   mysqlBind 的 exec/getNRows/fetch/getStr 等函数第一个参数是 mysql 句柄
-            //   业务模块不直接操作 mysql 句柄，通过 fridaDb 简化调用
-            ctx.fridaDb = createBoundMysqlDb(mysqlBind, mysqlFrida);
+          // 创建绑定 frida 句柄的便捷 DB 对象
+          // 为什么需要这个东西：
+          //   mysqlBind 的 exec/getNRows/fetch/getStr 等函数第一个参数是 mysql 句柄
+          //   业务模块不直接操作 mysql 句柄，通过 fridaDb 简化调用
+          ctx.fridaDb = createBoundMysqlDb(mysqlBind, mysqlFrida);
 
-            dbInitialized = true;
-          } else {
-            console.log('[database] frida 数据库连接失败');
-          }
+          dbInitialized = true;
+        } else {
+          console.log('[database] frida 数据库连接失败');
         }
       }
-      helpers.logModuleDone('database');
-    } catch (err) {
-      helpers.logModuleFailed('database', err);
     }
-  }
+  });
 
   // ---- 第 7 步：基础修复类模块 ----
-  // tod_fix: 绝望之塔修复
-  if (cfg.features.tod_fix) {
-    helpers.logModuleStart('tod_fix');
-    try { globalThis.startTodFixFeature(ctx); helpers.logModuleDone('tod_fix'); }
-    catch (err) { helpers.logModuleFailed('tod_fix', err); }
-  }
-
-  // emblem_fix: 时装徽章镶嵌修复
-  if (cfg.features.emblem_fix) {
-    helpers.logModuleStart('emblem_fix');
-    try { globalThis.startEmblemFixFeature(ctx); helpers.logModuleDone('emblem_fix'); }
-    catch (err) { helpers.logModuleFailed('emblem_fix', err); }
-  }
-
-  // hidden_option: 时装潜能
-  if (cfg.features.hidden_option) {
-    helpers.logModuleStart('hidden_option');
-    try { globalThis.startHiddenOptionFeature(ctx); helpers.logModuleDone('hidden_option'); }
-    catch (err) { helpers.logModuleFailed('hidden_option', err); }
-  }
-
-  // return_user: 勇士归来
-  if (cfg.features.return_user) {
-    helpers.logModuleStart('return_user');
-    try { globalThis.startReturnUserFeature(ctx); helpers.logModuleDone('return_user'); }
-    catch (err) { helpers.logModuleFailed('return_user', err); }
-  }
+  RU.runFeatureStep(helpers, 'tod_fix',       cfg.features.tod_fix,       function () { globalThis.startTodFixFeature(ctx); });
+  RU.runFeatureStep(helpers, 'emblem_fix',    cfg.features.emblem_fix,    function () { globalThis.startEmblemFixFeature(ctx); });
+  RU.runFeatureStep(helpers, 'hidden_option', cfg.features.hidden_option, function () { globalThis.startHiddenOptionFeature(ctx); });
+  RU.runFeatureStep(helpers, 'return_user',   cfg.features.return_user,   function () { globalThis.startReturnUserFeature(ctx); });
 
   // ---- 第 8 步：事件/排行榜类模块 ----
   // ranking: 战力排行
-  if (cfg.features.ranking) {
-    helpers.logModuleStart('ranking');
-    try {
-      // 如果数据库未初始化，排行榜无法持久化，但仍然可以启动
-      // 启动时输出中文日志说明
-      if (!dbInitialized) {
-        console.log('[ranking] 数据库未初始化，排行榜将无法持久化');
-      }
-      globalThis.startRankingFeature(ctx);
-      // 保存排行榜的 save 回调，供 dispose 时使用
-      ctx._rankingSaveToDb = function () {
-        if (globalThis.ranking_saveToDb && ctx.fridaDb) {
-          globalThis.ranking_saveToDb(ctx.fridaDb);
-        }
-      };
-      helpers.logModuleDone('ranking');
+  RU.runFeatureStep(helpers, 'ranking', cfg.features.ranking, function () {
+    // 如果数据库未初始化，排行榜无法持久化，但仍然可以启动
+    if (!dbInitialized) {
+      console.log('[ranking] 数据库未初始化，排行榜将无法持久化');
     }
-    catch (err) { helpers.logModuleFailed('ranking', err); }
-  }
+    globalThis.startRankingFeature(ctx);
+    // 保存排行榜的 save 回调，供 dispose 时使用
+    ctx._rankingSaveToDb = function () {
+      if (globalThis.ranking_saveToDb && ctx.fridaDb) {
+        globalThis.ranking_saveToDb(ctx.fridaDb);
+      }
+    };
+  });
 
   // user_inout: 玩家上下线处理
-  if (cfg.features.user_inout) {
-    helpers.logModuleStart('user_inout');
-    try {
-      // 设置事件回调（解耦 user_inout 和 ranking/village_attack）
-      ctx.onUserEnter = function (curUser) {
-        // 排行榜下发
-        if (globalThis.ranking_onUserEnter) {
-          globalThis.ranking_onUserEnter(ctx, curUser);
-        }
-      };
+  RU.runFeatureStep(helpers, 'user_inout', cfg.features.user_inout, function () {
+    // 设置事件回调（解耦 user_inout 和 ranking/village_attack）
+    ctx.onUserEnter = function (curUser) {
+      if (globalThis.ranking_onUserEnter) {
+        globalThis.ranking_onUserEnter(ctx, curUser);
+      }
+    };
 
-      ctx.onUserLeave = function (curUser) {
-        // 排行榜更新
-        if (globalThis.ranking_onUserLeave) {
-          globalThis.ranking_onUserLeave(ctx, curUser);
-        }
-      };
+    ctx.onUserLeave = function (curUser) {
+      if (globalThis.ranking_onUserLeave) {
+        globalThis.ranking_onUserLeave(ctx, curUser);
+      }
+    };
 
-      ctx.onUserEnterVillageAttack = function (curUser) {
-        // 怪物攻城进度通知（village_attack 模块会设置 ctx.va_notify）
-        if (ctx.va_notify) {
-          ctx.va_notify.notifyPlayerScore(curUser);
-          ctx.va_notify.broadcastPhase();
-        }
-      };
+    ctx.onUserEnterVillageAttack = function (curUser) {
+      if (ctx.va_notify) {
+        ctx.va_notify.notifyPlayerScore(curUser);
+        ctx.va_notify.broadcastPhase();
+      }
+    };
 
-      globalThis.startUserInoutFeature(ctx);
-      helpers.logModuleDone('user_inout');
-    }
-    catch (err) { helpers.logModuleFailed('user_inout', err); }
-  }
+    globalThis.startUserInoutFeature(ctx);
+  });
 
   // ---- 第 9 步：大型活动模块 ----
   // village_attack: 怪物攻城
-  if (cfg.features.village_attack) {
-    helpers.logModuleStart('village_attack');
-    try {
-      if (!dbInitialized) {
-        console.log('[village_attack] 数据库未初始化，活动数据将无法持久化');
-      }
-      globalThis.startVillageAttackFeature(ctx);
-      // 保存数据库保存回调供 dispose 使用
-      ctx._villageAttackSaveToDb = function () {
-        if (ctx.va_db) {
-          ctx.va_db.save(globalThis.village_attack_state.getInfo());
-        }
-      };
-      helpers.logModuleDone('village_attack');
+  RU.runFeatureStep(helpers, 'village_attack', cfg.features.village_attack, function () {
+    if (!dbInitialized) {
+      console.log('[village_attack] 数据库未初始化，活动数据将无法持久化');
     }
-    catch (err) { helpers.logModuleFailed('village_attack', err); }
-  }
+    globalThis.startVillageAttackFeature(ctx);
+    // 保存数据库保存回调供 dispose 使用
+    ctx._villageAttackSaveToDb = function () {
+      if (ctx.va_db) {
+        ctx.va_db.save(globalThis.village_attack_state.getInfo());
+      }
+    };
+  });
 
   // ---- 第 10 步：可选模块 ----
   // online_reward: 在线奖励（默认关闭，高风险）
-  if (cfg.features.online_reward) {
-    helpers.logModuleStart('online_reward');
-    try { globalThis.startOnlineRewardFeature(ctx); helpers.logModuleDone('online_reward'); }
-    catch (err) { helpers.logModuleFailed('online_reward', err); }
-  }
+  RU.runFeatureStep(helpers, 'online_reward', cfg.features.online_reward, function () {
+    globalThis.startOnlineRewardFeature(ctx);
+  });
 
   // 保存 ctx 到 globalThis 供 dispose 使用
   globalThis._runtimeCtx = ctx;
@@ -522,8 +432,6 @@ function disposeRuntimeModules() {
   console.log('-------------------- frida dispose done --------------------');
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startRuntimeModules = startRuntimeModules;
-  globalThis.disposeRuntimeModules = disposeRuntimeModules;
-  globalThis.createBoundMysqlDb = createBoundMysqlDb;
-}
+RuntimeUtils.exposeGlobal('startRuntimeModules', startRuntimeModules);
+RuntimeUtils.exposeGlobal('disposeRuntimeModules', disposeRuntimeModules);
+RuntimeUtils.exposeGlobal('createBoundMysqlDb', createBoundMysqlDb);

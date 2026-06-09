@@ -77,6 +77,4 @@ function createFileModule() {
   return { readFile: readFile, loadConfig: loadConfig };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createFileModule = createFileModule;
-}
+RuntimeUtils.exposeGlobal('createFileModule', createFileModule);

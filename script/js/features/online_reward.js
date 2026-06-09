@@ -14,17 +14,12 @@
 // - 每分钟 0.1 点券
 // - 最多奖励 12 小时（半天）
 
-var g_online_reward_started = false;
+var g_online_reward_state = { started: false };
 
 function startOnlineRewardFeature(ctx) {
-  if (g_online_reward_started) {
-    console.log('[online_reward] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_online_reward_state, 'online_reward', function () {
+    const addr = ctx.addresses;
 
-  const addr = ctx.addresses;
-
-  try {
     // 点券充值函数（来源：从旧 frida.js api_recharge_cash_cera 迁移）
     // 风险：禁止直接修改 billing 库所有表字段，点券相关操作务必调用数据库存储过程
     const _IPGInput = globalThis.nf(addr.cipghelper_ipg_input, 'int', ['pointer', 'pointer', 'int', 'int', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer', 'pointer']);
@@ -92,14 +87,7 @@ function startOnlineRewardFeature(ctx) {
         // 不影响原函数执行
       }
     });
-
-    g_online_reward_started = true;
-    if (ctx.log) ctx.log('[online_reward] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[online_reward] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startOnlineRewardFeature = startOnlineRewardFeature;
-}
+RuntimeUtils.exposeGlobal('startOnlineRewardFeature', startOnlineRewardFeature);

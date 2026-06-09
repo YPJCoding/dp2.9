@@ -195,8 +195,7 @@ function reset(systemTime) {
   g_info.start_time = systemTime;
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.village_attack_state = {
+RuntimeUtils.exposeGlobal('village_attack_state', {
     getInfo: getInfo,
     setInfo: setInfo,
     getState: getState,
@@ -228,5 +227,4 @@ if (typeof globalThis !== 'undefined') {
     clearUserPtInfo: clearUserPtInfo,
     getRemainTime: getRemainTime,
     reset: reset,
-  };
-}
+});

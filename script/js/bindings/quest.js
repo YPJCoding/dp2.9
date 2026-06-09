@@ -55,6 +55,4 @@ function createQuestBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createQuestBinding = createQuestBinding;
-}
+RuntimeUtils.exposeGlobal('createQuestBinding', createQuestBinding);

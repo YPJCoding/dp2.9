@@ -48,7 +48,5 @@ function protectAndWrite(address, size, data, restoreProtection) {
   }
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.bin2hex = bin2hex;
-  globalThis.memoryProtectAndWrite = protectAndWrite;
-}
+RuntimeUtils.exposeGlobal('bin2hex', bin2hex);
+RuntimeUtils.exposeGlobal('memoryProtectAndWrite', protectAndWrite);

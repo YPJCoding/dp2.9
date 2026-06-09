@@ -47,6 +47,4 @@ function createVillageAttackDb(fridaDb) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackDb = createVillageAttackDb;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackDb', createVillageAttackDb);

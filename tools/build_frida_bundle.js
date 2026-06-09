@@ -28,6 +28,7 @@ const files = [
   'script/js/core/random.js',
   'script/js/core/memory.js',
   'script/js/core/file.js',
+  'script/js/core/runtime_utils.js',
   'script/js/core/hook_guard.js',
 
   'script/js/bindings/packet.js',

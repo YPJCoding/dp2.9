@@ -14,17 +14,12 @@
 // 不要在 user_inout 里直接写排行榜、怪物攻城等业务细节。
 // 通过 ctx 中的回调或函数调用实现解耦。
 
-var g_user_inout_started = false;
+var g_user_inout_state = { started: false };
 
 function startUserInoutFeature(ctx) {
-  if (g_user_inout_started) {
-    console.log('[user_inout] already started');
-    return;
-  }
+  return RuntimeUtils.startOnce(ctx, g_user_inout_state, 'user_inout', function () {
+    const addr = ctx.addresses;
 
-  const addr = ctx.addresses;
-
-  try {
     // ---- Hook 1: GameWorld::reach_game_world（玩家进入游戏世界） ----
     // 来源：从旧 frida.js hook_user_inout_game_world 第一个 hook 迁移
     // 原函数：玩家选择角色后进入游戏世界
@@ -74,14 +69,7 @@ function startUserInoutFeature(ctx) {
       },
       onLeave: function (retval) {}
     });
-
-    g_user_inout_started = true;
-    if (ctx.log) ctx.log('[user_inout] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[user_inout] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startUserInoutFeature = startUserInoutFeature;
-}
+RuntimeUtils.exposeGlobal('startUserInoutFeature', startUserInoutFeature);

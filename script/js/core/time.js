@@ -25,6 +25,4 @@ function createTimeModule(addr) {
   return { getCurSec: getCurSec };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createTimeModule = createTimeModule;
-}
+RuntimeUtils.exposeGlobal('createTimeModule', createTimeModule);

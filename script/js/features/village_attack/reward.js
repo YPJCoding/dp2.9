@@ -63,6 +63,4 @@ function createVillageAttackReward(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackReward = createVillageAttackReward;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackReward', createVillageAttackReward);

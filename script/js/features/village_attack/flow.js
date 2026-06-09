@@ -182,6 +182,4 @@ function createVillageAttackFlow(ctx) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createVillageAttackFlow = createVillageAttackFlow;
-}
+RuntimeUtils.exposeGlobal('createVillageAttackFlow', createVillageAttackFlow);

@@ -12,15 +12,10 @@
 // 7. reward.js（奖励发放）
 // 8. settlement.js（结算）
 
-var g_village_attack_started = false;
+var g_village_attack_start_guard = { started: false };
 
 function startVillageAttackFeature(ctx) {
-  if (g_village_attack_started) {
-    console.log('[village_attack] already started');
-    return;
-  }
-
-  try {
+  return RuntimeUtils.startOnce(ctx, g_village_attack_start_guard, 'village_attack', function () {
     // 配置覆盖默认值
     ctx.villageAttackConfig = {
       start_hour: ctx.config.village_attack.start_hour || 12,
@@ -87,14 +82,7 @@ function startVillageAttackFeature(ctx) {
 
     // 启动活动流程（恢复计时器 or 等待下一轮）
     vaFlow.initFlow();
-
-    g_village_attack_started = true;
-    if (ctx.log) ctx.log('[village_attack] started');
-  } catch (err) {
-    if (ctx.log) ctx.log('[village_attack] failed: ' + err);
-  }
+  });
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.startVillageAttackFeature = startVillageAttackFeature;
-}
+RuntimeUtils.exposeGlobal('startVillageAttackFeature', startVillageAttackFeature);

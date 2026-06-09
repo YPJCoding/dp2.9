@@ -99,6 +99,4 @@ function createInventoryBinding(addr) {
   };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createInventoryBinding = createInventoryBinding;
-}
+RuntimeUtils.exposeGlobal('createInventoryBinding', createInventoryBinding);

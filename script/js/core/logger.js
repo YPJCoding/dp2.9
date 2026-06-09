@@ -86,6 +86,4 @@ function createLogger(ctx) {
   return { log: log, getTimestamp: getTimestamp };
 }
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.createLogger = createLogger;
-}
+RuntimeUtils.exposeGlobal('createLogger', createLogger);
