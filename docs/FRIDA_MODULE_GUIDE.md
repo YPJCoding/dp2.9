@@ -1,5 +1,9 @@
 # Frida/JS 模块开发指南
 
+## 与 Lua 侧的关系
+
+`df_game_r.lua` 仅是 DP2 Lua 兼容空壳入口，Frida/JS runtime 不依赖 Lua bootstrap。
+
 ## 目标
 
 Frida/JS 侧用于编写运行时 JS 模块。模板只提供入口结构、模块组织方式和编码风格示例，不包含真实地址或真实业务实现。

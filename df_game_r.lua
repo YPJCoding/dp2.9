@@ -1,20 +1,14 @@
--- clean runtime template Lua entry
+-- DP2 Lua compatibility entry
 --
--- 这是模板入口文件，只演示 dp2 Lua 侧的基础装配流程。
--- 不包含真实项目逻辑或真实项目标识。
+-- 当前 template 的 Lua 侧不承载业务逻辑。
+-- 实际 runtime 入口是 df_game_r.js，通过 dp_load 动态加载 script/js/**。
 --
--- 使用方式：
--- 1. 按项目需要调整 script/config.lua。
--- 2. 在 script/modules/ 下新增模块。
--- 3. 在 script/bootstrap.lua 中注册模块。
-
-local bootstrap = require("script.bootstrap")
+-- 保留 setup(ctx) 是为了兼容 DP2 Lua 入口调用约定。
+-- 不要在这里 require script.bootstrap 或其它 template-only Lua 模块。
 
 local M = {}
 
 function M.setup(ctx)
-    ctx = ctx or {}
-    bootstrap.setup(ctx)
     return M
 end
 
