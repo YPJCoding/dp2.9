@@ -39,8 +39,7 @@ const PROJECT_JS_CONFIG = {
     village_attack: true,
 
     // 在线奖励（每5分钟送点券）
-    // 默认关闭，因为涉及充值点券操作，过于高风险
-    online_reward: false,
+    online_reward: true,
   },
 
   // 绝望之塔配置
