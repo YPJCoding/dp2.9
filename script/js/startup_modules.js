@@ -23,7 +23,6 @@ var g_runtime_modules_started = false;
 // 顺序与各模块的依赖拓扑一致，不可随意调整
 //
 // 返回: true=全部加载成功，false=有模块加载失败或 dp_load 不存在
-// 返回: true=全部加载成功，false=有模块加载失败或 dp_load 不存在
 function loadRuntimeDependencies() {
   if (typeof dp_load !== 'function') {
     console.log('[startup] dp_load 不存在，无法加载依赖模块，终止 runtime 启动');
@@ -94,6 +93,104 @@ function loadRuntimeDependencies() {
   return true;
 }
 
+// ---- 启动环境自检 ----
+function validateRuntimeEnvironment(addr, cfg) {
+  var ok = true;
+
+  function fail(message) {
+    console.log('[startup] environment check failed: ' + message);
+    ok = false;
+  }
+
+  if (!addr) {
+    fail('PROJECT_ADDRESSES not found');
+  }
+
+  if (!cfg) {
+    fail('PROJECT_JS_CONFIG not found');
+  } else if (!cfg.features) {
+    fail('PROJECT_JS_CONFIG.features not found');
+  }
+
+  if (typeof RuntimeUtils === 'undefined') {
+    fail('RuntimeUtils not found');
+  }
+
+  if (typeof attachOnce !== 'function') {
+    fail('attachOnce not found');
+  }
+
+  if (typeof replaceOnce !== 'function') {
+    fail('replaceOnce not found');
+  }
+
+  if (typeof safeLoadModule !== 'function') {
+    fail('safeLoadModule not found');
+  }
+
+  return ok;
+}
+
+// ---- binding 自检 ----
+function validateRuntimeBindings(ctx) {
+  var ok = true;
+
+  function fail(message) {
+    console.log('[startup] binding check failed: ' + message);
+    ok = false;
+  }
+
+  if (!ctx) {
+    fail('ctx not found');
+    return false;
+  }
+
+  if (!ctx.packet) { fail('packet binding not found'); }
+  if (!ctx.mysql)  { fail('mysql binding not found'); }
+  if (!ctx.user)   { fail('user binding not found'); }
+  if (!ctx.inventory) { fail('inventory binding not found'); }
+  if (!ctx.item)   { fail('item binding not found'); }
+  if (!ctx.mail)   { fail('mail binding not found'); }
+  if (!ctx.gw)     { fail('game_world binding not found'); }
+  if (!ctx.timer)  { fail('timer_dispatcher binding not found'); }
+  if (!ctx.quest)  { fail('quest binding not found'); }
+
+  return ok;
+}
+
+// ---- feature 启动结果汇总 ----
+function createFeatureSummary() {
+  var results = [];
+
+  return {
+    record: function (name, enabled, result) {
+      var status = 'skipped';
+
+      if (enabled) {
+        status = result === true ? 'ok' : 'failed';
+      }
+
+      results.push({
+        name: name,
+        status: status
+      });
+
+      return result;
+    },
+
+    log: function () {
+      var parts = [];
+      var i;
+
+      for (i = 0; i < results.length; i++) {
+        parts.push(results[i].name + '=' + results[i].status);
+      }
+
+      console.log('[startup] feature summary: ' + parts.join(', '));
+    }
+  };
+}
+
 function startRuntimeModules() {
   if (g_runtime_modules_started) {
     console.log('[startup] runtime modules already started');
@@ -102,14 +199,25 @@ function startRuntimeModules() {
 
   console.log('==================== frida runtime start ====================');
 
+  // ---- 环境自检 ----
+  const addr = globalThis.PROJECT_ADDRESSES;
+  const cfg = globalThis.PROJECT_JS_CONFIG;
+
+  if (!validateRuntimeEnvironment(addr, cfg)) {
+    return false;
+  }
+
+  if (typeof globalThis.createStartupHelpers !== 'function') {
+    console.log('[startup] environment check failed: createStartupHelpers not found');
+    return false;
+  }
+
+  const helpers = globalThis.createStartupHelpers(addr);
+
   // 加载所有依赖子模块
   if (!loadRuntimeDependencies()) {
     return false;
   }
-
-  const addr = globalThis.PROJECT_ADDRESSES;
-  const cfg = globalThis.PROJECT_JS_CONFIG;
-  const helpers = globalThis.createStartupHelpers(addr);
 
   helpers.logStartup('initializing runtime...');
 
@@ -192,9 +300,18 @@ function startRuntimeModules() {
     quest: questBind,
   };
 
+  // ---- binding 自检（必须在启动 feature 前） ----
+  if (!validateRuntimeBindings(ctx)) {
+    console.log('[startup] required bindings missing, abort runtime startup');
+    return false;
+  }
+
+  var featureSummary = createFeatureSummary();
+
   // ---- 第 5 步：Timer Dispatcher ----
   // 为什么必须第一个：所有异步任务都需要在 dispatcher 线程执行
-  RU.runFeatureStep(helpers, 'timer_dispatcher', cfg.features.timer_dispatcher, function () {
+  featureSummary.record('timer_dispatcher', cfg.features.timer_dispatcher,
+    RU.runFeatureStep(helpers, 'timer_dispatcher', cfg.features.timer_dispatcher, function () {
     // 挂接消息分发线程，确保代码线程安全
     // 来源：从旧 frida.js hook_TimerDispatcher_dispatch 迁移
     attachOnce('timer_dispatcher', addr.timer_dispatcher_dispatch, {
@@ -205,12 +322,13 @@ function startRuntimeModules() {
         }
       }
     });
-  });
+  }));
 
   // ---- 第 6 步：Database 初始化 ----
   // 来源：从旧 frida.js init_db 迁移
   var dbInitialized = false;
-  RU.runFeatureStep(helpers, 'database', cfg.features.database, function () {
+  featureSummary.record('database', cfg.features.database,
+    RU.runFeatureStep(helpers, 'database', cfg.features.database, function () {
     // 加载本地配置文件（数据库连接信息）
     const fileMod = globalThis.createFileModule();
     const globalConfig = fileMod.loadConfig('frida_config.json');
@@ -266,17 +384,18 @@ function startRuntimeModules() {
         }
       }
     }
-  });
+  }));
 
   // ---- 第 7 步：基础修复类模块 ----
-  RU.runFeatureStep(helpers, 'tod_fix',       cfg.features.tod_fix,       function () { return globalThis.startTodFixFeature(ctx); });
-  RU.runFeatureStep(helpers, 'emblem_fix',    cfg.features.emblem_fix,    function () { return globalThis.startEmblemFixFeature(ctx); });
-  RU.runFeatureStep(helpers, 'hidden_option', cfg.features.hidden_option, function () { return globalThis.startHiddenOptionFeature(ctx); });
-  RU.runFeatureStep(helpers, 'return_user',   cfg.features.return_user,   function () { return globalThis.startReturnUserFeature(ctx); });
+  featureSummary.record('tod_fix',       cfg.features.tod_fix,       RU.runFeatureStep(helpers, 'tod_fix',       cfg.features.tod_fix,       function () { return globalThis.startTodFixFeature(ctx); }));
+  featureSummary.record('emblem_fix',    cfg.features.emblem_fix,    RU.runFeatureStep(helpers, 'emblem_fix',    cfg.features.emblem_fix,    function () { return globalThis.startEmblemFixFeature(ctx); }));
+  featureSummary.record('hidden_option', cfg.features.hidden_option, RU.runFeatureStep(helpers, 'hidden_option', cfg.features.hidden_option, function () { return globalThis.startHiddenOptionFeature(ctx); }));
+  featureSummary.record('return_user',   cfg.features.return_user,   RU.runFeatureStep(helpers, 'return_user',   cfg.features.return_user,   function () { return globalThis.startReturnUserFeature(ctx); }));
 
   // ---- 第 8 步：事件/排行榜类模块 ----
   // ranking: 战力排行
-  RU.runFeatureStep(helpers, 'ranking', cfg.features.ranking, function () {
+  featureSummary.record('ranking', cfg.features.ranking,
+    RU.runFeatureStep(helpers, 'ranking', cfg.features.ranking, function () {
     // 如果数据库未初始化，排行榜无法持久化，但仍然可以启动
     if (!dbInitialized) {
       console.log('[ranking] 数据库未初始化，排行榜将无法持久化');
@@ -292,10 +411,11 @@ function startRuntimeModules() {
     };
 
     return ok;
-  });
+  }));
 
   // user_inout: 玩家上下线处理
-  RU.runFeatureStep(helpers, 'user_inout', cfg.features.user_inout, function () {
+  featureSummary.record('user_inout', cfg.features.user_inout,
+    RU.runFeatureStep(helpers, 'user_inout', cfg.features.user_inout, function () {
     // 设置事件回调（解耦 user_inout 和 ranking/village_attack）
     ctx.onUserEnter = function (curUser) {
       if (globalThis.ranking_onUserEnter) {
@@ -317,11 +437,12 @@ function startRuntimeModules() {
     };
 
     return globalThis.startUserInoutFeature(ctx);
-  });
+  }));
 
   // ---- 第 9 步：大型活动模块 ----
   // village_attack: 怪物攻城
-  RU.runFeatureStep(helpers, 'village_attack', cfg.features.village_attack, function () {
+  featureSummary.record('village_attack', cfg.features.village_attack,
+    RU.runFeatureStep(helpers, 'village_attack', cfg.features.village_attack, function () {
     if (!dbInitialized) {
       console.log('[village_attack] 数据库未初始化，活动数据将无法持久化');
     }
@@ -336,16 +457,19 @@ function startRuntimeModules() {
     };
 
     return ok;
-  });
+  }));
 
   // ---- 第 10 步：可选模块 ----
   // online_reward: 在线奖励（默认关闭，高风险）
-  RU.runFeatureStep(helpers, 'online_reward', cfg.features.online_reward, function () {
+  featureSummary.record('online_reward', cfg.features.online_reward,
+    RU.runFeatureStep(helpers, 'online_reward', cfg.features.online_reward, function () {
     return globalThis.startOnlineRewardFeature(ctx);
-  });
+  }));
 
   // 保存 ctx 到 globalThis 供 dispose 使用
   globalThis._runtimeCtx = ctx;
+
+  featureSummary.log();
 
   g_runtime_modules_started = true;
   console.log('==================== frida runtime started ====================');
