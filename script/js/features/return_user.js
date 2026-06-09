@@ -18,9 +18,10 @@ function startReturnUserFeature(ctx) {
     const cfg = ctx.config.return_user;
 
     // 计算回归判定时间阈值（秒）
-    // day * 86400 秒/天
-    const day = cfg.day || 15;
-    const time = day * 86400;
+    var day = cfg.day || 15;
+    var time = ctx.time && ctx.time.daysToSeconds
+      ? ctx.time.daysToSeconds(day)
+      : day * 86400;
 
     // 修改内存：将回归判定时间写入代码段
     // 来源：从旧 frida.js set_return_user 迁移

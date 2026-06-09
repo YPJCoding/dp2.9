@@ -53,7 +53,9 @@ function startOnlineRewardFeature(ctx) {
 
         if (loginTick > 0) {
           // 在线时长（分钟）
-          const diffTime = Math.floor((curTime - loginTick) / 60);
+          var diffTime = ctx.time.diffMinutes
+            ? ctx.time.diffMinutes(curTime, loginTick)
+            : Math.floor((curTime - loginTick) / 60);
 
           // 在线 30 分钟后才开始计算
           if (diffTime < 30) {
@@ -61,7 +63,10 @@ function startOnlineRewardFeature(ctx) {
           }
 
           // 最多奖励 12 小时
-          if (diffTime > 12 * 60) {
+          var maxRewardMinutes = ctx.time.hoursToMinutes
+            ? ctx.time.hoursToMinutes(12)
+            : 12 * 60;
+          if (diffTime > maxRewardMinutes) {
             return;
           }
 

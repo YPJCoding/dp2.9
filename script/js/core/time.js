@@ -1,6 +1,11 @@
 // 时间模块
-// 来源：从旧 frida.js 迁移
-// 用途：提供系统时间、时间戳等相关工具函数
+// 来源：从旧 frida.js 迁移并扩展
+// 用途：统一时间相关工具函数
+//
+// 两类时间必须区分：
+//   游戏服务器时间：getCurSec() — 业务逻辑使用
+//   日志展示时间：formatLocalTimestamp() — 日志展示和文件名使用
+// 不要混用。
 
 function createTimeModule(addr) {
   // 系统时间全局变量地址
@@ -14,7 +19,7 @@ function createTimeModule(addr) {
     console.log('[time] system_time 地址未提供，时间模块将返回 0');
   }
 
-  // 获取系统UTC时间(秒)
+  // ---- 游戏服务器时间（秒） ----
   function getCurSec() {
     if (!systemTimePtr) {
       return 0;
@@ -22,7 +27,76 @@ function createTimeModule(addr) {
     return systemTimePtr.readInt();
   }
 
-  return { getCurSec: getCurSec };
+  // ---- JS runtime 本地时间（毫秒） ----
+  function getNowMs() {
+    return new Date().getTime();
+  }
+
+  // ---- 日期拆分（统一格式，不补零） ----
+  function getDateParts(date) {
+    var d = date || new Date();
+    return {
+      year: d.getFullYear().toString(),
+      month: (d.getMonth() + 1).toString(),
+      day: d.getDate().toString(),
+      hour: d.getHours().toString(),
+      minute: d.getMinutes().toString(),
+      second: d.getSeconds().toString(),
+      ms: d.getMilliseconds().toString()
+    };
+  }
+
+  // ---- 本地时间戳格式化（日志展示用） ----
+  function formatLocalTimestamp(date) {
+    var p = getDateParts(date || new Date());
+    return p.year + '-' + p.month + '-' + p.day + ' ' +
+      p.hour + ':' + p.minute + ':' + p.second + '.' + p.ms;
+  }
+
+  // ---- 日志文件日期（文件名轮转用） ----
+  function formatLogFileDate(date) {
+    var p = getDateParts(date || new Date());
+    return {
+      year: p.year,
+      month: p.month,
+      day: p.day
+    };
+  }
+
+  // ---- 时间差计算（基于游戏服务器时间 getCurSec()） ----
+  function diffSeconds(endSec, startSec) {
+    return endSec - startSec;
+  }
+
+  function diffMinutes(endSec, startSec) {
+    return Math.floor((endSec - startSec) / 60);
+  }
+
+  // ---- 时间单位换算 ----
+  function minutesToSeconds(minutes) {
+    return minutes * 60;
+  }
+
+  function hoursToMinutes(hours) {
+    return hours * 60;
+  }
+
+  function daysToSeconds(days) {
+    return days * 86400;
+  }
+
+  return {
+    getCurSec: getCurSec,
+    getNowMs: getNowMs,
+    getDateParts: getDateParts,
+    formatLocalTimestamp: formatLocalTimestamp,
+    formatLogFileDate: formatLogFileDate,
+    diffSeconds: diffSeconds,
+    diffMinutes: diffMinutes,
+    minutesToSeconds: minutesToSeconds,
+    hoursToMinutes: hoursToMinutes,
+    daysToSeconds: daysToSeconds
+  };
 }
 
 RuntimeUtils.exposeGlobal('createTimeModule', createTimeModule);

@@ -115,18 +115,7 @@ function startRuntimeModules() {
 
   helpers.logStartup('initializing runtime...');
 
-  // ---- 第 1 步：Logger ----
-  helpers.logModuleStart('logger');
-  var logger;
-  try {
-    logger = globalThis.createLogger({ getChannelName: helpers.getChannelName });
-    helpers.logModuleDone('logger');
-  } catch (err) {
-    helpers.logModuleFailed('logger', err);
-    logger = { log: console.log, getTimestamp: function () { return ''; } };
-  }
-
-  // ---- 第 2 步：Config（已由文件加载到 globalThis，此处做校验） ----
+  // ---- 第 1 步：Config（已由文件加载到 globalThis，此处做校验） ----
   helpers.logModuleStart('config');
   if (!cfg || !cfg.features) {
     helpers.logModuleFailed('config', 'PROJECT_JS_CONFIG not found');
@@ -134,7 +123,7 @@ function startRuntimeModules() {
   }
   helpers.logModuleDone('config');
 
-  // ---- 第 3 步：Time Module ----
+  // ---- 第 2 步：Time Module（在 logger 之前，供 logger 复用时间格式化） ----
   helpers.logModuleStart('time');
   var timeMod;
   try {
@@ -145,6 +134,17 @@ function startRuntimeModules() {
   } catch (err) {
     helpers.logModuleFailed('time', err);
     timeMod = { getCurSec: function () { return 0; } };
+  }
+
+  // ---- 第 3 步：Logger（依赖 time 的时间格式化） ----
+  helpers.logModuleStart('logger');
+  var logger;
+  try {
+    logger = globalThis.createLogger({ getChannelName: helpers.getChannelName, time: timeMod });
+    helpers.logModuleDone('logger');
+  } catch (err) {
+    helpers.logModuleFailed('logger', err);
+    logger = { log: console.log, getTimestamp: function () { return ''; } };
   }
 
   // ---- 第 4 步：Native Bindings ----

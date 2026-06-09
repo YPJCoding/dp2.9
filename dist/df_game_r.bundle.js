@@ -1140,40 +1140,62 @@ function nf(address, retType, argTypes) {
 
 RuntimeUtils.exposeGlobal('nf', nf);
 // 日志模块
-// 来源：从旧 frida.js 迁移
+// 来源：从旧 frida.js 迁移并重构
 // 用途：统一日志输出（控制台 + 文件）
 // 风险：文件日志依赖 libc fopen/fread 等底层函数，如果运行环境变化可能失效
 
 var g_log_file = null;
 var g_log_day = null;
-const g_log_dir_path = './frida_log/';
+var g_log_dir_path = './frida_log/';
+
+// ---- 本地时间 fallback（ctx.time 不可用时使用） ----
+function _fallbackDateParts(date) {
+  var d = date || new Date();
+  return {
+    year: d.getFullYear().toString(),
+    month: (d.getMonth() + 1).toString(),
+    day: d.getDate().toString(),
+    hour: d.getHours().toString(),
+    minute: d.getMinutes().toString(),
+    second: d.getSeconds().toString(),
+    ms: d.getMilliseconds().toString()
+  };
+}
+
+function _fallbackTimestamp(date) {
+  var p = _fallbackDateParts(date || new Date());
+  return p.year + '-' + p.month + '-' + p.day + ' ' +
+    p.hour + ':' + p.minute + ':' + p.second + '.' + p.ms;
+}
 
 // 日志对象，挂载到 globalThis 供所有模块使用
 function createLogger(ctx) {
   // 打开目录
-  const opendir = new NativeFunction(Module.getGlobalExportByName('opendir'), 'int', ['pointer'], {'abi': 'sysv'});
-  const mkdir = new NativeFunction(Module.getGlobalExportByName('mkdir'), 'int', ['pointer', 'int'], {'abi': 'sysv'});
+  var opendir = new NativeFunction(Module.getGlobalExportByName('opendir'), 'int', ['pointer'], {'abi': 'sysv'});
+  var mkdir = new NativeFunction(Module.getGlobalExportByName('mkdir'), 'int', ['pointer', 'int'], {'abi': 'sysv'});
 
   function ensureDir(path) {
-    const pathPtr = Memory.allocUtf8String(path);
+    var pathPtr = Memory.allocUtf8String(path);
     if (opendir(pathPtr)) {
       return true;
     }
     return mkdir(pathPtr, 0x1FF);
   }
 
-  // 获取时间戳字符串
+  // 获取时间戳字符串（优先使用 ctx.time 的时间格式化）
   function getTimestamp() {
-    var date = new Date();
-    date = new Date(date.setHours(date.getHours() + 0));
-    const year = date.getFullYear().toString();
-    const month = (date.getMonth() + 1).toString();
-    const day = date.getDate().toString();
-    const hour = date.getHours().toString();
-    const minute = date.getMinutes().toString();
-    const second = date.getSeconds().toString();
-    const ms = date.getMilliseconds().toString();
-    return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
+    if (ctx && ctx.time && ctx.time.formatLocalTimestamp) {
+      return ctx.time.formatLocalTimestamp();
+    }
+    return _fallbackTimestamp();
+  }
+
+  // 获取日期拆解（优先使用 ctx.time）
+  function getDateParts(date) {
+    if (ctx && ctx.time && ctx.time.getDateParts) {
+      return ctx.time.getDateParts(date);
+    }
+    return _fallbackDateParts(date);
   }
 
   // 获取频道名
@@ -1189,26 +1211,27 @@ function createLogger(ctx) {
   // 这些需要在启动前由 bindings 初始化好。
   function log(msg) {
     var date = new Date();
-    date = new Date(date.setHours(date.getHours() + 0));
-    const year = date.getFullYear().toString();
-    const month = (date.getMonth() + 1).toString();
-    const day = date.getDate().toString();
-    const hour = date.getHours().toString();
-    const minute = date.getMinutes().toString();
-    const second = date.getSeconds().toString();
-    const ms = date.getMilliseconds().toString();
+    var dateParts = getDateParts(date);
+
+    var year = dateParts.year;
+    var month = dateParts.month;
+    var day = dateParts.day;
 
     // 按日期轮转日志文件
     if ((g_log_file === null) || (g_log_day != day)) {
       ensureDir(g_log_dir_path);
-      // 依赖 globalThis 上注册的 fopen 等函数
       if (typeof globalThis.fopen !== 'undefined') {
         g_log_file = new File(g_log_dir_path + 'frida_' + getChannelName() + '_' + year + '_' + month + '_' + day + '.log', 'a+');
       }
       g_log_day = day;
     }
 
-    const timestamp = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + ms;
+    var timestamp;
+    if (ctx && ctx.time && ctx.time.formatLocalTimestamp) {
+      timestamp = ctx.time.formatLocalTimestamp(date);
+    } else {
+      timestamp = _fallbackTimestamp(date);
+    }
 
     // 控制台日志
     console.log('[' + timestamp + '] ' + msg + '\n');
@@ -1229,8 +1252,13 @@ function createLogger(ctx) {
 
 RuntimeUtils.exposeGlobal('createLogger', createLogger);
 // 时间模块
-// 来源：从旧 frida.js 迁移
-// 用途：提供系统时间、时间戳等相关工具函数
+// 来源：从旧 frida.js 迁移并扩展
+// 用途：统一时间相关工具函数
+//
+// 两类时间必须区分：
+//   游戏服务器时间：getCurSec() — 业务逻辑使用
+//   日志展示时间：formatLocalTimestamp() — 日志展示和文件名使用
+// 不要混用。
 
 function createTimeModule(addr) {
   // 系统时间全局变量地址
@@ -1244,7 +1272,7 @@ function createTimeModule(addr) {
     console.log('[time] system_time 地址未提供，时间模块将返回 0');
   }
 
-  // 获取系统UTC时间(秒)
+  // ---- 游戏服务器时间（秒） ----
   function getCurSec() {
     if (!systemTimePtr) {
       return 0;
@@ -1252,7 +1280,76 @@ function createTimeModule(addr) {
     return systemTimePtr.readInt();
   }
 
-  return { getCurSec: getCurSec };
+  // ---- JS runtime 本地时间（毫秒） ----
+  function getNowMs() {
+    return new Date().getTime();
+  }
+
+  // ---- 日期拆分（统一格式，不补零） ----
+  function getDateParts(date) {
+    var d = date || new Date();
+    return {
+      year: d.getFullYear().toString(),
+      month: (d.getMonth() + 1).toString(),
+      day: d.getDate().toString(),
+      hour: d.getHours().toString(),
+      minute: d.getMinutes().toString(),
+      second: d.getSeconds().toString(),
+      ms: d.getMilliseconds().toString()
+    };
+  }
+
+  // ---- 本地时间戳格式化（日志展示用） ----
+  function formatLocalTimestamp(date) {
+    var p = getDateParts(date || new Date());
+    return p.year + '-' + p.month + '-' + p.day + ' ' +
+      p.hour + ':' + p.minute + ':' + p.second + '.' + p.ms;
+  }
+
+  // ---- 日志文件日期（文件名轮转用） ----
+  function formatLogFileDate(date) {
+    var p = getDateParts(date || new Date());
+    return {
+      year: p.year,
+      month: p.month,
+      day: p.day
+    };
+  }
+
+  // ---- 时间差计算（基于游戏服务器时间 getCurSec()） ----
+  function diffSeconds(endSec, startSec) {
+    return endSec - startSec;
+  }
+
+  function diffMinutes(endSec, startSec) {
+    return Math.floor((endSec - startSec) / 60);
+  }
+
+  // ---- 时间单位换算 ----
+  function minutesToSeconds(minutes) {
+    return minutes * 60;
+  }
+
+  function hoursToMinutes(hours) {
+    return hours * 60;
+  }
+
+  function daysToSeconds(days) {
+    return days * 86400;
+  }
+
+  return {
+    getCurSec: getCurSec,
+    getNowMs: getNowMs,
+    getDateParts: getDateParts,
+    formatLocalTimestamp: formatLocalTimestamp,
+    formatLogFileDate: formatLogFileDate,
+    diffSeconds: diffSeconds,
+    diffMinutes: diffMinutes,
+    minutesToSeconds: minutesToSeconds,
+    hoursToMinutes: hoursToMinutes,
+    daysToSeconds: daysToSeconds
+  };
 }
 
 RuntimeUtils.exposeGlobal('createTimeModule', createTimeModule);
@@ -2916,9 +3013,10 @@ function startReturnUserFeature(ctx) {
     const cfg = ctx.config.return_user;
 
     // 计算回归判定时间阈值（秒）
-    // day * 86400 秒/天
-    const day = cfg.day || 15;
-    const time = day * 86400;
+    var day = cfg.day || 15;
+    var time = ctx.time && ctx.time.daysToSeconds
+      ? ctx.time.daysToSeconds(day)
+      : day * 86400;
 
     // 修改内存：将回归判定时间写入代码段
     // 来源：从旧 frida.js set_return_user 迁移
@@ -2987,7 +3085,9 @@ function startOnlineRewardFeature(ctx) {
 
         if (loginTick > 0) {
           // 在线时长（分钟）
-          const diffTime = Math.floor((curTime - loginTick) / 60);
+          var diffTime = ctx.time.diffMinutes
+            ? ctx.time.diffMinutes(curTime, loginTick)
+            : Math.floor((curTime - loginTick) / 60);
 
           // 在线 30 分钟后才开始计算
           if (diffTime < 30) {
@@ -2995,7 +3095,10 @@ function startOnlineRewardFeature(ctx) {
           }
 
           // 最多奖励 12 小时
-          if (diffTime > 12 * 60) {
+          var maxRewardMinutes = ctx.time.hoursToMinutes
+            ? ctx.time.hoursToMinutes(12)
+            : 12 * 60;
+          if (diffTime > maxRewardMinutes) {
             return;
           }
 
@@ -4979,18 +5082,7 @@ function startRuntimeModules() {
 
   helpers.logStartup('initializing runtime...');
 
-  // ---- 第 1 步：Logger ----
-  helpers.logModuleStart('logger');
-  var logger;
-  try {
-    logger = globalThis.createLogger({ getChannelName: helpers.getChannelName });
-    helpers.logModuleDone('logger');
-  } catch (err) {
-    helpers.logModuleFailed('logger', err);
-    logger = { log: console.log, getTimestamp: function () { return ''; } };
-  }
-
-  // ---- 第 2 步：Config（已由文件加载到 globalThis，此处做校验） ----
+  // ---- 第 1 步：Config（已由文件加载到 globalThis，此处做校验） ----
   helpers.logModuleStart('config');
   if (!cfg || !cfg.features) {
     helpers.logModuleFailed('config', 'PROJECT_JS_CONFIG not found');
@@ -4998,7 +5090,7 @@ function startRuntimeModules() {
   }
   helpers.logModuleDone('config');
 
-  // ---- 第 3 步：Time Module ----
+  // ---- 第 2 步：Time Module（在 logger 之前，供 logger 复用时间格式化） ----
   helpers.logModuleStart('time');
   var timeMod;
   try {
@@ -5009,6 +5101,17 @@ function startRuntimeModules() {
   } catch (err) {
     helpers.logModuleFailed('time', err);
     timeMod = { getCurSec: function () { return 0; } };
+  }
+
+  // ---- 第 3 步：Logger（依赖 time 的时间格式化） ----
+  helpers.logModuleStart('logger');
+  var logger;
+  try {
+    logger = globalThis.createLogger({ getChannelName: helpers.getChannelName, time: timeMod });
+    helpers.logModuleDone('logger');
+  } catch (err) {
+    helpers.logModuleFailed('logger', err);
+    logger = { log: console.log, getTimestamp: function () { return ''; } };
   }
 
   // ---- 第 4 步：Native Bindings ----
