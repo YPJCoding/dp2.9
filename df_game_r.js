@@ -52,7 +52,7 @@ function loadRuntimeBootstrapModules() {
   ok = loadEntryModule('runtime_addresses') && ok;
   ok = loadEntryModule('runtime_config') && ok;
 
-  // 第 2 步：公共工具（hook_guard 的缓存函数可用，但不依赖 N
+  // 第 2 步：公共工具（后续模块依赖 RuntimeUtils，必须在 hook_guard 前加载）
   ok = loadEntryModule('core/runtime_utils') && ok;
 
   // 第 3 步：hook guard（early hook 需要 attachOnce）

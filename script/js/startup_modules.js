@@ -271,10 +271,10 @@ function startRuntimeModules() {
   });
 
   // ---- 第 7 步：基础修复类模块 ----
-  RU.runFeatureStep(helpers, 'tod_fix',       cfg.features.tod_fix,       function () { globalThis.startTodFixFeature(ctx); });
-  RU.runFeatureStep(helpers, 'emblem_fix',    cfg.features.emblem_fix,    function () { globalThis.startEmblemFixFeature(ctx); });
-  RU.runFeatureStep(helpers, 'hidden_option', cfg.features.hidden_option, function () { globalThis.startHiddenOptionFeature(ctx); });
-  RU.runFeatureStep(helpers, 'return_user',   cfg.features.return_user,   function () { globalThis.startReturnUserFeature(ctx); });
+  RU.runFeatureStep(helpers, 'tod_fix',       cfg.features.tod_fix,       function () { return globalThis.startTodFixFeature(ctx); });
+  RU.runFeatureStep(helpers, 'emblem_fix',    cfg.features.emblem_fix,    function () { return globalThis.startEmblemFixFeature(ctx); });
+  RU.runFeatureStep(helpers, 'hidden_option', cfg.features.hidden_option, function () { return globalThis.startHiddenOptionFeature(ctx); });
+  RU.runFeatureStep(helpers, 'return_user',   cfg.features.return_user,   function () { return globalThis.startReturnUserFeature(ctx); });
 
   // ---- 第 8 步：事件/排行榜类模块 ----
   // ranking: 战力排行
@@ -283,7 +283,7 @@ function startRuntimeModules() {
     if (!dbInitialized) {
       console.log('[ranking] 数据库未初始化，排行榜将无法持久化');
     }
-    globalThis.startRankingFeature(ctx);
+    return globalThis.startRankingFeature(ctx);
     // 保存排行榜的 save 回调，供 dispose 时使用
     ctx._rankingSaveToDb = function () {
       if (globalThis.ranking_saveToDb && ctx.fridaDb) {
@@ -314,7 +314,7 @@ function startRuntimeModules() {
       }
     };
 
-    globalThis.startUserInoutFeature(ctx);
+    return globalThis.startUserInoutFeature(ctx);
   });
 
   // ---- 第 9 步：大型活动模块 ----
@@ -323,7 +323,7 @@ function startRuntimeModules() {
     if (!dbInitialized) {
       console.log('[village_attack] 数据库未初始化，活动数据将无法持久化');
     }
-    globalThis.startVillageAttackFeature(ctx);
+    return globalThis.startVillageAttackFeature(ctx);
     // 保存数据库保存回调供 dispose 使用
     ctx._villageAttackSaveToDb = function () {
       if (ctx.va_db) {
@@ -335,7 +335,7 @@ function startRuntimeModules() {
   // ---- 第 10 步：可选模块 ----
   // online_reward: 在线奖励（默认关闭，高风险）
   RU.runFeatureStep(helpers, 'online_reward', cfg.features.online_reward, function () {
-    globalThis.startOnlineRewardFeature(ctx);
+    return globalThis.startOnlineRewardFeature(ctx);
   });
 
   // 保存 ctx 到 globalThis 供 dispose 使用

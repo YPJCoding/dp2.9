@@ -73,35 +73,35 @@ function createMysqlBinding(addr) {
 
   // 读取整数字段
   function getInt(mysql, fieldIndex) {
-    const v = Memory.alloc(4);
-    if (1 == _MySQLGetInt(mysql, fieldIndex, v)) {
-      return v.readInt();
-    }
-    return null;
+    return RuntimeUtils.readNativeOut(4, function (p) {
+      return 1 == _MySQLGetInt(mysql, fieldIndex, p);
+    }, function (p) {
+      return p.readInt();
+    }, null);
   }
 
   function getUint(mysql, fieldIndex) {
-    const v = Memory.alloc(4);
-    if (1 == _MySQLGetUint(mysql, fieldIndex, v)) {
-      return v.readUInt();
-    }
-    return null;
+    return RuntimeUtils.readNativeOut(4, function (p) {
+      return 1 == _MySQLGetUint(mysql, fieldIndex, p);
+    }, function (p) {
+      return p.readUInt();
+    }, null);
   }
 
   function getShort(mysql, fieldIndex) {
-    const v = Memory.alloc(4);
-    if (1 == _MySQLGetShort(mysql, fieldIndex, v)) {
-      return v.readShort();
-    }
-    return null;
+    return RuntimeUtils.readNativeOut(4, function (p) {
+      return 1 == _MySQLGetShort(mysql, fieldIndex, p);
+    }, function (p) {
+      return p.readShort();
+    }, null);
   }
 
   function getFloat(mysql, fieldIndex) {
-    const v = Memory.alloc(4);
-    if (1 == _MySQLGetFloat(mysql, fieldIndex, v)) {
-      return v.readFloat();
-    }
-    return null;
+    return RuntimeUtils.readNativeOut(4, function (p) {
+      return 1 == _MySQLGetFloat(mysql, fieldIndex, p);
+    }, function (p) {
+      return p.readFloat();
+    }, null);
   }
 
   // 读取字符串字段

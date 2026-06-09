@@ -74,12 +74,8 @@ function getRankNumber(fridaDb, characNo) {
   }
   // SQL 拼接未做转义，characNo 为数字类型是安全的
   const sql = "SELECT ZLZ FROM frida.battle WHERE CID='" + characNo + "';";
-  if (fridaDb.exec(sql)) {
-    if (fridaDb.getNRows() == 1) {
-      fridaDb.fetch();
-      return parseInt(fridaDb.getStr(0));
-    }
-  }
+  const value = RuntimeUtils.queryOneInt(fridaDb, sql, 0);
+  return value || 0;
 }
 
 // ---- 获取角色排行数据 ----
@@ -226,17 +222,12 @@ function sendRankLits(ctx, curUser, all) {
 // ---- 从数据库加载排行榜 ----
 // 来源：从旧 frida.js event_rankinfo_load_from_db 迁移
 function loadRankInfoFromDb(fridaDb) {
-  if (fridaDb.exec("select event_info from game_event where event_id = 'rankinfo';")) {
-    if (fridaDb.getNRows() == 1) {
-      fridaDb.fetch();
-      const info = fridaDb.getStr(0);
-      if (info) {
-        try {
-          g_ranklist = JSON.parse(info);
-        } catch (e) {
-          console.log('[ranking] failed to parse saved ranklist: ' + e);
-        }
-      }
+  const info = RuntimeUtils.queryOneStr(fridaDb, "select event_info from game_event where event_id = 'rankinfo';", 0);
+  if (info) {
+    try {
+      g_ranklist = JSON.parse(info);
+    } catch (e) {
+      console.log('[ranking] failed to parse saved ranklist: ' + e);
     }
   }
 }

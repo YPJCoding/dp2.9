@@ -26,7 +26,9 @@ echo "building $OUTPUT ..."
 cat "$PROJECT_DIR/script/js/runtime_addresses.js"     >> "$OUTPUT"
 cat "$PROJECT_DIR/script/js/runtime_config.js"        >> "$OUTPUT"
 
+cat "$PROJECT_DIR/script/js/core/runtime_utils.js"    >> "$OUTPUT"
 cat "$PROJECT_DIR/script/js/bindings/native_functions.js" >> "$OUTPUT"
+
 cat "$PROJECT_DIR/script/js/core/logger.js"           >> "$OUTPUT"
 cat "$PROJECT_DIR/script/js/core/time.js"             >> "$OUTPUT"
 cat "$PROJECT_DIR/script/js/core/random.js"           >> "$OUTPUT"

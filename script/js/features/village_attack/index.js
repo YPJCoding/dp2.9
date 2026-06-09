@@ -65,15 +65,14 @@ function startVillageAttackFeature(ctx) {
       if (!fridaDb) {
         return characNo.toString();
       }
-      if (fridaDb.exec("select charac_name from charac_info where charac_no=" + characNo + ";")) {
-        if (fridaDb.getNRows() == 1) {
-          fridaDb.fetch();
-          const name = fridaDb.getStr(0);
-          if (name) {
-            return name;
-          }
-        }
-      }
+
+      const name = RuntimeUtils.queryOneStr(
+        fridaDb,
+        "select charac_name from charac_info where charac_no=" + characNo + ";",
+        0
+      );
+
+      return name || characNo.toString();
       return characNo.toString();
     };
 

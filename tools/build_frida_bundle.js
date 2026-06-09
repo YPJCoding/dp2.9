@@ -22,13 +22,14 @@ const files = [
   'script/js/runtime_addresses.js',
   'script/js/runtime_config.js',
 
+  'script/js/core/runtime_utils.js',
   'script/js/bindings/native_functions.js',
+
   'script/js/core/logger.js',
   'script/js/core/time.js',
   'script/js/core/random.js',
   'script/js/core/memory.js',
   'script/js/core/file.js',
-  'script/js/core/runtime_utils.js',
   'script/js/core/hook_guard.js',
 
   'script/js/bindings/packet.js',

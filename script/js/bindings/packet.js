@@ -9,31 +9,31 @@ function createPacketBinding(addr) {
   const _getByte = nf(addr.packetbuf_get_byte, 'int', ['pointer', 'pointer']);
 
   function getByte(packetBuf) {
-    const data = Memory.alloc(1);
-    if (_getByte(packetBuf, data)) {
-      return data.readU8();
-    }
-    throw new Error('PacketBuf_get_byte Fail!');
+    return RuntimeUtils.readNativeOutOrThrow(1, function (p) {
+      return _getByte(packetBuf, p);
+    }, function (p) {
+      return p.readU8();
+    }, 'PacketBuf_get_byte Fail!');
   }
 
   const _getShort = nf(addr.packetbuf_get_short, 'int', ['pointer', 'pointer']);
 
   function getShort(packetBuf) {
-    const data = Memory.alloc(2);
-    if (_getShort(packetBuf, data)) {
-      return data.readShort();
-    }
-    throw new Error('PacketBuf_get_short Fail!');
+    return RuntimeUtils.readNativeOutOrThrow(2, function (p) {
+      return _getShort(packetBuf, p);
+    }, function (p) {
+      return p.readShort();
+    }, 'PacketBuf_get_short Fail!');
   }
 
   const _getInt = nf(addr.packetbuf_get_int, 'int', ['pointer', 'pointer']);
 
   function getInt(packetBuf) {
-    const data = Memory.alloc(4);
-    if (_getInt(packetBuf, data)) {
-      return data.readInt();
-    }
-    throw new Error('PacketBuf_get_int Fail!');
+    return RuntimeUtils.readNativeOutOrThrow(4, function (p) {
+      return _getInt(packetBuf, p);
+    }, function (p) {
+      return p.readInt();
+    }, 'PacketBuf_get_int Fail!');
   }
 
   const _getBinary = nf(addr.packetbuf_get_binary, 'int', ['pointer', 'pointer', 'int']);

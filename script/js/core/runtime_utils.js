@@ -114,7 +114,13 @@ RuntimeUtils.runFeatureStep = function (helpers, name, enabled, runner) {
 
   helpers.logModuleStart(name);
   try {
-    runner();
+    var result = runner();
+
+    if (result === false) {
+      helpers.logModuleFailed(name, 'returned false');
+      return false;
+    }
+
     helpers.logModuleDone(name);
     return true;
   } catch (err) {
