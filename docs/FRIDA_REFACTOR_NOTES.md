@@ -111,6 +111,15 @@
 4. **bundle 改为 fallback**：`dist/df_game_r.bundle.js` 不再作为默认部署文件，仅作为无 `dp_load` 环境备用 / 静态检查产物。
 5. **dp_load 支持子目录**：确认 `dp_load('core/hook_guard')` → `/dp2/script/js/core/hook_guard.js`，无需 shim 文件。
 
+## 第七轮小修 (fix: return false on runtime config startup failure)
+
+修复内容：
+
+- `startRuntimeModules()` 在 `PROJECT_JS_CONFIG` 或 `PROJECT_JS_CONFIG.features` 缺失时，明确 `return false`。
+- 避免失败路径裸 `return` 返回 `undefined`，被 `df_game_r.js` 误判为启动成功。
+- 保证 `df_game_r.js` 不会误打印 `frida started`，也不会错误设置 `g_entry_started = true`。
+- bundle 已同步更新。
+
 ## 部署方式
 
 ```text
