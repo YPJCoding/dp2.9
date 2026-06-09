@@ -283,13 +283,17 @@ function startRuntimeModules() {
     if (!dbInitialized) {
       console.log('[ranking] 数据库未初始化，排行榜将无法持久化');
     }
-    return globalThis.startRankingFeature(ctx);
+
+    var ok = globalThis.startRankingFeature(ctx);
+
     // 保存排行榜的 save 回调，供 dispose 时使用
     ctx._rankingSaveToDb = function () {
       if (globalThis.ranking_saveToDb && ctx.fridaDb) {
         globalThis.ranking_saveToDb(ctx.fridaDb);
       }
     };
+
+    return ok;
   });
 
   // user_inout: 玩家上下线处理
@@ -323,13 +327,17 @@ function startRuntimeModules() {
     if (!dbInitialized) {
       console.log('[village_attack] 数据库未初始化，活动数据将无法持久化');
     }
-    return globalThis.startVillageAttackFeature(ctx);
+
+    var ok = globalThis.startVillageAttackFeature(ctx);
+
     // 保存数据库保存回调供 dispose 使用
     ctx._villageAttackSaveToDb = function () {
       if (ctx.va_db) {
         ctx.va_db.save(globalThis.village_attack_state.getInfo());
       }
     };
+
+    return ok;
   });
 
   // ---- 第 10 步：可选模块 ----

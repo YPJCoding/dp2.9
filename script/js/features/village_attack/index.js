@@ -73,7 +73,6 @@ function startVillageAttackFeature(ctx) {
       );
 
       return name || characNo.toString();
-      return characNo.toString();
     };
 
     // 注册所有 hook（这是启动的关键步骤）
