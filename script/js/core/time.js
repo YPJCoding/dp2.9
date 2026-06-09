@@ -34,23 +34,12 @@ function createTimeModule(addr) {
 
   // ---- 日期拆分（统一格式，不补零） ----
   function getDateParts(date) {
-    var d = date || new Date();
-    return {
-      year: d.getFullYear().toString(),
-      month: (d.getMonth() + 1).toString(),
-      day: d.getDate().toString(),
-      hour: d.getHours().toString(),
-      minute: d.getMinutes().toString(),
-      second: d.getSeconds().toString(),
-      ms: d.getMilliseconds().toString()
-    };
+    return RuntimeUtils.getDateParts(date);
   }
 
   // ---- 本地时间戳格式化（日志展示用） ----
   function formatLocalTimestamp(date) {
-    var p = getDateParts(date || new Date());
-    return p.year + '-' + p.month + '-' + p.day + ' ' +
-      p.hour + ':' + p.minute + ':' + p.second + '.' + p.ms;
+    return RuntimeUtils.formatLocalTimestamp(date);
   }
 
   // ---- 日志文件日期（文件名轮转用） ----

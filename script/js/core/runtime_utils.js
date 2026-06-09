@@ -241,6 +241,29 @@ RuntimeUtils.replaceFeatureHook = function (ctx, featureName, key, address, call
   return ok;
 };
 
+// ---- 12. 纯 JS 时间工具（不依赖 ctx / PROJECT_ADDRESSES） ----
+
+// 日期拆分为 year/month/day/hour/minute/second/ms（不补零，保持旧格式）
+RuntimeUtils.getDateParts = function (date) {
+  var d = date || new Date();
+  return {
+    year: d.getFullYear().toString(),
+    month: (d.getMonth() + 1).toString(),
+    day: d.getDate().toString(),
+    hour: d.getHours().toString(),
+    minute: d.getMinutes().toString(),
+    second: d.getSeconds().toString(),
+    ms: d.getMilliseconds().toString()
+  };
+};
+
+// 本地时间戳格式化（日志展示用）
+RuntimeUtils.formatLocalTimestamp = function (date) {
+  var p = RuntimeUtils.getDateParts(date || new Date());
+  return p.year + '-' + p.month + '-' + p.day + ' ' +
+    p.hour + ':' + p.minute + ':' + p.second + '.' + p.ms;
+};
+
 // ---- 挂载到 globalThis ----
 
 if (typeof globalThis !== 'undefined') {

@@ -7,25 +7,7 @@ var g_log_file = null;
 var g_log_day = null;
 var g_log_dir_path = './frida_log/';
 
-// ---- 本地时间 fallback（ctx.time 不可用时使用） ----
-function _fallbackDateParts(date) {
-  var d = date || new Date();
-  return {
-    year: d.getFullYear().toString(),
-    month: (d.getMonth() + 1).toString(),
-    day: d.getDate().toString(),
-    hour: d.getHours().toString(),
-    minute: d.getMinutes().toString(),
-    second: d.getSeconds().toString(),
-    ms: d.getMilliseconds().toString()
-  };
-}
-
-function _fallbackTimestamp(date) {
-  var p = _fallbackDateParts(date || new Date());
-  return p.year + '-' + p.month + '-' + p.day + ' ' +
-    p.hour + ':' + p.minute + ':' + p.second + '.' + p.ms;
-}
+// ---- 本地时间 fallback（ctx.time 不可用时使用 RuntimeUtils） ----
 
 // 日志对象，挂载到 globalThis 供所有模块使用
 function createLogger(ctx) {
@@ -41,12 +23,12 @@ function createLogger(ctx) {
     return mkdir(pathPtr, 0x1FF);
   }
 
-  // 获取时间戳字符串（优先使用 ctx.time 的时间格式化）
+  // 获取时间戳字符串（优先使用 ctx.time，回退到 RuntimeUtils）
   function getTimestamp() {
     if (ctx && ctx.time && ctx.time.formatLocalTimestamp) {
       return ctx.time.formatLocalTimestamp();
     }
-    return _fallbackTimestamp();
+    return RuntimeUtils.formatLocalTimestamp();
   }
 
   // 获取日期拆解（优先使用 ctx.time）
@@ -54,7 +36,7 @@ function createLogger(ctx) {
     if (ctx && ctx.time && ctx.time.getDateParts) {
       return ctx.time.getDateParts(date);
     }
-    return _fallbackDateParts(date);
+    return RuntimeUtils.getDateParts(date);
   }
 
   // 获取频道名
@@ -89,7 +71,7 @@ function createLogger(ctx) {
     if (ctx && ctx.time && ctx.time.formatLocalTimestamp) {
       timestamp = ctx.time.formatLocalTimestamp(date);
     } else {
-      timestamp = _fallbackTimestamp(date);
+      timestamp = RuntimeUtils.formatLocalTimestamp(date);
     }
 
     // 控制台日志
